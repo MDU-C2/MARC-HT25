@@ -1,18 +1,188 @@
+# Python
+##########
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
 
-# Compiled source #
-###################
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django
+##########
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+##########
+instance/
+.webassets-cache
+
+# Scrapy
+##########
+.scrapy
+
+# Sphinx
+##########
+docs/_build/
+
+# PyBuilder
+##########
+.pybuilder/
+target/
+
+# Jupyter / IPython
+##########
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# C / C++
+##########
+
+# Prerequisites
+*.d
+
+# Object files
+*.slo
+*.lo
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.ex
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# Debug info
+*.dwo
+
+# Build Systems
+##########
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+build.ninja
+.ninja_deps
+.ninja_log
+meson-logs/
+meson-private/
+configure
+config.log
+config.status
+autom4te.cache/
+
+# VSCode / Clangd
+##########
+.vscode/
+.code-workspace
+clangd/
+
+# Editors / Temp Files
+##########
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Compiled Source (General)
+##########
 *.com
 *.class
-*.dll
-*.exe
-*.o
-*.so
-.vscode/
 
-# Packages #
-############
-# it's better to unpack these files and commit the raw source
-# git has its own built in compression methods
+# Compressed / Package Files
+##########
 *.7z
 *.dmg
 *.gz
@@ -22,14 +192,14 @@
 *.tar
 *.zip
 
-# Logs and databases #
-######################
+# Logs and Databases
+##########
 *.log
 *.sql
 *.sqlite
 
-# OS generated files #
-######################
+# OS-specific Files
+##########
 .DS_Store
 .DS_Store?
 ._*
@@ -37,3 +207,5 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+Desktop.ini
+.directory
