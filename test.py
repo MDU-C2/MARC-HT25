@@ -1,4 +1,6 @@
 print("Hej gruppen!")
+for i in range(5):
+    print('*' * (i + 1))
 # actually Aron was here before  🤓 2025-09-05
 #Jonathan was here! 2025-09-05
 #David Was here 2025-09-05
