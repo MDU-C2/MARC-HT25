@@ -1,4 +1,7 @@
-RobotStudio is too large to upload to GitHub.
+RobotStudio is too large to upload to GitHub, therefore all code is added here.
+Then in RobotStudio is "add module" to this file
+
+######################################################################################
 
 Setting up the Control Panel in RobotStudio:
 
@@ -16,6 +19,8 @@ Opening and Using the Virtual Controller and FlexPendant:
 2. On the FlexPendant, set the controller mode:
    - Go to Controller -> Operating Mode -> Manual.
    - Then go to Controller -> FlexPendant.
+
+######################################################################################
 
 Saving Robot Positions in FlexPendant:
 
@@ -36,6 +41,8 @@ Viewing Coordinates:
 
 Note: Moving the hand frame in Linear mode can cause the robot to enter a singularity (a problematic position).
 
+######################################################################################
+
 Opening and Editing Programs:
 
 1. Open the program:
@@ -49,12 +56,16 @@ Opening and Editing Programs:
    - Double-click the star (*) next to the instruction.
    - Select the point you want to assign.
 
+######################################################################################
+
 Debugging:
 
 - In the Program Editor, click Debug, then click PP to Main.(You need to do this for both arms!)
 - Press "|>"(arrow to the right) in the left panel to run the code
 
 
-Main file location:
-C:\Users\Elliot\Documents\RobotStudio\Projects\YuMi2Arm-test\Virtual Controllers\Controller\INTERNAL\RAPID\PRG1\00050681
-C:\Users\Elliot\Documents\RobotStudio\Projects\YuMi2Arm-test\Virtual Controllers\Controller\INTERNAL\RAPID\PRG2\00050682
+######################################################################################
+
+Main file location for 2 arm YuMi:
+C:\Users\<username>\Documents\RobotStudio\Projects\YuMi2Arm-test\Virtual Controllers\Controller\INTERNAL\RAPID\PRG1\00050681
+C:\Users\<username>\Documents\RobotStudio\Projects\YuMi2Arm-test\Virtual Controllers\Controller\INTERNAL\RAPID\PRG2\00050682
