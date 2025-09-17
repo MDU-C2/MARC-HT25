@@ -17,7 +17,7 @@
 // #pragma comment (lib, "Mswsock.lib")
 
 #define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "27015"
+#define DEFAULT_PORT "127.0.0.1.8080"
 
 int __cdecl main(void) 
 {
