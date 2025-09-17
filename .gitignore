@@ -135,7 +135,6 @@ ipython_config.py
 *.pdb
 
 # Kernel Module Compile Results
-*.mod*
 *.cmd
 .tmp_versions/
 modules.order
@@ -209,3 +208,5 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 .directory
+
+/robotstudio/test
