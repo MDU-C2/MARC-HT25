@@ -5,6 +5,7 @@
 #undef UNICODE
 
 #define WIN32_LEAN_AND_MEAN
+#define _WIN32_WINNT 0x501
 
 #include <windows.h>
 #include <winsock2.h>
@@ -17,7 +18,8 @@
 // #pragma comment (lib, "Mswsock.lib")
 
 #define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "127.0.0.1.8080"
+#define DEFAULT_PORT "8080"
+
 
 int __cdecl main(void) 
 {
@@ -33,6 +35,8 @@ int __cdecl main(void)
     int iSendResult;
     char recvbuf[DEFAULT_BUFLEN];
     int recvbuflen = DEFAULT_BUFLEN;
+    
+    const int loading_delay = 5000,timer = 0;
     
     // Initialize Winsock
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -84,6 +88,8 @@ int __cdecl main(void)
         return 1;
     }
 
+    printf("Waiting for client");
+
     // Accept a client socket
     ClientSocket = accept(ListenSocket, NULL, NULL);
     if (ClientSocket == INVALID_SOCKET) {
@@ -99,9 +105,11 @@ int __cdecl main(void)
     // Receive until the peer shuts down the connection
     do {
 
+       
         iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0) {
             printf("Bytes received: %d\n", iResult);
+            printf("message: %s\n",recvbuf);
 
         // Echo the buffer back to the sender
             iSendResult = send( ClientSocket, recvbuf, iResult, 0 );

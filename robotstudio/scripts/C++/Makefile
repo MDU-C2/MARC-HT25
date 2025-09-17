@@ -13,10 +13,11 @@ OUT = $(FILENAME).exe
 LIBS = -lws2_32
 
 build:
-	$(COMPILER) $(CXXFLAGS) -o $(OUT) $(SRC) $(LIBS)
+	$(COMPILER)  -o $(OUT) $(SRC) $(LIBS)
+	./$(OUT)
 
 clean:
-	del *.o *.exe
+	del *.o $(OUT)
 
 run:
 	./$(OUT)
