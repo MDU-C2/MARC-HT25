@@ -9,11 +9,11 @@ CONST robtarget home:=[[385.20,290.61,225.75],[0.146381,-0.613708,0.75069,-0.195
     currentJoints := CJointT();
 
     ! Slightly increase the first joint (in degrees)
-    currentJoints.robax.rax_1 := currentJoints.robax.rax_1 + 5;
+    !currentJoints.robax.rax_1 := currentJoints.robax.rax_1 - 5;
     ! Move to the new joint position
-    MoveAbsJ currentJoints, v100, fine, tool0;
-    currentJoints.robax.rax_1 := currentJoints.robax.rax_1 - 5;
-    MoveAbsJ currentJoints, v2000, fine, tool0;
+    !MoveAbsJ currentJoints, v100, fine, tool0;
+    !currentJoints.robax.rax_1 := currentJoints.robax.rax_1 - 5;
+    !MoveAbsJ currentJoints, v2000, fine, tool0;
 
 
 ENDPROC
