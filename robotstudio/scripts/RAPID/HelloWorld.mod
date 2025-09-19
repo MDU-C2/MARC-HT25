@@ -1,16 +1,5 @@
-MODULE Module1
-    !***********************************************************
-    !
-    ! Module:  Module1
-    !
-    ! Description:
-    !   <Insert description here>
-    !
-    ! Author: Laptop
-    !
-    ! Version: 1.0
-    !
-    !***********************************************************
+MODULE HelloWorld
+
     
     
     !***********************************************************
@@ -20,7 +9,7 @@ MODULE Module1
     !   This is the entry point of your program
     !
     !***********************************************************
-    PROC main()
+    PROC testing()
         TPwrite "Hello World";
     
         STOP;
