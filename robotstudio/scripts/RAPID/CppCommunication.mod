@@ -9,7 +9,7 @@ MODULE CppCommunication
     !VAR num bytesSent;
     !VAR num bytesRecv;
 
-    PROC main()
+    PROC single_communication()
         WaitTime 0.5;
         SocketClose sd;
         WaitTime 0.5;
