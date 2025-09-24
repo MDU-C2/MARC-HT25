@@ -40,7 +40,7 @@ MODULE server
                 CASE "end": 
                     TPWrite "[INFO] end communication";
                     have_communication := FALSE;
-                    SocketSend client_socket \Str := "end_ack";! add real cordinates here
+                    SocketSend client_socket \Str := "end";! add real cordinates here
                 
                 CASE "cordinates":
                     TPWrite "[INFO] clinet want cordinates";
@@ -62,6 +62,7 @@ MODULE server
     IF ERRNO = ERR_SOCK_CLOSED THEN ! clinet closed connection before sending end ack!
         have_communication := FALSE;
         SocketClose server_socket;
+        EXIT;
     ENDIF
         
     ENDPROC

@@ -3,8 +3,8 @@ COMPILER = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
 # Source file to build (set to server or client)
-FILENAME = server
-# FILENAME = client
+# FILENAME = server
+FILENAME = client
 
 SRC = $(FILENAME).cpp
 OUT = $(FILENAME).exe

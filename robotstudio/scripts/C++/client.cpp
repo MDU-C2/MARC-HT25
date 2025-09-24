@@ -10,7 +10,8 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <iostream>
+#include <string>
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -19,7 +20,7 @@
 
 
 #define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "8080"
+#define DEFAULT_PORT "1025"
 
 int __cdecl main(int argc, char **argv) 
 {
@@ -28,8 +29,8 @@ int __cdecl main(int argc, char **argv)
     struct addrinfo *result = NULL,
                     *ptr = NULL,
                     hints;
-    const char *sendbuf = "this is a test";
-    char recvbuf[DEFAULT_BUFLEN];
+    char sendbuf[DEFAULT_BUFLEN];
+    char recvbuf[DEFAULT_BUFLEN] = {'\0'};
     int iResult;
     int recvbuflen = DEFAULT_BUFLEN;
     
@@ -89,38 +90,43 @@ int __cdecl main(int argc, char **argv)
         return 1;
     }
 
-    // Send an initial buffer
-    iResult = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
-    if (iResult == SOCKET_ERROR) {
-        printf("send failed with error: %d\n", WSAGetLastError());
-        closesocket(ConnectSocket);
-        WSACleanup();
-        return 1;
-    }
 
-    printf("Bytes Sent: %ld\n", iResult);
-
-    // shutdown the connection since no more data will be sent
-    iResult = shutdown(ConnectSocket, SD_SEND);
-    if (iResult == SOCKET_ERROR) {
-        printf("shutdown failed with error: %d\n", WSAGetLastError());
-        closesocket(ConnectSocket);
-        WSACleanup();
-        return 1;
-    }
-
+     bool continue_com = true;
     // Receive until the peer closes the connection
     do {
 
+
+        // get user input to send
+        printf("\nENTER MESSAGE: ");
+        scanf("%s", sendbuf);
+
+        // send message
+        iResult = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
+        if (iResult == SOCKET_ERROR) {
+            printf("send failed with error: %d\n", WSAGetLastError());
+            closesocket(ConnectSocket);
+            WSACleanup();
+            return 1;
+        }
+
+        printf("Bytes Sent: %ld\n", iResult);
+
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
+   
         if ( iResult > 0 )
-            printf("Bytes received: %d\n", iResult);
+        {
+            printf("message received: %s\n", recvbuf);
+            recvbuf[iResult]='\0';
+            fflush(stdout);
+        }
         else if ( iResult == 0 )
             printf("Connection closed\n");
         else
             printf("recv failed with error: %d\n", WSAGetLastError());
-
-    } while( iResult > 0 );
+  
+        continue_com = !(strcmp(recvbuf,"end_ack") == 0);
+        printf("\n[debugg] %d\n",continue_com);
+    } while( (iResult > 0) && continue_com);
 
     // cleanup
     closesocket(ConnectSocket);
