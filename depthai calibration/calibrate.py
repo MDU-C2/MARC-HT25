@@ -115,9 +115,9 @@ def parse_args():
                         help="Marker size in charuco boards.")
     parser.add_argument("-db", "--defaultBoard", default=None, type=str,
                         help="Calculates the size of markers, numbers of squareX and squareY base on the choosing board from charuco_boards directory.")
-    parser.add_argument("-nx", "--squaresX", default="13", type=int, required=False,
+    parser.add_argument("-nx", "--squaresX", default="9", type=int, required=False,
                         help="number of chessboard squares in X direction in charuco boards.")
-    parser.add_argument("-ny", "--squaresY", default="7", type=int, required=False,
+    parser.add_argument("-ny", "--squaresY", default="6", type=int, required=False,
                         help="number of chessboard squares in Y direction in charuco boards.")
     parser.add_argument("-rd", "--rectifiedDisp", default=True, action="store_false",
                         help="Display rectified images with lines drawn for epipolar check")
