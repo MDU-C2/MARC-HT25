@@ -1,0 +1,9 @@
+Marker Size: 2.2 cm
+Square Size: 3.0 cm
+Number of squaresX: 9
+Number of squaresY: 6
+rgb-reprojection: 1.1602106034531132
+left-reprojection: 0.30751803306568554
+left and right epipolar_error: 0.22257705755108828
+right-reprojection: 0.3379018280097412
+right and rgb epipolar_error: 0.35614946153428817
