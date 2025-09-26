@@ -211,5 +211,5 @@ Desktop.ini
 
 /robotstudio/test
 .venv
-.json
-.png
+*.json
+*.png
