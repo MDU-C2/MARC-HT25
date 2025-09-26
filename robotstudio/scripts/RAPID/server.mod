@@ -12,7 +12,7 @@ MODULE server
     ! process variables
     VAR string message := "";
     VAR robtarget hand_frame; 
-    VAR num coordinates_index := -1;
+    VAR num message_index := -1;
     
  ! Open socket connection
     PROC server_init() !runs once in initzilise
@@ -48,29 +48,47 @@ MODULE server
             SocketReceive client_socket \Str := message;
             ! swich case
             TEST message 
-                CASE "end": 
-                    TPWrite "[INFO] end communication";
-                    SocketSend client_socket \Str := "end_ack";! add real cordinates here
-                    SocketClose client_socket;
-                    RETURN;
+            
+                CASE "Connection_test":
+                    TPWrite("[INFO] client is sending test message");
+                    SocketSend client_socket \Str:= "Connection_Confirmed";
                 
-                CASE "coordinates":
+                CASE "Cups_Available":
+                    TPWrite("[INFO] client have found cups");
+                    hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0); !get handframe
+                    SocketSend client_socket \Str:= "Ask_Instructions:" +  RobtargetToString(hand_frame);
+                    
+                CASE "Coordinates":
                     TPWrite "[INFO] clinet want cordinates";
                     hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0);
-                  !  SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
-                    
+                    SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
+                          
+                CASE "Move":
+                 SocketSend client_socket \Str:= "Ask_Coordinate";
+                            MoveRob; 
+                            
+                !don't want to be able to end communication from client
+                !CASE "end": 
+!                    TPWrite "[INFO] end communication";
+!                    SocketSend client_socket \Str := "end_ack";! add real cordinates here
+!                    SocketClose client_socket;
+!                    RETURN;
+
+                CASE "Gripp":
+                
+                 SocketSend client_socket \Str:= "Ack_wait";
+                 !grip function
+                 SocketSend client_socket \Str:= "Ack_Gripp done";
+                
+                 CASE "Release":
+                 
+                 SocketSend client_socket \Str:= "Ack_wait";
+                 !Release function
+                 SocketSend client_socket \Str:= "Ack_Release done";
+                 
                 DEFAULT:
-                     coordinates_index := StrFind(message,0,"move");
-                     
-                    !IF(cordinates_index > 0) THEN !we got a move message!
-                        !example input: move [x,y,z],[q1,q2,q3,q4]
-                     !   moveRob(StrPart(message,coordinates_index,
-                        
-                        
-                    !ELSE !something else
-                        TPWrite "[INFO] message from client: "+message;
-                      !  SocketSend client_socket \Str := "ack";! add real cordinates here
-                    !ENDIF
+                TPWrite "[INFO] message from client: "+message;
+                SocketSend client_socket \Str := "default_"+message;! add real cordinates here
             ENDTEST
             message := ""; ! reset message
 
@@ -84,27 +102,38 @@ MODULE server
             RETRY;
         ENDIF
     ENDPROC
-
-!    FUNC string RobtargetToString(robtarget target)
-        
-!        !position
-!        VAR string temp_string := "[";
-!        temp_string := temp_string+NumToStr(target.trans.x,0)+",";
-!        temp_string :=temp_string+NumToStr(target.trans.y,0)+",";
-!        temp_string :=temp_string+NumToStr(target.trans.z,0)+"]";
-        
-!        !orientation
-!        temp_string := temp_string+",[";
-!        temp_string := temp_string+NumToStr(target.rot.q1,0)+";";
-!        temp_string :=temp_string+NumToStr(target.rot.q2,0)+";";
-!        temp_string :=temp_string+NumToStr(target.rot.q3,0)+";";
-!        temp_string :=temp_string+NumToStr(target.rot.q4,0)+"]";
-        
-!        RETURN temp_string;
-!    ENDFUNC
     
-!    PROC moveRob(string target)
+        ! move robot 
+    PROC MoveRob()
+        VAR pos target_pos;
+        VAR orient target_orient;
+        VAR robtarget target;
+        VAR jointtarget joints;
+        ! expect message [x,y,z] commands next
+        SocketReceive client_socket \Str := message;
+        target_pos := rob_coordinates(message);
+        SocketSend client_socket \Str:= " Ack_Coordinate_Received";
         
+        ! expect message [q1,q2,q3,q4] commands next
+        SocketReceive client_socket \Str := message;
+        target_orient := rob_orientation(message);
+        SocketSend client_socket \Str:= " Ack_Orientation_Received";
         
-!    ENDPROC
+        SocketSend client_socket \Str:= " Ack_Wait";
+        target := CRobT(\Tool:=tool0 \WObj:=wobj0); ! copy same as hand frame
+        target.trans := target_pos;
+        target.rot := target_orient;
+           
+        joints := CalcJointT(target,tool0 \WObj:=wobj0);
+        
+        MoveJ target,vmax \T:=5,z30,tool0;
+        
+        SocketSend client_socket \Str:= " Ack_Done"; ! send new command or end communication   
+    ERROR
+        IF ERRNO = ERR_ROBLIMIT THEN
+            SocketSend client_socket \Str:= "can't reach that possition,try again";
+            RETURN;
+        ENDIF
+    ENDPROC
+    
 ENDMODULE

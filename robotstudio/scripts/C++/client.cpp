@@ -97,11 +97,27 @@ int __cdecl main(int argc, char **argv)
 
 
         // get user input to send
+        fflush(stdin);
         printf("\nENTER MESSAGE: ");
-        scanf("%s", sendbuf);
+        fgets(sendbuf,DEFAULT_BUFLEN,stdin);
+
+        // remove \n and \r
+        int i=strlen(sendbuf)-1,end_index = i;
+        while(i > 0)
+        {
+            i--;
+            if((sendbuf[i]=='\n') || (sendbuf[i]=='\r')) /* strip line feeds and carriage returns */
+            {
+                sendbuf[i] = '\0';
+                end_index = i;
+            }    
+            else
+                break;
+            
+        }
 
         // send message
-        iResult = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
+        iResult = send( ConnectSocket,  sendbuf, end_index, 0 );
         if (iResult == SOCKET_ERROR) {
             printf("send failed with error: %d\n", WSAGetLastError());
             closesocket(ConnectSocket);
