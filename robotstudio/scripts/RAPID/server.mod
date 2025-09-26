@@ -57,20 +57,20 @@ MODULE server
                 CASE "coordinates":
                     TPWrite "[INFO] clinet want cordinates";
                     hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0);
-                    SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
+                  !  SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
                     
                 DEFAULT:
                      coordinates_index := StrFind(message,0,"move");
                      
-                    IF(cordinates_index > 0) THEN !we got a move message!
+                    !IF(cordinates_index > 0) THEN !we got a move message!
                         !example input: move [x,y,z],[q1,q2,q3,q4]
-                        moveRob(StrPart(message,coordinates_index,
+                     !   moveRob(StrPart(message,coordinates_index,
                         
                         
-                    ELSE !something else
+                    !ELSE !something else
                         TPWrite "[INFO] message from client: "+message;
-                        SocketSend client_socket \Str := "ack";! add real cordinates here
-                    ENDIF
+                      !  SocketSend client_socket \Str := "ack";! add real cordinates here
+                    !ENDIF
             ENDTEST
             message := ""; ! reset message
 
@@ -85,26 +85,26 @@ MODULE server
         ENDIF
     ENDPROC
 
-    FUNC string RobtargetToString(robtarget target)
+!    FUNC string RobtargetToString(robtarget target)
         
-        !position
-        VAR string temp_string := "[";
-        temp_string := temp_string+NumToStr(target.trans.x,0)+",";
-        temp_string :=temp_string+NumToStr(target.trans.y,0)+",";
-        temp_string :=temp_string+NumToStr(target.trans.z,0)+"]";
+!        !position
+!        VAR string temp_string := "[";
+!        temp_string := temp_string+NumToStr(target.trans.x,0)+",";
+!        temp_string :=temp_string+NumToStr(target.trans.y,0)+",";
+!        temp_string :=temp_string+NumToStr(target.trans.z,0)+"]";
         
-        !orientation
-        temp_string := temp_string+",[";
-        temp_string := temp_string+NumToStr(target.rot.q1,0)+";";
-        temp_string :=temp_string+NumToStr(target.rot.q2,0)+";";
-        temp_string :=temp_string+NumToStr(target.rot.q3,0)+";";
-        temp_string :=temp_string+NumToStr(target.rot.q4,0)+"]";
+!        !orientation
+!        temp_string := temp_string+",[";
+!        temp_string := temp_string+NumToStr(target.rot.q1,0)+";";
+!        temp_string :=temp_string+NumToStr(target.rot.q2,0)+";";
+!        temp_string :=temp_string+NumToStr(target.rot.q3,0)+";";
+!        temp_string :=temp_string+NumToStr(target.rot.q4,0)+"]";
         
-        RETURN temp_string;
-    ENDFUNC
+!        RETURN temp_string;
+!    ENDFUNC
     
-    PROC moveRob(string target)
+!    PROC moveRob(string target)
         
         
-    ENDPROC
+!    ENDPROC
 ENDMODULE
