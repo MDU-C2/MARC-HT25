@@ -211,5 +211,5 @@ Desktop.ini
 
 /robotstudio/test
 .venv
-/depthai/dataset/*.json
+/depthai/dataset
 *.png
