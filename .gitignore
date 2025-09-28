@@ -150,7 +150,6 @@ dkms.conf
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
 build.ninja
 .ninja_deps
 .ninja_log
