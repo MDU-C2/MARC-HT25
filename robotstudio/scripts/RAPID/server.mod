@@ -55,17 +55,18 @@ MODULE server
                 
                 CASE "Cups_Available":
                     TPWrite("[INFO] client have found cups");
-                    hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0); !get handframe
+                    hand_frame := CRobT(\Tool:= tool0 \WObj:= wobj0);
                     SocketSend client_socket \Str:= "Ask_Instructions:" +  RobtargetToString(hand_frame);
                     
                 CASE "Coordinates":
                     TPWrite "[INFO] clinet want cordinates";
-                    hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0);
+                    hand_frame := CRobT(\Tool:= tool0 \WObj:= wobj0);
                     SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
                           
                 CASE "Move":
-                 SocketSend client_socket \Str:= "Ask_Coordinate";
-                            MoveRob; 
+                 hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0);
+                 SocketSend client_socket \Str:= "Ask_Coordinate: "+RobtargetToString(hand_frame);
+                 MoveRob;  !start move sequence
                             
                 !don't want to be able to end communication from client
                 !CASE "end": 
@@ -112,12 +113,11 @@ MODULE server
         ! expect message [x,y,z] commands next
         SocketReceive client_socket \Str := message;
         target_pos := rob_coordinates(message);
-        SocketSend client_socket \Str:= " Ack_Coordinate_Received";
+        SocketSend client_socket \Str:= " Ack_Orientation_Received";
         
         ! expect message [q1,q2,q3,q4] commands next
         SocketReceive client_socket \Str := message;
         target_orient := rob_orientation(message);
-        SocketSend client_socket \Str:= " Ack_Orientation_Received";
         
         SocketSend client_socket \Str:= " Ack_Wait";
         target := CRobT(\Tool:=tool0 \WObj:=wobj0); ! copy same as hand frame
