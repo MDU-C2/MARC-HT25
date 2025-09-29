@@ -148,6 +148,9 @@ MODULE server
         VAR num amount_of_cups := 0;
         VAR bool succeded := FALSE;
         
+        VAR robtarget cup_start_frame;
+        VAR robtarget cup_end_frame; 
+        
         !expect amount of cups
         SocketSend client_socket \Str:= "Ask_amount_of_cups";   
         SocketReceive client_socket \Str := message;
@@ -155,19 +158,21 @@ MODULE server
         succeded := StrToVal(message,amount_of_cups); ! we got an cup amount
         SocketSend client_socket \Str:= "Ack_amount_of_cups"; 
         
-        IF (cup_end_frame.rot.q1 +cup_end_frame.rot.q2 +cup_end_frame.rot.q3 +cup_end_frame.rot.q4 = 0) THEN !we have not gotten a end frame!
-            
-            SocketSend client_socket \Str:= "Ask_where_to_place_cup"; 
-            cup_end_frame := GetRobTarget();
-            
-        ENDIF
+!        IF (cup_end_frame.rot.q1 +cup_end_frame.rot.q2 +cup_end_frame.rot.q3 +cup_end_frame.rot.q4 = 0) THEN !we have not gotten a end frame! 
+!            SocketSend client_socket \Str:= "Ask_where_to_place_cup"; 
+!            cup_end_frame := GetRobTarget();   
+!        ENDIF
         
         !go through all cups
         WHILE(amount_of_cups > 0) DO
             
-            SocketSend client_socket \Str:= "Ack_start_cup_sequence";   
-          
-            MoveRob(GetRobTarget()); !move robot arm sequence
+            SocketSend client_socket \Str:= "Ack_cup_current_position";   
+            cup_start_frame := GetRobTarget();
+            
+            SocketSend client_socket \Str:= "Ack_cup_end_position";   
+            cup_end_frame := GetRobTarget();
+            
+            MoveRob(cup_start_frame); !move robot arm sequence
             
             ! gripp cup
                
