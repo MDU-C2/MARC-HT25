@@ -88,4 +88,21 @@ FUNC orient rob_orientation(string input_string)
 
         RETURN rob_ori;
     ENDFUNC
+    
+    
+    FUNC orient NormilizeRotation(orient rot)
+        
+        VAR num total;
+        
+        total := sqrt(rot.q1*rot.q1 + rot.q2*rot.q2 +rot.q3*rot.q3 +rot.q4*rot.q4);
+        
+        rot.q1 := rot.q1/total;
+        rot.q2 := rot.q2/total;
+        rot.q3 := rot.q3/total;
+        rot.q4 := rot.q4/total;
+        
+        rot := NOrient(rot); ! should not be needed!
+        
+        RETURN rot;
+    ENDFUNC
 ENDMODULE

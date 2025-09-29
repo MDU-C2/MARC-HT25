@@ -126,8 +126,8 @@ int __cdecl main(int argc, char **argv)
         }
 
         printf("Bytes Sent: %ld\n", iResult);
-
-        iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
+        memset(recvbuf, 0, recvbuflen);
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen-1, 0);
    
         if ( iResult > 0 )
         {
