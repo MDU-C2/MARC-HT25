@@ -13,14 +13,9 @@ MODULE MainModule
 
     PROC main()
     
-        !MoveToHome;
+!        TPWrite "" \Orient:= calib_robtargets{1}.rot;
+!        MoveToHome;
         !HandInit_Verify;
-
-
-        !        moveTest;
-        !        TPWrite "test Position1:"\Pos:=testtargets{1}.trans;
-        !        TPWrite "test Position2:"\Pos:=testtargets{2}.trans;
-!        testjointtargets{1} := CJointT();
         user_main_continue := TRUE;
         WHILE user_main_continue DO
             TPErase;
@@ -31,7 +26,7 @@ MODULE MainModule
             TEST choice
             CASE 1:
                 TPgetTarget;
-                MoveY requested_target,vMedium,fine,tgripper;
+                MoveJ requested_target,vMedium,fine,tgripper;
             CASE 2:
                 MoveToHome;
             CASE 3:
@@ -40,7 +35,6 @@ MODULE MainModule
                 user_main_continue := FALSE;
             ENDTEST
             
-
         ENDWHILE
         TPWrite "Program ended!";
 
@@ -78,7 +72,7 @@ MODULE MainModule
         WaitTime 1;
 
         currentPos:=CRobT(\Tool:=tGripper);
-        testtargets{2}:=currentPos;
+        calib_robtargets{2}:=currentPos;
         !        TPWrite "Position:"\Pos:=currentPos.trans;
         !        TPWrite "Orientation:"\Orient:=currentPos.rot;
 
