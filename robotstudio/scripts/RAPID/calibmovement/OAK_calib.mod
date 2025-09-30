@@ -26,9 +26,6 @@ MODULE OAK_calib
         VAR bool user_continue := TRUE;
         
         TPErase;
-!        TPReadnum arr_pos, "Please enter pos #";
-!!        MoveY testtargets{arr_pos},vSlow,fine,tgripper;
-!        MoveAbsJ testjointtargets{arr_pos}, v100, fine, tool0;
         
         WHILE user_continue DO
             TPErase;
@@ -120,7 +117,6 @@ MODULE OAK_calib
             ok := StrToVal(temp_string,temp_orient);
             calib_robtargets{i}.rot := temp_orient;
             
-!            calib_jointtargets{i} := CalcJointT(calib_robtargets{i},tGripper);
         ENDFOR
         Close logfile;
     ENDPROC

@@ -15,15 +15,10 @@ MODULE MainModule
     PERS jointtarget tempJoints{calib_array_size};
 
     PROC main()
-    
-!        TPWrite "" \Orient:= calib_robtargets{1}.rot;
+
 !        MoveToHome;
         !HandInit_Verify;
-!        TPErase;
-        
-!    single_client_communication;
-!        tempTargets := calib_robtargets;
-!        tempJoints := calib_jointtargets;
+
         
 !        user_main_continue := FALSE;
         WHILE user_main_continue DO
@@ -51,53 +46,6 @@ MODULE MainModule
         ENDWHILE
         TPWrite "Program ended!";
 
-    ENDPROC
-
-    !Take user position input from Flex Pendant.
-    PROC TPgetTarget()
-
-        TPReadNum requested_target.trans.x,"enter x-value (160 - 500):";
-        TPReadNum requested_target.trans.y,"enter y-value (-200 - 300):";
-        TPReadNum requested_target.trans.z,"enter z-value (0 - 700):";
-
-
-    ENDPROC
-
-    PROC moveTest()
-
-        TPWrite "Moving...";
-
-        MoveY YLExample_pMoveY,vMedium,fine,tGripper;
-
-
-        TPWrite "Position:"\Pos:=currentPos.trans;
-        TPWrite "Orientation:"\Orient:=currentPos.rot;
-
-
-        !WaitForTap;
-        WaitTime 1;
-
-        !        MoveL target2, vSlow, fine,tgripper;
-        !        !MoveY target2,vSlow,fine,tGripper;
-
-        !        !MoveY Offs(YLExample_pMoveY,50,-100,0),vMedium,fine,tGripper;
-
-        WaitTime 1;
-
-        currentPos:=CRobT(\Tool:=tGripper);
-        calib_robtargets{2}:=currentPos;
-        !        TPWrite "Position:"\Pos:=currentPos.trans;
-        !        TPWrite "Orientation:"\Orient:=currentPos.rot;
-
-
-    ENDPROC
-
-    !Print current tool position & orientation to the FlexPendant
-    PROC printCRobT()
-
-        currentPos:=CRobT(\Tool:=tGripper);
-        TPWrite "Position:"\Pos:=currentPos.trans;
-        TPWrite "Orientation:"\Orient:=currentPos.rot;
     ENDPROC
 
 

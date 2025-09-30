@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <Program>
-	<Module>calibVars.mod</Module>
-	<Module>Server_functions.mod</Module>
-	<Module>server.mod</Module>
-	<Module>PersistentVars.mod</Module>
-	<Module>OAK_calib.mod</Module>
+	<Module>Processes.mod</Module>
 	<Module>MainModule.mod</Module>
+	<Module>OAK_calib.mod</Module>
+	<Module>PersistentVars.mod</Module>
+	<Module>calibVars.mod</Module>
 </Program>
