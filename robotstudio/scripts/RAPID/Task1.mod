@@ -28,7 +28,7 @@ MODULE Task1
         ClearPath;       ! Clear planned path
         StorePath;       ! Save path so new moves are allowed
         
-        trapFlag := FALSE;   ! Reset flag so it doesn't retrigger
+        !trapFlag := FALSE;   ! unnecessary, IPers triggers on change of trapFlag
 
         ! Oscillate Joint2 back and forth
         MoveAbsJ jtPosC, v100, fine, tool0;
