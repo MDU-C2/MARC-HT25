@@ -1,0 +1,426 @@
+MODULE CupPickingServer
+    !==== Variables ====!
+    VAR socketdev server_socket;
+    VAR socketdev client_socket;
+    
+    ! Network settings
+    VAR string ipAddress := "127.0.0.1";
+    VAR num port := 1025;
+    
+    ! Communication variables
+    VAR string message := "";
+    VAR string response := "";
+    VAR robtarget current_hand_frame;
+    VAR robtarget cup_position;
+    VAR bool connected := FALSE;
+    VAR bool session_active := TRUE;
+    
+    ! Cup data variables
+    VAR pos cup_coordinates;
+    VAR orient cup_orientation;
+    VAR pos approach_coordinates;
+    VAR string current_cup_id := "";
+    
+    ! Movement variables
+    VAR robtarget approach_target;
+    VAR robtarget pickup_target;
+    VAR robtarget release_target;
+    VAR speeddata movement_speed := v100;
+    VAR speeddata slow_speed := v10;
+    
+    ! Retry control variables
+    VAR num retry_count := 0;
+    CONST num MAX_RETRIES := 3;
+    
+    ! Initialize server connection
+    PROC server_init()
+        ! Close existing sockets
+        SocketClose server_socket;
+        SocketClose client_socket;
+        
+        ! Create and bind server socket
+        SocketCreate server_socket;
+        SocketBind server_socket, ipAddress, port;
+        SocketListen server_socket;
+        
+        ! Accept connection
+        SocketAccept server_socket, client_socket \ClientAddress:=ipAddress;
+        
+        TPWrite "Python client connected";
+        connected := TRUE;
+        retry_count := 0;  ! Reset retry counter on new connection
+        
+    ERROR
+        IF ERRNO = ERR_SOCK_TIMEOUT THEN
+            TPWrite "Socket accept timeout - retrying...";
+            RETRY;
+        ELSEIF ERRNO = ERR_SOCK_CLOSED THEN
+            RETURN;
+        ENDIF
+    ENDPROC
+    
+    ! Main communication protocol
+    PROC cup_picking_communication()
+        ! Initial connection confirmation with timeout
+        SocketReceive client_socket \Str := message \Time:=10;
+        IF message = "Connection_Test" THEN
+            TPWrite "Connection confirmed with Python";
+            SocketSend client_socket \Str := "Connection_Confirmed";
+            retry_count := 0;  ! Reset after successful receive
+        ENDIF
+        
+        ! Send cups available to start the process
+        SocketSend client_socket \Str := "Cups_Available";
+        
+        ! Main session loop
+        WHILE connected AND session_active DO
+            TPWrite "=== Starting new cup request cycle ===";
+            
+            ! Request coordinate data from Python
+            TPWrite "Requesting cup coordinates...";
+            current_hand_frame := CRobT(\Tool:=tool0 \WObj:=wobj0);
+            response := "Ask_Coordinate:" + RobtargetToString(current_hand_frame);
+            SocketSend client_socket \Str := response;
+            
+            ! Wait for coordinate response with timeout
+            SocketReceive client_socket \Str := message \Time:=10;
+            TPWrite "Coordinate response: " + message;
+            retry_count := 0;  ! Reset after successful receive
+            
+            TEST message
+                CASE "No_Coordinates_Available":
+                    TPWrite "No coordinates available - ending session";
+                    session_active := FALSE;
+                CASE "User_Declined_Coordinate":
+                    TPWrite "User declined to send coordinates - asking for next";
+                    ask_for_next_cup;
+                DEFAULT:
+                    ! Got coordinates - process them
+                    TPWrite "Processing coordinates: " + message;
+                    SocketSend client_socket \Str := "Ack_Coordinate_Received";
+                    
+                    ! Parse coordinates
+                    cup_coordinates := ParsePosition(message);
+                    TPWrite "Parsed coordinates successfully";
+                    
+                    ! Continue with orientation and approach position
+                    get_orientation_and_approach;
+            ENDTEST
+            
+            message := ""; ! Reset message
+        ENDWHILE
+        
+        ! Send session complete signal
+        SocketSend client_socket \Str := "Session_Complete";
+        TPWrite "Cup picking session completed";
+        
+    ERROR
+        IF ERRNO = ERR_SOCK_CLOSED THEN
+            TPWrite "Python disconnected";
+            connected := FALSE;
+            session_active := FALSE;
+            RETURN;
+        ELSEIF ERRNO = ERR_SOCK_TIMEOUT THEN
+            retry_count := retry_count + 1;
+            TPWrite "Socket timeout - retry " + NumToStr(retry_count, 0) + " of " + NumToStr(MAX_RETRIES, 0);
+            IF retry_count < MAX_RETRIES THEN
+                RETRY;
+            ELSE
+                TPWrite "Max retries reached - ending session";
+                session_active := FALSE;
+                connected := FALSE;
+                RETURN;
+            ENDIF
+        ENDIF
+    ENDPROC
+    
+    ! Get orientation and approach position
+    PROC get_orientation_and_approach()
+        ! Ask for orientation
+        TPWrite "Requesting orientation...";
+        SocketSend client_socket \Str := "Ask_Orientation";
+        SocketReceive client_socket \Str := message \Time:=10;
+        retry_count := 0;  ! Reset after successful receive
+        
+        TEST message
+            CASE "User_Declined_Orientation":
+                TPWrite "User declined orientation - asking for next";
+                ask_for_next_cup;
+                RETURN;
+            CASE "No_Orientation_Available":
+                TPWrite "No orientation available";
+                ask_for_next_cup;
+                RETURN;
+            DEFAULT:
+                TPWrite "Received orientation: " + message;
+                SocketSend client_socket \Str := "Ack_Orientation_Received";
+                cup_orientation := ParseOrientation(message);
+        ENDTEST
+        
+        ! Ask for approach position
+        TPWrite "Requesting approach position...";
+        SocketSend client_socket \Str := "Ask_Approach_Position";
+        SocketReceive client_socket \Str := message \Time:=10;
+        retry_count := 0;  ! Reset after successful receive
+        
+        TEST message
+            CASE "User_Declined_Approach":
+                TPWrite "User declined approach position - asking for next";
+                ask_for_next_cup;
+                RETURN;
+            CASE "No_Approach_Available":
+                TPWrite "No approach position available";
+                ask_for_next_cup;
+                RETURN;
+            DEFAULT:
+                TPWrite "Received approach position: " + message;
+                SocketSend client_socket \Str := "Ack_Approach_Position_Received";
+                approach_coordinates := ParsePosition(message);
+                
+                ! Now execute the pickup
+                execute_pickup_sequence;
+        ENDTEST
+        
+    ERROR
+        IF ERRNO = ERR_SOCK_CLOSED THEN
+            connected := FALSE;
+            session_active := FALSE;
+            RETURN;
+        ELSEIF ERRNO = ERR_SOCK_TIMEOUT THEN
+            retry_count := retry_count + 1;
+            TPWrite "Timeout waiting for response - retry " + NumToStr(retry_count, 0) + " of " + NumToStr(MAX_RETRIES, 0);
+            IF retry_count < MAX_RETRIES THEN
+                RETRY;
+            ELSE
+                TPWrite "Max retries reached - asking for next cup";
+                retry_count := 0;
+                ask_for_next_cup;
+                RETURN;
+            ENDIF
+        ENDIF
+    ENDPROC
+    
+    ! Ask for next cup
+    PROC ask_for_next_cup()
+        TPWrite "Asking for next cup...";
+        SocketSend client_socket \Str := "Ask_Next";
+        SocketReceive client_socket \Str := message \Time:=10;
+        retry_count := 0;  ! Reset after successful receive
+        
+        IF message = "Cups_Not_Available" THEN
+            TPWrite "No more cups available";
+            session_active := FALSE;
+        ELSEIF message = "Cups_Available" THEN
+            TPWrite "More cups available - continuing";
+        ENDIF
+        
+    ERROR
+        IF ERRNO = ERR_SOCK_CLOSED THEN
+            connected := FALSE;
+            session_active := FALSE;
+        ELSEIF ERRNO = ERR_SOCK_TIMEOUT THEN
+            retry_count := retry_count + 1;
+            TPWrite "Timeout waiting for next cup - retry " + NumToStr(retry_count, 0) + " of " + NumToStr(MAX_RETRIES, 0);
+            IF retry_count < MAX_RETRIES THEN
+                RETRY;
+            ELSE
+                TPWrite "Max retries reached - ending session";
+                session_active := FALSE;
+                RETURN;
+            ENDIF
+        ENDIF
+    ENDPROC
+    
+    ! Execute complete pickup sequence with simulation movements
+    PROC execute_pickup_sequence()
+        VAR robtarget current_pos;  ! Declare variable at the top
+        
+        TPWrite "=== Starting Cup Pickup Sequence ===";
+        
+        ! Get current robot position as reference
+        current_pos := CRobT(\Tool:=tool0 \WObj:=wobj0);
+        
+        ! Build safe robtargets for movement
+        approach_target := current_pos;
+        approach_target.trans := approach_coordinates;
+        approach_target.rot := cup_orientation;
+        
+        pickup_target := current_pos;
+        pickup_target.trans := cup_coordinates;
+        pickup_target.rot := cup_orientation;
+        
+        ! Set release position (100mm higher than pickup)
+        release_target := pickup_target;
+        release_target.trans.z := release_target.trans.z + 100;
+        
+        ! Signal start of movement
+        SocketSend client_socket \Str := "Robot_Moving";
+        WaitTime 0.2; ! Small delay after socket send
+        
+        ! Phase 1: Move to approach position
+        TPWrite "Phase 1: Moving to approach position...";
+        MoveL approach_target, movement_speed, z20, tool0\WObj:=wobj0;
+        TPWrite "Reached approach position";
+        WaitTime 0.5;
+        
+        ! Phase 2: Move to pickup position
+        TPWrite "Phase 2: Moving to pickup position...";
+        MoveL pickup_target, slow_speed, fine, tool0\WObj:=wobj0;
+        TPWrite "Reached pickup position";
+        WaitTime 0.3;
+        
+        ! Phase 3: Close gripper and pick up cup
+        TPWrite "Phase 3: Picking up cup...";
+        ! Add your gripper close command here
+        ! SetDO gripper_close, 1;
+        WaitTime 1.0; ! Simulate gripper closing time
+        SocketSend client_socket \Str := "Cup_Picked_Up";
+        WaitTime 0.2;
+        
+        ! Phase 4: Move to release position
+        TPWrite "Phase 4: Moving to release position...";
+        MoveL release_target, movement_speed, z20, tool0\WObj:=wobj0;
+        TPWrite "Reached release position";
+        WaitTime 0.3;
+        
+        ! Phase 5: Open gripper and release cup
+        TPWrite "Phase 5: Releasing cup...";
+        ! Add your gripper open command here
+        ! SetDO gripper_close, 0;
+        WaitTime 1.0; ! Simulate gripper opening time
+        SocketSend client_socket \Str := "Cup_Released";
+        WaitTime 0.2;
+        
+        ! Phase 6: Return to safe position
+        TPWrite "Phase 6: Returning to safe position...";
+        MoveL approach_target, movement_speed, z20, tool0\WObj:=wobj0;
+        TPWrite "Returned to safe position";
+        WaitTime 0.5;
+        
+        ! Signal movement complete and ask for next
+        SocketSend client_socket \Str := "Movement_Complete";
+        TPWrite "=== Cup Pickup Sequence Completed ===";
+        WaitTime 0.3;
+        
+        ! Ask for next cup
+        ask_for_next_cup;
+        
+    ERROR
+        IF ERRNO = ERR_PATH_STOP THEN
+            TPWrite "ERROR: Path stopped";
+            SocketSend client_socket \Str := "Movement_Error";
+            RETURN;
+        ELSEIF ERRNO = ERR_ROBLIMIT THEN
+            TPWrite "ERROR: Robot limit reached - Position may be unreachable";
+            SocketSend client_socket \Str := "Movement_Error";
+            RETURN;
+        ELSEIF ERRNO = ERR_OUTOFBND THEN
+            TPWrite "ERROR: Position out of bounds";
+            SocketSend client_socket \Str := "Movement_Error";
+            RETURN;
+        ELSEIF ERRNO = ERR_SOCK_CLOSED THEN
+            connected := FALSE;
+        ENDIF
+    ENDPROC
+    
+    ! Parse position string [x,y,z] to pos
+    FUNC pos ParsePosition(string pos_str)
+        VAR pos result;
+        VAR string temp_str;
+        VAR num start_pos;
+        VAR num end_pos;
+        VAR bool ok;
+        
+        ! Remove brackets and spaces
+        temp_str := StrPart(pos_str, 2, StrLen(pos_str) - 2);
+        
+        ! Parse X coordinate
+        end_pos := StrFind(temp_str, 1, ",");
+        ok := StrToVal(StrPart(temp_str, 1, end_pos - 1), result.x);
+        
+        ! Parse Y coordinate
+        start_pos := end_pos + 1;
+        end_pos := StrFind(temp_str, start_pos, ",");
+        ok := StrToVal(StrPart(temp_str, start_pos, end_pos - start_pos), result.y);
+        
+        ! Parse Z coordinate
+        start_pos := end_pos + 1;
+        ok := StrToVal(StrPart(temp_str, start_pos, StrLen(temp_str) - start_pos + 1), result.z);
+        
+        RETURN result;
+        
+    ERROR
+        TPWrite "ERROR: Failed to parse position string: " + pos_str;
+        result := [0, 0, 0];
+        RETURN result;
+    ENDFUNC
+    
+    ! Parse orientation string [q1,q2,q3,q4] to orient
+    FUNC orient ParseOrientation(string orient_str)
+        VAR orient result;
+        VAR string temp_str;
+        VAR num start_pos;
+        VAR num end_pos;
+        VAR bool ok;
+        
+        ! Remove brackets and spaces
+        temp_str := StrPart(orient_str, 2, StrLen(orient_str) - 2);
+        
+        ! Parse Q1
+        end_pos := StrFind(temp_str, 1, ",");
+        ok := StrToVal(StrPart(temp_str, 1, end_pos - 1), result.q1);
+        
+        ! Parse Q2
+        start_pos := end_pos + 1;
+        end_pos := StrFind(temp_str, start_pos, ",");
+        ok := StrToVal(StrPart(temp_str, start_pos, end_pos - start_pos), result.q2);
+        
+        ! Parse Q3
+        start_pos := end_pos + 1;
+        end_pos := StrFind(temp_str, start_pos, ",");
+        ok := StrToVal(StrPart(temp_str, start_pos, end_pos - start_pos), result.q3);
+        
+        ! Parse Q4
+        start_pos := end_pos + 1;
+        ok := StrToVal(StrPart(temp_str, start_pos, StrLen(temp_str) - start_pos + 1), result.q4);
+        
+        RETURN result;
+        
+    ERROR
+        TPWrite "ERROR: Failed to parse orientation string: " + orient_str;
+        result := [1, 0, 0, 0];
+        RETURN result;
+    ENDFUNC
+    
+    ! Convert robtarget to string (enhanced version)
+    FUNC string RobtargetToString(robtarget target)
+        VAR string temp_string := "[";
+        temp_string := temp_string + NumToStr(target.trans.x, 2) + ",";
+        temp_string := temp_string + NumToStr(target.trans.y, 2) + ",";
+        temp_string := temp_string + NumToStr(target.trans.z, 2) + "]";
+        
+        temp_string := temp_string + ",[";
+        temp_string := temp_string + NumToStr(target.rot.q1, 4) + ",";
+        temp_string := temp_string + NumToStr(target.rot.q2, 4) + ",";
+        temp_string := temp_string + NumToStr(target.rot.q3, 4) + ",";
+        temp_string := temp_string + NumToStr(target.rot.q4, 4) + "]";
+        
+        RETURN temp_string;
+    ENDFUNC
+    
+ENDMODULE
+
+
+
+
+--------------- Replace the main in T_ROB_L -> module1 -> main ******* With ------------
+  PROC main()
+        server_init;
+        cup_picking_communication;
+        
+        ! Cleanup
+        SocketClose client_socket;
+        SocketClose server_socket;
+        TPWrite "Cup picking server shutdown";
+  ENDPROC      
+ENDMODULE
