@@ -1,0 +1,20 @@
+MODULE Processes
+    
+    !Take hand position input from Flex Pendant.
+    PROC TPgetTarget()
+
+        TPReadNum requested_target.trans.x,"enter x-value (160 - 500):";
+        TPReadNum requested_target.trans.y,"enter y-value (-200 - 300):";
+        TPReadNum requested_target.trans.z,"enter z-value (0 - 700):";
+
+    ENDPROC
+    
+    !Print current tool position & orientation to the FlexPendant
+    PROC printCRobT()
+        
+        currentPos:=CRobT(\Tool:=tGripper);
+        TPWrite "Position:"\Pos:=currentPos.trans;
+        TPWrite "Orientation:"\Orient:=currentPos.rot;
+    ENDPROC
+
+ENDMODULE
