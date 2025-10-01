@@ -1,21 +1,20 @@
 MODULE server
 
     !==== variables ====!
-
     VAR socketdev server_socket;
     VAR socketdev client_socket;
     
+    CONST num delay_time := 0.1;
     ! port values
-    VAR string ipAddress := "127.0.0.1"; ! local host
+    VAR string ipAddress := "127.0.0.1"; ! YuMi ip "192.168.0.1"
     VAR num port := 1025;
 
     ! process variables
     VAR string message := "";
     VAR robtarget hand_frame; 
     VAR num message_index := -1;
-    
     VAR robtarget cup_end_frame := [ [0, 0, 0], [0, 0, 0, 0], [1, 1,
-0, 0], [ 11, 12.3, 9E9, 9E9, 9E9, 9E9] ];
+0, 0], [ 11, 12.3, 9E9, 9E9, 9E9, 9E9] ]; ! dummy values
     
  ! Open socket connection
     PROC server_init() !runs once in initzilise
@@ -31,12 +30,11 @@ MODULE server
         SocketListen server_socket;
         SocketAccept server_socket,client_socket\ClientAddress:=ipAddress;
         TPWrite ("client connected");
-        !have_communication := TRUE;
 
     ERROR ! we use and expect errors in rapid,
-        IF ERRNO=ERR_SOCK_TIMEOUT THEN
+        IF ERRNO=ERR_SOCK_TIMEOUT THEN ! if no clinet did connect, try again
             RETRY;
-        ELSEIF ERRNO=ERR_SOCK_CLOSED THEN
+        ELSEIF ERRNO=ERR_SOCK_CLOSED THEN ! if the socket is closed that I lissen too, return from this function
             RETURN;
         ENDIF
     ENDPROC
@@ -48,7 +46,7 @@ MODULE server
         ! while we want to have a communication we keep on having one
         WHILE TRUE DO
 
-            SocketReceive client_socket \Str := message;
+            SocketReceive client_socket \Str := message \Time:=30; !you have 30 sec to send message or conneciton closes
             ! swich case
             TEST message 
                 
@@ -57,10 +55,12 @@ MODULE server
                     SocketSend client_socket \Str:= "Connection_Confirmed";
                 
                 CASE "Cups_available":
-                
                     TPWrite("[INFO] client have found cups"); 
+                    
                     MovingCups;
                     
+                    WaitTime(delay_time);
+                    SocketSend client_socket \Str:= "Ack_stop"; ! no more cups
                     SocketClose client_socket;
                     RETURN; !break process
                     
@@ -70,29 +70,32 @@ MODULE server
                     SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
                           
                 CASE "Move":
-                    MoveRob(GetRobTarget());  !start move sequence
-                            
-                CASE "Change_end_target":
-                 
-                    SocketSend client_socket \Str :=  "Ack_Change_end_target";! add real cordinates here
-                    cup_end_frame := GetRobTarget();
-                
+                TPWrite("[INFO] client want to move arm");
+                   IF(MoveRob(GetRobTarget())) THEN !Successfull move sequence 
+                        SocketSend client_socket \Str :=  "Ack_succesfull";! add real cordinates here       
+                   ELSE
+                        SocketSend client_socket \Str:= "[ERROR]can't reach that possition,try again"; !move failed
+                   ENDIF
+                   
                 CASE "Gripp":
+                TPWrite("[INFO] client want to gripp with gripper");
                  SocketSend client_socket \Str:= "Ack_wait";
                  !grip function
                  SocketSend client_socket \Str:= "Ack_Gripp done";
                 
                 CASE "Release":  
+                TPWrite("[INFO] client want to open with gripper");
                  SocketSend client_socket \Str:= "Ack_wait";
                  !Release function
                  SocketSend client_socket \Str:= "Ack_Release done";
                  
                 DEFAULT:
-                 TPWrite "[INFO] message from client: "+message;
+                 TPWrite("[INFO] message from client: "+message);
                  SocketSend client_socket \Str := "default_"+message;! add real cordinates here
             ENDTEST
            
-            SocketSend client_socket \Str:= "Ask_next";
+            WaitTime(delay_time);
+            SocketSend client_socket \Str:= "Ask_next"; ! ask for next "order"
 
         ENDWHILE
 
@@ -101,43 +104,65 @@ MODULE server
             server_init;
             RETRY;
         ELSEIF ERRNO = ERR_SOCK_TIMEOUT THEN
-            RETRY;
-        ENDIF
-    ENDPROC
-    
-        ! move robot 
-    PROC MoveRob(robtarget target)
-        VAR jointtarget joints;
-        
-        
-        SocketSend client_socket \Str:= "Ask_Wait";
-                 
-        joints := CalcJointT(target,tool0 \WObj:=wobj0);
-        
-        MoveAbsJ joints ,v100 ,z100,tool0;
-        !MoveAbsJ joints ,vmax \T:=5,z100,tool0; ! move tool0 with joints of a duration of 5sec or max speed, with error margen 100z and 
-        !MoveJ target,vmax \T:=5,z200,tool0;   
-    ERROR
-        IF ERRNO = ERR_ROBLIMIT THEN
-            SocketSend client_socket \Str:= "[ERROR]can't reach that possition,try again";
+            SocketClose client_socket; ! socket never send annything, close connection and return to main
             RETURN;
         ENDIF
     ENDPROC
+    
+    ! move robot to target
+    FUNC bool MoveRob(robtarget target)
+        VAR jointtarget joints;
+        
+        joints := CalcJointT(target,tool0 \WObj:=wobj0); ! get target joint values
+        
+        MoveAbsJ joints ,v100 ,z100,tool0; ! predefined speed of v100
+        
+        !MoveAbsJ joints ,vmax \T:=5,z100,tool0; ! move tool0 with joints of a duration of 5sec or max speed, with error margen 100z and 
+        !MoveJ target,vmax \T:=5,z200,tool0; 
+        RETURN TRUE; 
+    ERROR
+        IF ERRNO = ERR_ROBLIMIT THEN ! exead limit, send error to client and expect new coordinates
+            RETURN FALSE;
+        ENDIF
+    ENDFUNC
   
     FUNC robtarget GetRobTarget()
+        VAR bool sucess := FALSE;
         VAR robtarget return_target;
         return_target := CRobT(\Tool:= tool0 \WObj:= wobj0); !init values
         
         SocketSend client_socket \Str:= "Ask_Coordinate";
-        
         SocketReceive client_socket \Str := message;
-        return_target.trans := rob_coordinates(message);
+        sucess := rob_coordinates(message,return_target.trans);
+        WHILE NOT sucess DO
+            SocketSend client_socket \Str:= "[ERROR]_wrong_format,try_again(exampel[x,y,z])";
+            WaitTime(delay_time);
+            SocketSend client_socket \Str:= "Ask_Coordinate";
+            
+            SocketReceive client_socket \Str := message;
+            sucess := rob_coordinates(message,return_target.trans);
+        ENDWHILE
+        
         SocketSend client_socket \Str:= "Ack_Coordinate";
+        WaitTime(delay_time);
         SocketSend client_socket \Str:= "Ask_Orientation";
         
         ! expect message [q1,q2,q3,q4] commands next
         SocketReceive client_socket \Str := message;
-        return_target.rot := NormilizeRotation(rob_orientation(message));
+        sucess := rob_orientation(message,return_target.rot);
+        
+        WHILE NOT sucess DO
+            SocketSend client_socket \Str:= "[ERROR]_wrong_format,try_again(exampel[q1,q2,q3,q4])";
+            WaitTime(delay_time);
+            SocketSend client_socket \Str:= "Ask_Orientation";
+            
+            SocketReceive client_socket \Str := message;
+            sucess := rob_orientation(message,return_target.rot);
+        ENDWHILE
+        
+        return_target.rot := NormilizeRotation(return_target.rot);
+        
+        
         SocketSend client_socket \Str:= "Ack_Orientation";
         
         RETURN return_target;
@@ -151,46 +176,85 @@ MODULE server
         VAR robtarget cup_start_frame;
         VAR robtarget cup_end_frame; 
         
-        !expect amount of cups
+        ! ==== expect amount of cups ==== !
         SocketSend client_socket \Str:= "Ask_amount_of_cups";   
         SocketReceive client_socket \Str := message;
         
         succeded := StrToVal(message,amount_of_cups); ! we got an cup amount
+        
+        WHILE NOT succeded DO !while we don't get a number
+        
+            SocketSend client_socket \Str:= "[ERROR]not a number,try again"; !move failed 
+            WaitTime(delay_time);
+            SocketSend client_socket \Str:= "Ask_amount_of_cups";  
+            
+            SocketReceive client_socket \Str := message;
+            succeded := StrToVal(message,amount_of_cups); 
+        ENDWHILE
+        
         SocketSend client_socket \Str:= "Ack_amount_of_cups"; 
         
-!        IF (cup_end_frame.rot.q1 +cup_end_frame.rot.q2 +cup_end_frame.rot.q3 +cup_end_frame.rot.q4 = 0) THEN !we have not gotten a end frame! 
-!            SocketSend client_socket \Str:= "Ask_where_to_place_cup"; 
-!            cup_end_frame := GetRobTarget();   
-!        ENDIF
-        
-        !go through all cups
+        ! ==== go through all cups ==== !
         WHILE(amount_of_cups > 0) DO
             
+            !get current frame
+            WaitTime(delay_time);
             SocketSend client_socket \Str:= "Ack_cup_current_position";   
             cup_start_frame := GetRobTarget();
             
+            !get end frame
             SocketSend client_socket \Str:= "Ack_cup_end_position";   
             cup_end_frame := GetRobTarget();
+            WaitTime(delay_time);
+            SocketSend client_socket \Str:= "Ask_Wait";
             
-            MoveRob(cup_start_frame); !move robot arm sequence
             
-            ! gripp cup
-               
-            MoveRob(cup_end_frame); !move robot arm sequence
-        
-            !release cup
+            !move to current possition
+            succeded := MoveRob(cup_start_frame);
+            
+            WHILE NOT succeded DO !while we fail to move
+                SocketSend client_socket \Str:= "[ERROR]can't reach current frame,try again"; !move failed 
+                WaitTime(delay_time);
+                SocketSend client_socket \Str:= "Ack_cup_current_position";  !we want new position
+                
+                !try again
+                cup_start_frame := GetRobTarget();
+                succeded := MoveRob(cup_start_frame);
+            ENDWHILE
+            
+            !move to end possition
+            succeded := MoveRob(cup_end_frame);
+             
+            WHILE NOT succeded DO !while we fail to move
+                SocketSend client_socket \Str:= "[ERROR]can't reach end frame,try again"; !move failed 
+                WaitTime(delay_time);
+                SocketSend client_socket \Str:= "Ack_cup_end_position"; 
+                
+                !try again
+                cup_end_frame := GetRobTarget();
+                succeded := MoveRob(cup_end_frame);
+            ENDWHILE
             
             SocketSend client_socket \Str:= "Ask_amount_of_cups";   
             
-            !expext amount of cups
+            
+            !expect amount of cups
             SocketReceive client_socket \Str := message;
             succeded := StrToVal(message,amount_of_cups);
+            
+            WHILE NOT succeded DO !while we don't get a number
+            
+                SocketSend client_socket \Str:= "[ERROR]not a number,try again"; !move failed 
+                WaitTime(delay_time);
+                SocketSend client_socket \Str:= "Ask_amount_of_cups";  
+                
+                SocketReceive client_socket \Str := message;
+                succeded := StrToVal(message,amount_of_cups); 
+            ENDWHILE
+            
+            SocketSend client_socket \Str:= "Ack_amount_of_cups";
+            
         ENDWHILE
-        
-        
-        SocketSend client_socket \Str:= "Ack_stop"; ! no more cups
-        
     ENDPROC
-    
-    
+
 ENDMODULE

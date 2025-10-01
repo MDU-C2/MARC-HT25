@@ -1,4 +1,5 @@
 MODULE Server_functions
+    VAR errnum ERR_NOT_VALID_STRING := 42;
     FUNC string RobtargetToString(robtarget input_target)
 
         VAR string robtarget_string;
@@ -19,74 +20,128 @@ MODULE Server_functions
        RETURN robtarget_string;
     ENDFUNC
 
-    FUNC pos rob_coordinates(string input_string)
+    FUNC bool rob_coordinates(string input_string,INOUT pos rob_pos)
+        
+        
         VAR num start_index := 1;
         VAR num end_index := 0;
 
         VAR string buffer;
-        VAR pos rob_pos;
         VAR bool valid := FALSE;
 
         ! to find x
         start_index := StrFind(input_string,start_index,"[")+1;
         end_index := StrFind(input_string,start_index,",");
-
+        ! wrong format
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_pos.x); 
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
         
         ! to find y
         start_index := end_index+1;
         end_index := StrFind(input_string,start_index,",");
-
+        ! wrong format
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_pos.y); 
-
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         ! to find z
         start_index := end_index+1;
         end_index := StrFind(input_string,start_index,"]");
-
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_pos.z); 
-
-        RETURN rob_pos;
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
+        RETURN TRUE;
+        
+        ERROR
+            IF ERRNO = ERR_NOT_VALID_STRING THEN        
+                RETURN FALSE; ! should not be valid
+            ENDIF
     ENDFUNC
-FUNC orient rob_orientation(string input_string)
+    
+FUNC bool rob_orientation(string input_string,INOUT orient rob_ori)
         VAR num start_index := 1;
         VAR num end_index := 0;
 
         VAR string buffer;
-        VAR orient rob_ori;
         VAR bool valid := FALSE;
 
         ! to find q1
         start_index := StrFind(input_string,start_index,"[")+1;
         end_index := StrFind(input_string,start_index,",");
-
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_ori.q1); 
-
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         ! to find q2
         start_index := end_index+1;
         end_index := StrFind(input_string,start_index,",");
-
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_ori.q2); 
-
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         ! to find q3
         start_index := end_index+1;
         end_index := StrFind(input_string,start_index,",");
-
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_ori.q3); 
-
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         ! to find q4
         start_index := end_index+1;
         end_index := StrFind(input_string,start_index,"]");
-
+        IF end_index < start_index THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
         buffer := StrPart(input_string,start_index,end_index-start_index);
         valid := StrToVal(buffer,rob_ori.q4); 
-
-        RETURN rob_ori;
+        IF NOT valid THEN
+            RAISE ERR_NOT_VALID_STRING;
+        ENDIF
+        
+        RETURN TRUE;        
+        
+        ERROR
+            IF ERRNO = ERR_NOT_VALID_STRING THEN        
+                RETURN FALSE; ! Not valid
+            ENDIF
     ENDFUNC
     
     
@@ -106,3 +161,7 @@ FUNC orient rob_orientation(string input_string)
         RETURN rot;
     ENDFUNC
 ENDMODULE
+
+
+
+
