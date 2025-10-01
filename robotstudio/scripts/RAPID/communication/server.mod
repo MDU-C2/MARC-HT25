@@ -111,14 +111,13 @@ MODULE server
     
     ! move robot to target
     FUNC bool MoveRob(robtarget target)
-        VAR jointtarget joints;
+ 
+        WaitUntil shared_vars.wait_flag = FALSE;
         
-        joints := CalcJointT(target,tool0 \WObj:=wobj0); ! get target joint values
+        shared_vars.joint_values := CalcJointT(target,tool0 \WObj:=wobj0); ! get target joint values
         
-        MoveAbsJ joints ,v100 ,z100,tool0; ! predefined speed of v100
+        shared_vars.wait_flag := TRUE;
         
-        !MoveAbsJ joints ,vmax \T:=5,z100,tool0; ! move tool0 with joints of a duration of 5sec or max speed, with error margen 100z and 
-        !MoveJ target,vmax \T:=5,z200,tool0; 
         RETURN TRUE; 
     ERROR
         IF ERRNO = ERR_ROBLIMIT THEN ! exead limit, send error to client and expect new coordinates
