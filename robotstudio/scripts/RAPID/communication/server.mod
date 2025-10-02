@@ -6,7 +6,7 @@ MODULE server
     
     CONST num delay_time := 0.1;
     ! port values
-    VAR string ipAddress := "192.168.125.1"; ! YuMi ip "192.168.0.1"
+    VAR string ipAddress := "127.0.0.1"; ! YuMi ip "192.168.0.1"
     VAR num port := 1025;
 
     ! process variables
@@ -66,7 +66,7 @@ MODULE server
                     
                 CASE "Coordinates":
                     TPWrite "[INFO] clinet want cordinates";
-                    hand_frame :=  CRobT(\Tool:= tGripper);
+                    hand_frame :=  CRobT(\Tool:= tool0);! tGripper);
                     SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
                           
                 CASE "Move":
@@ -120,7 +120,7 @@ MODULE server
         TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf4;
         TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf6;
         TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cfx;
-        shared_vars.joint_values := CalcJointT(target,tGripper); ! get target joint values
+        shared_vars.joint_values := CalcJointT(target,tool0);! tGripper); ! get target joint values
         TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
         shared_vars.wait_flag := TRUE;
         TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
@@ -137,7 +137,7 @@ MODULE server
         VAR robtarget return_target;
         return_target := [[611.44,-10,224.449],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];!CRobT(\Tool:= tGripper); !init values
         
-            WaitTime(delay_time);
+        WaitTime(delay_time);
         SocketSend client_socket \Str:= "Ask_Coordinate";
         SocketReceive client_socket \Str := message;
         sucess := rob_coordinates(message,return_target.trans);
@@ -243,25 +243,38 @@ MODULE server
                 succeded := MoveRob(cup_end_frame);
             ENDWHILE
             
-            SocketSend client_socket \Str:= "Ask_amount_of_cups";   
+!            SocketSend client_socket \Str:= "Ask_amount_of_cups";            
             
+!            !expect amount of cups
+!            SocketReceive client_socket \Str := message;
+!            succeded := StrToVal(message,amount_of_cups);
             
-            !expect amount of cups
-            SocketReceive client_socket \Str := message;
-            succeded := StrToVal(message,amount_of_cups);
+!            WHILE NOT succeded DO !while we don't get a number
             
-            WHILE NOT succeded DO !while we don't get a number
-            
-                SocketSend client_socket \Str:= "[ERROR]not a number,try again"; !move failed 
-                WaitTime(delay_time);
-                SocketSend client_socket \Str:= "Ask_amount_of_cups";  
+!                SocketSend client_socket \Str:= "[ERROR]not a number,try again"; !move failed 
+!                WaitTime(delay_time);
+!                SocketSend client_socket \Str:= "Ask_amount_of_cups";  
                 
-                SocketReceive client_socket \Str := message;
-                succeded := StrToVal(message,amount_of_cups); 
-            ENDWHILE
+!                SocketReceive client_socket \Str := message;
+!                succeded := StrToVal(message,amount_of_cups); 
+!            ENDWHILE
             
-            SocketSend client_socket \Str:= "Ack_amount_of_cups";
-            
+!            WaitTime(delay_time);
+!            SocketSend client_socket \Str:= "Ack_amount_of_cups";
+    
+           WHILE amount_of_cups > -1 DO
+                WaitTime(delay_time);
+                SocketSend client_socket \Str:= "Ask_next";
+                SocketReceive client_socket \Str:= message;
+                
+                IF message = "y" THEN !yes 
+                    amount_of_cups := 1;
+                ELSEIF message = "n" THEN !no
+                    amount_of_cups := 0;
+                ELSE
+                    SocketSend client_socket \Str:= "[ERROR] enter yes or no,try again";
+                ENDIF
+           ENDWHILE      
         ENDWHILE
     ENDPROC
 
