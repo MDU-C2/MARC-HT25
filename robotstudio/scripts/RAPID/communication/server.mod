@@ -262,8 +262,9 @@ MODULE server
 !            WaitTime(delay_time);
 !            SocketSend client_socket \Str:= "Ack_amount_of_cups";
     
-           WHILE amount_of_cups > -1 DO
-                WaitTime(delay_time);
+           amount_of_cups := -1;
+           WHILE amount_of_cups = -1 DO !while we get wrong input, keep on going
+                WaitTime(delay_time); 
                 SocketSend client_socket \Str:= "Ask_next";
                 SocketReceive client_socket \Str:= message;
                 
@@ -273,6 +274,7 @@ MODULE server
                     amount_of_cups := 0;
                 ELSE
                     SocketSend client_socket \Str:= "[ERROR] enter yes or no,try again";
+                    amount_of_cups := -1;
                 ENDIF
            ENDWHILE      
         ENDWHILE
