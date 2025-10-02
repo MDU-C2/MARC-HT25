@@ -6,7 +6,7 @@ MODULE server
     
     CONST num delay_time := 0.1;
     ! port values
-    VAR string ipAddress := "127.0.0.1"; ! YuMi ip "192.168.0.1"
+    VAR string ipAddress := "192.168.125.1"; ! YuMi ip "192.168.0.1"
     VAR num port := 1025;
 
     ! process variables
@@ -66,7 +66,7 @@ MODULE server
                     
                 CASE "Coordinates":
                     TPWrite "[INFO] clinet want cordinates";
-                    hand_frame := CRobT(\Tool:= tool0 \WObj:= wobj0);
+                    hand_frame :=  CRobT(\Tool:= tGripper);
                     SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
                           
                 CASE "Move":
@@ -113,10 +113,17 @@ MODULE server
     FUNC bool MoveRob(robtarget target)
  
         WaitUntil shared_vars.wait_flag = FALSE;
-        
-        shared_vars.joint_values := CalcJointT(target,tool0 \WObj:=wobj0); ! get target joint values
-        
+        shared_vars.flag := 1;
+        TPWrite "Pos(MoveRob):"\Pos:=target.trans;
+        TPWrite "Orient(MoveRob)"\Orient:=target.rot;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf1;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf4;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf6;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cfx;
+        shared_vars.joint_values := CalcJointT(target,tGripper); ! get target joint values
+        TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
         shared_vars.wait_flag := TRUE;
+        TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
         
         RETURN TRUE; 
     ERROR
@@ -128,8 +135,9 @@ MODULE server
     FUNC robtarget GetRobTarget()
         VAR bool sucess := FALSE;
         VAR robtarget return_target;
-        return_target := CRobT(\Tool:= tool0 \WObj:= wobj0); !init values
+        return_target := [[611.44,-10,224.449],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];!CRobT(\Tool:= tGripper); !init values
         
+            WaitTime(delay_time);
         SocketSend client_socket \Str:= "Ask_Coordinate";
         SocketReceive client_socket \Str := message;
         sucess := rob_coordinates(message,return_target.trans);
@@ -141,7 +149,7 @@ MODULE server
             SocketReceive client_socket \Str := message;
             sucess := rob_coordinates(message,return_target.trans);
         ENDWHILE
-        
+        TPWrite "Recieved pos(GetRobTarget):"\Pos:=return_target.trans;
         SocketSend client_socket \Str:= "Ack_Coordinate";
         WaitTime(delay_time);
         SocketSend client_socket \Str:= "Ask_Orientation";
@@ -163,6 +171,7 @@ MODULE server
         
         
         SocketSend client_socket \Str:= "Ack_Orientation";
+        WaitTime(delay_time);
         
         RETURN return_target;
     ENDFUNC

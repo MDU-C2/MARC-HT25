@@ -8,7 +8,7 @@ MODULE MainModule
     VAR robtarget requested_target:=[[0,0,0],[q1,q2,q3,q4],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];
 
     VAR robtarget currentPos;
-    VAR num choice;
+
     VAR bool user_main_continue := TRUE;
     
     PERS robtarget tempTargets{calib_array_size};
@@ -18,7 +18,7 @@ MODULE MainModule
 
 !        MoveToHome;
         !HandInit_Verify;
-
+        VAR num choice;
         
 !        user_main_continue := FALSE;
         WHILE user_main_continue DO
