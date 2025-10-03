@@ -5,7 +5,7 @@ import os
 
 
 class CupPickingClient:
-    def __init__(self, host='192.168.125.1', port=1025, json_file_path="cups_data.json"):
+    def __init__(self, host='127.0.0.1', port=1025, json_file_path="cups_data.json"):
         self.host = host
         self.port = port
         self.socket = None
@@ -209,7 +209,7 @@ class CupPickingClient:
                         if response == "Ack_Orientation":
                             print("[INFO] Cup placement position sent successfully")
                             # Update cup status to 'Sent' after successfully sending all data
-                            cup['status'] = 'Sent'
+                            # cup['status'] = 'Sent'
                             print(f"[INFO] Updated cup {cup.get('id')} status to 'Sent'")
 
         # Step 3: Wait for robot movement to pickup position (Ask_Wait)
@@ -229,6 +229,11 @@ class CupPickingClient:
             remaining_cups = self.get_available_cups_count()
             self.send_message(str(remaining_cups))
             print(f"[INFO] Sent remaining cups: {remaining_cups}")
+            
+        response = self.receive_message()
+        if response == "Ack_amount_of_cups":
+            print(f"[RECEIVED] Ack_cup_current_position")
+                  
 
     def disconnect(self):
         """Close connection"""
