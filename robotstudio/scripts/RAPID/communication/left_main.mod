@@ -2,16 +2,19 @@ MODULE left_main
 
     ! main
     PROC main()
-        !variables and init functions
-        server_init;
+!        WaitTime 2;
+!        shared_vars.flag := 3;
+!        shared_vars.wait_flag := TRUE;
 
+!        TPErase;
+!        WaitTime 2;
+!        TPwrite ""\Num:=shared_vars.flag;
+!        TPWrite ""\Bool:=shared_vars.wait_flag;
+        shared_vars.wait_flag := FALSE;
         WHILE TRUE DO !main loop
             !server
             single_client_communication; ! get and connect client communication
         
-            !move arm
-            !TPWrite("[INFO] this is the other function"); ! to check if multithreading might be needed
-
         ENDWHILE
     ENDPROC
 ENDMODULE

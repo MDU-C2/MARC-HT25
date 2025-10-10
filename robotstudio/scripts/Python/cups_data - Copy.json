@@ -1,0 +1,50 @@
+{
+    "cups": [
+        {
+            "id": "cup_1",
+            "status": "Available",
+            "position": {
+                "x": 611.44,
+                "y": -10,
+                "z": 224.449
+            },
+            "orientation": {
+                "q1": 0.00944177,
+                "q2": -0.683755,
+                "q3": 0.728027,
+                "q4": -0.0486451
+            },
+            "approach_position": {
+                "x": 523.263,
+                "y": -60.6114,
+                "z": 299.53
+            }
+        },
+        {
+            "id": "cup_2",
+            "status": "Available",
+            "position": {
+                "x": 450.8,
+                "y": 0.5,
+                "z": 85.2
+            },
+            "orientation": {
+                "q1": 0.5,
+                "q2": 0.5,
+                "q3": 0.5,
+                "q4": 0.5
+            },
+            "approach_position": {
+                "x": 450.8,
+                "y": 0.5,
+                "z": 200.0
+            }
+        }
+    ],
+    "metadata": {
+        "coordinate_system": "robot_base",
+        "units": "mm",
+        "orientation_format": "quaternion",
+        "description": "Test coordinates for cup pickup task"
+    }
+}

@@ -66,7 +66,7 @@ MODULE server
                     
                 CASE "Coordinates":
                     TPWrite "[INFO] clinet want cordinates";
-                    hand_frame := CRobT(\Tool:= tool0 \WObj:= wobj0);
+                    hand_frame :=  CRobT(\Tool:= tool0);! tGripper);
                     SocketSend client_socket \Str :=  RobtargetToString(hand_frame) + "_ack";! add real cordinates here
                           
                 CASE "Move":
@@ -111,14 +111,20 @@ MODULE server
     
     ! move robot to target
     FUNC bool MoveRob(robtarget target)
-        VAR jointtarget joints;
+ 
+        WaitUntil shared_vars.wait_flag = FALSE;
+        shared_vars.flag := 1;
+        TPWrite "Pos(MoveRob):"\Pos:=target.trans;
+        TPWrite "Orient(MoveRob)"\Orient:=target.rot;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf1;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf4;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cf6;
+        TPWrite "ConfData(MoveRob)"\Num:=target.robconf.cfx;
+        shared_vars.joint_values := CalcJointT(target,tool0);! tGripper); ! get target joint values
+        TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
+        shared_vars.wait_flag := TRUE;
+        TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
         
-        joints := CalcJointT(target,tool0 \WObj:=wobj0); ! get target joint values
-        
-        MoveAbsJ joints ,v100 ,z100,tool0; ! predefined speed of v100
-        
-        !MoveAbsJ joints ,vmax \T:=5,z100,tool0; ! move tool0 with joints of a duration of 5sec or max speed, with error margen 100z and 
-        !MoveJ target,vmax \T:=5,z200,tool0; 
         RETURN TRUE; 
     ERROR
         IF ERRNO = ERR_ROBLIMIT THEN ! exead limit, send error to client and expect new coordinates
@@ -129,8 +135,9 @@ MODULE server
     FUNC robtarget GetRobTarget()
         VAR bool sucess := FALSE;
         VAR robtarget return_target;
-        return_target := CRobT(\Tool:= tool0 \WObj:= wobj0); !init values
+        return_target := [[611.44,-10,224.449],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];!CRobT(\Tool:= tGripper); !init values
         
+        WaitTime(delay_time);
         SocketSend client_socket \Str:= "Ask_Coordinate";
         SocketReceive client_socket \Str := message;
         sucess := rob_coordinates(message,return_target.trans);
@@ -142,7 +149,7 @@ MODULE server
             SocketReceive client_socket \Str := message;
             sucess := rob_coordinates(message,return_target.trans);
         ENDWHILE
-        
+        TPWrite "Recieved pos(GetRobTarget):"\Pos:=return_target.trans;
         SocketSend client_socket \Str:= "Ack_Coordinate";
         WaitTime(delay_time);
         SocketSend client_socket \Str:= "Ask_Orientation";
@@ -164,6 +171,7 @@ MODULE server
         
         
         SocketSend client_socket \Str:= "Ack_Orientation";
+        WaitTime(delay_time);
         
         RETURN return_target;
     ENDFUNC
@@ -235,25 +243,40 @@ MODULE server
                 succeded := MoveRob(cup_end_frame);
             ENDWHILE
             
-            SocketSend client_socket \Str:= "Ask_amount_of_cups";   
+!            SocketSend client_socket \Str:= "Ask_amount_of_cups";            
             
+!            !expect amount of cups
+!            SocketReceive client_socket \Str := message;
+!            succeded := StrToVal(message,amount_of_cups);
             
-            !expect amount of cups
-            SocketReceive client_socket \Str := message;
-            succeded := StrToVal(message,amount_of_cups);
+!            WHILE NOT succeded DO !while we don't get a number
             
-            WHILE NOT succeded DO !while we don't get a number
-            
-                SocketSend client_socket \Str:= "[ERROR]not a number,try again"; !move failed 
-                WaitTime(delay_time);
-                SocketSend client_socket \Str:= "Ask_amount_of_cups";  
+!                SocketSend client_socket \Str:= "[ERROR]not a number,try again"; !move failed 
+!                WaitTime(delay_time);
+!                SocketSend client_socket \Str:= "Ask_amount_of_cups";  
                 
-                SocketReceive client_socket \Str := message;
-                succeded := StrToVal(message,amount_of_cups); 
-            ENDWHILE
+!                SocketReceive client_socket \Str := message;
+!                succeded := StrToVal(message,amount_of_cups); 
+!            ENDWHILE
             
-            SocketSend client_socket \Str:= "Ack_amount_of_cups";
-            
+!            WaitTime(delay_time);
+!            SocketSend client_socket \Str:= "Ack_amount_of_cups";
+    
+           amount_of_cups := -1;
+           WHILE amount_of_cups = -1 DO !while we get wrong input, keep on going
+                WaitTime(delay_time); 
+                SocketSend client_socket \Str:= "Ask_next";
+                SocketReceive client_socket \Str:= message;
+                
+                IF message = "y" THEN !yes 
+                    amount_of_cups := 1;
+                ELSEIF message = "n" THEN !no
+                    amount_of_cups := 0;
+                ELSE
+                    SocketSend client_socket \Str:= "[ERROR] enter yes or no,try again";
+                    amount_of_cups := -1;
+                ENDIF
+           ENDWHILE      
         ENDWHILE
     ENDPROC
 
