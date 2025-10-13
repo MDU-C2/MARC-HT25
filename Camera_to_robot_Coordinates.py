@@ -18,6 +18,22 @@ def cam_to_robot_xyz(x_mm: float, y_mm: float, z_mm: float):
     return float(p_robot_h[0]), float(p_robot_h[1]), float(p_robot_h[2])
 # --- end added ---
 
+def build_homogeneous(rotation_matrix, translation_vector):
+    T_camera_to_base_effector = np.eye(4)
+    T_camera_to_base_effector[:3, :3] = rotation_matrix
+    T_camera_to_base_effector[:3, 3] = translation_vector.reshape(3)
+    return T_camera_to_base_effector
+
+
+def convert_coordinates(x ,y ,z, homogeneous_matrix): # X Y Z coordinates that should be translated into robot frame coordinates
+    obj_camera_coordinates = np.array([x, y, z])
+    obj_camera_coordinates_homo = np.append(obj_camera_coordinates, [1])  # Convert object coordinates to homogeneous coordinates
+    obj_base_effector_coordinates_homo = homogeneous_matrix.dot(obj_camera_coordinates_homo)
+    obj_base_coordinates = obj_base_effector_coordinates_homo[:3]  
+
+    #return list(map(int, obj_base_coordinates)) # uncomment this line if you want to send integers instead of floats
+    return np.around(obj_base_coordinates,2).tolist() # Use this to get a list of new coordinates, chane the number to get the number of decimal numbers
+
 # Create DepthAI pipeline
 pipeline = dai.Pipeline()
 
@@ -139,7 +155,8 @@ with dai.Device(pipeline) as device:
             # --- changed: use transform to show both camera and robot coords ---
             coords = det.spatialCoordinates  # spatial coordinates relative to camera (mm)
             xc, yc, zc = float(coords.x), float(coords.y), float(coords.z)
-            xr, yr, zr = cam_to_robot_xyz(xc, yc, zc)
+            #xr, yr, zr = cam_to_robot_xyz(xc, yc, zc)
+            xr, yr, zr = convert_coordinates(xc, yc, zc, H_cam_to_robot) # our own old version that should do the same  
 
             # Camera-frame coords
             cv2.putText(frame, f"Xc: {int(xc)} mm", (x1+5, y1+35),
