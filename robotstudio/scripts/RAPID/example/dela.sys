@@ -1,0 +1,15 @@
+MODULE dela (SYSMODULE)
+    
+
+        RECORD Struct
+        robtarget a;
+        num b;
+        bool c;
+        ENDRECORD
+        
+        VAR Struct Shared;
+        
+        
+    
+    
+ENDMODULE
