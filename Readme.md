@@ -9,7 +9,7 @@
   <br>
 </h1>
 
-<h4 align="center">A minimal Markdown Editor desktop app built on top of <a href="http://electron.atom.io" target="_blank">Electron</a>.</h4>
+<h4 align="center">A robot arm and vision system capable of picking up and placing cups. </h4>
 
 
 
@@ -26,23 +26,11 @@
 
 ## Key Features
 
-* LivePreview - Make changes, See changes
+* Dynamic robot to pick up and place cups in a dishwasher
   - Instantly see what your Markdown documents look like in HTML as you create them.
-* Sync Scrolling
-  - While you type, LivePreview will automatically scroll to the current location you're editing.
-* GitHub Flavored Markdown  
-* Syntax highlighting
-* [KaTeX](https://khan.github.io/KaTeX/) Support
-* Dark/Light mode
-* Toolbar for basic Markdown formatting
-* Supports multiple cursors
-* Save the Markdown preview as PDF
-* Emoji support in preview :tada:
-* App will keep alive in tray for quick usage
-* Full screen mode
-  - Write distraction free.
-* Cross platform
-  - Windows, macOS and Linux ready.
+* Object awareness
+  - Identifies cups, their postion and pose.
+* 
 
 ## How To Use
 
