@@ -4,8 +4,8 @@ import numpy as np
 import blobconverter
 import json
 
-cam_coords = 'path/to/cam/coords' 
-robot_file = 'path/to/robot/coords'
+cam_coords = 'saved_coordinates (1).txt' 
+robot_file = 'rob_coords.txt'
 quaternion = [1,0,0,0] # dump value, not used in robot but needs to be sent.
 
 def json_converter(coordinates, quaternion):
