@@ -1,0 +1,5 @@
+To compile client.cpp with the makefile
+
+1. open Developer PowerShell for VS 2022
+2. navigate to the folder with the client and the makefile
+3. type "nmake" and press enter
