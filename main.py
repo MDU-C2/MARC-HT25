@@ -4,15 +4,15 @@ import numpy as np
 import blobconverter
 import json
 
-cam_coords = 'saved_coordinates (1).txt' 
-robot_file = 'rob_coords.txt'
+cam_coords = 'saved_coordinates.txt' 
+robot_file = 'robo_coords.txt'
 quaternion = [1,0,0,0] # dump value, not used in robot but needs to be sent.
 
 def json_converter(coordinates, quaternion):
     data = [coordinates, quaternion] # We store the coordinates and quaternion in a list so that it can be easily accessible.
 
     # The layout/structure of the JSON file
-    cup = {
+    cup = [{
         "id":"cup_1",
         "status": "Available",
         "position":{
@@ -26,12 +26,12 @@ def json_converter(coordinates, quaternion):
             "q3": float(data[1][2]),
             "q4": float(data[1][3])
         },
-        "approach_position":{
+        "release_position":{
             "x": data[0][0],
             "y": data[0][1],
             "z": data[0][2]
         }
-    }
+    }]
 
     cup_data = {"cups": cup}
 
