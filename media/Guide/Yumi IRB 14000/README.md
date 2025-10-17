@@ -11,7 +11,16 @@
 ## How to operate
 Start the YuMI by turning the power knob at the base of the robot.
 
-![Power](../../images/Power.jpg)
+
+<h1 align="center">
+  <br>
+  <img src="../../images/Power.jpg" alt="MARC Logo" width="400">
+  <br>
+</h1>
+
+
 
 ## System failure
+
+When you start the robot you will most likely get the error "SMB communication failure" on the FlexPendant (the wired controller) 
 
