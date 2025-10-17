@@ -121,7 +121,8 @@ xout_nn.setStreamName("detections")
 
 # Camera configuration (RGB camera)
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_400_P)
+cam_rgb.setVideoSize(720,720)
 cam_rgb.setPreviewSize(416, 416)  # neural network input size for TinyYOLOv4
 cam_rgb.setInterleaved(False)
 cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
