@@ -3,6 +3,7 @@ import depthai as dai
 import numpy as np
 import blobconverter
 import json
+import math
 
 cam_coords = 'saved_coordinates.txt' 
 robot_file = 'robo_coords.txt'
@@ -34,9 +35,12 @@ def json_converter(coordinates, quaternion):
     }]
 
     cup_data = {"cups": cup}
+    try:
+        with open("cups.json", "w") as f:
+            json.dump(cup_data, f, indent=2)
+    except PermissionError:
+        print("Error opening json file, retrying.")
 
-    with open("cups.json", "w") as f:
-        json.dump(cup_data, f, indent=2)
 
 
 def build_homogeneous(rotation_matrix, translation_vector):
@@ -121,7 +125,7 @@ xout_nn.setStreamName("detections")
 
 # Camera configuration (RGB camera)
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
 cam_rgb.setPreviewSize(416, 416)  # neural network input size for TinyYOLOv4
 cam_rgb.setInterleaved(False)
 cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
@@ -188,6 +192,7 @@ with dai.Device(pipeline) as device:
         "keyboard","cell phone","microwave","oven","toaster","sink","refrigerator","book",
         "clock","vase","scissors","teddy bear","hair drier","toothbrush"
     ]
+    prev_coord = [1,1,1]
     while True:
         in_rgb   = q_rgb.get()      # latest RGB frame
         in_depth = q_depth.get()    # latest depth frame (aligned to RGB)
@@ -230,7 +235,11 @@ with dai.Device(pipeline) as device:
                             cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
                 coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-                json_converter(coordinates, quaternion)
+                if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
+                    continue
+                else:
+                    json_converter(coordinates, quaternion)
+                    prev_coord = coordinates
                 
 
         # Show the frames in windows
