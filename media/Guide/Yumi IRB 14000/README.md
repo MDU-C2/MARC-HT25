@@ -11,4 +11,7 @@
 ## How to operate
 Start the YuMI by turing the power knob at the base of the robot.
 
-![Power]()
+![Power](../../images/Power.jpg)
+
+## System failure
+
