@@ -46,7 +46,9 @@ Each arm has its own SMB and its own battery to power it. Since it is always the
 If you don't shut down the robot with the knob but first go into Restart -> advanced -> shutdown main computer, ***Then*** turn off the robot with the knob. You should not have system failure if you turn on the robot again within one day. (Off at 15:00, On at 09:00).
 
 ### Longterm fix
-As mentioned the long term fix seems to switch the SMB battery for the ***right arm***. The battery seems to be two 18650 units in series with some built in protection circuits
+As mentioned the long term fix seems to switch the SMB battery for the ***right arm***. The battery seems to be two 18650 units in series with some built in protection circuits outputting 7.2V 
+
+LINK REPAIR MANUAL
 
 
 
