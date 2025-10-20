@@ -4,6 +4,7 @@ import numpy as np
 import blobconverter
 import json
 import math
+from send_coords import CupPickingClient
 
 cam_coords = 'saved_coordinates.txt' 
 robot_file = 'robo_coords.txt'
@@ -100,6 +101,8 @@ def extract_data(file):
             float_list.append(x)
     return list(float_list)
 
+client = CupPickingClient()
+client.connect()
 camera_points = extract_data(cam_coords) # get coordinates from the camera 
 robot_points = extract_data(robot_file) # get coordinats from the robot (both .txt files)
 rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
@@ -238,9 +241,13 @@ with dai.Device(pipeline) as device:
                 if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
                     continue
                 else:
-                    json_converter(coordinates, quaternion)
-                    prev_coord = coordinates
-                
+                    try:
+                        client.send_coordinate(coordinates)
+                        prev_coord = coordinates
+                    #json_converter(coordinates, quaternion)
+                    except Exeption as e:
+                       print(f"Error {e}") 
+
 
         # Show the frames in windows
         cv.imshow("RGB", frame)

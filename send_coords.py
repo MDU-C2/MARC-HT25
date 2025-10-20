@@ -96,7 +96,7 @@ class CupPickingClient:
 
     def send_coordinate(self, position):
         """Send coordinate in format [x,y,z]"""
-        coord_str = f"[{position['x']},{position['y']},{position['z']}]"
+        coord_str = f"[{position[0]},{position[1]},{position[2]}]"
         self.send_message(coord_str)
 
     def send_orientation(self, orientation):
