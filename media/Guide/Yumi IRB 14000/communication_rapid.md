@@ -4,7 +4,7 @@ The rapid communication script utilized the build in TCP handeling that RAPID pr
 Worth noting. The robot in the Master in the communication, therefore the client (the system connecting to the robots) will ask for a sequence, example "Move". Then the server(Robot) will tell the client what it needs. Where "ACK" is acknowlagement, meaning telling the client that a message or action have been registered. Where "ASK" is a request that the client needs to provide.
 
 
-![example: ](/images/RAPID/client_com.png)
+![example: ](/media/images/RAPID/client_com.png)
 
 # Modify the code
 
@@ -25,14 +25,14 @@ The ipAdress can be found in two places in the function server_init(). the first
 
 The resoning for these two places is that the function "socketBind" provided by RAPID changes the ipAdress (don't know why but it does that on the robot). So change at both places if you want to change the ipAdress.
 
-![server init code](/images/RAPID/server_init.png)
+![server init code](/media/images/RAPID/server_init.png)
 
 *note: the code might have changed a bit sence this was written.*
 
 ---
 To add or change the string input, go down to the function "single_client_communication()" and in the swich case.
 The input to the swich case is the variable "message", and the cases are "actions" or likeworthy of the robot.
-![exmpale test connection](/images/RAPID/server_switch_case.png)
+![exmpale test connection](/media/images/RAPID/server_switch_case.png)
 
 Here it's just add your own CASE "example" and or change the syntax of exsisting inputs. Worth noting. After the case is done the server will send a "Ask_next" to get next input. If none is sent in 30 second the communication is assumed to have ended and it will end.
 
