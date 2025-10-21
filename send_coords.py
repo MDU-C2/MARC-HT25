@@ -320,7 +320,37 @@ class CupPickingClient:
             except:
                 pass
 
+    def move_cup(self, coordinates, orientation):
+        coord_str = f"[{coordinates[0]},{coordinates[1]},{coordinates[2]}]"
+        orientation_str = f"[{orientation[0]},{orientation[1]},{orientation[2]},{orientation[3]}]"
+        self.socket.send("MOVE")
+        response = self.receive_message()
+        if response != "Ask_Coordinate":
+            print(f"[ERROR] Expected Ask_Coordinate, got: {response}")
+            return False
+        else:
+            self.socket.send(coord_str.encode)
+        
+        response = self.receive_message()
+        if response != "Ack_Coordinate":
+            print(f"[ERROR] Expected Ack_Coordinate, got: {response}")
+            return False
 
+        response = self.receive_message()
+        if response != "Ask_Orientation":
+            print(f"[ERROR] Expected Ask_Orientation, got: {response}")
+            return False
+        
+        else:
+            self.socket.send(orientation_str.encode)
+        
+        response = self.receive_message()
+        if response != "Ack_Orientation":
+            print(f"[ERROR] Expected Ack_Orientation, got: {response}")
+            return False
+
+        print("[INFO] Cup pickup position sent successfully")
+        
 def main():
     print("=== Cup Picking Communication Protocol ===")
 
