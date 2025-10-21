@@ -1,4 +1,4 @@
-- [Communication](/Guide/Yumi%20IRB%2014000/CommunicationRapid.md)
-- [Move arm](/Guide/Yumi%20IRB%2014000/MoveArm.md)
-- [Start the system](/Guide/Yumi%20IRB%2014000/how_to_start.md)
-- [System failure](/Guide/Yumi%20IRB%2014000/systemfailure.md)
+- [Communication](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md)
+- [Move arm](/media/Guide/Yumi%20IRB%2014000/move_arm.md)
+- [Start the system](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
+- [System failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md)
