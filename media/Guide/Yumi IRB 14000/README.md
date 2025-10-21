@@ -24,6 +24,6 @@ Start the YuMI by turning the power knob at the base of the robot.
 
 ## RobotStudio
 
-Robotstudio is the easiest way to program the YuMI. You can install a 30 day trial version. You can also ask IT to install it on the school computers you will be using.
+Robotstudio is the easiest way to program the YuMI. You can install a 30 day trial version. You can also ask IT to install it on the school computers you will be using. 
 
 
