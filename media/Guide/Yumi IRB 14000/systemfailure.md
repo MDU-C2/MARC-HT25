@@ -4,7 +4,7 @@ The following sections about system failure is only if you are are using the sam
 When you start the robot you will most likely get the error "SMB communication failure" on the FlexPendant (the wired controller) and a system failure. System failure will prevent you from doing most things with the robot. To get out of this you will need to go to Restart -> advanced -> Shutdown main computer, then turn off the power knob. Turn on the power knob again and robot (controller) should start without system failure. However you will probably have to recalibrate the right arm. (Click the image play the video).
 
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/gbao9k5uro8/0.jpg)](http://www.youtube.com/watch?v=gbao9k5uro8)
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/O1MPd2k_ZHU/0.jpg)](http://www.youtube.com/watch?v=O1MPd2k_ZHU)
 
 To calibrate the right arm you will have to align all the joints on the right arm with the calibration marks. After you have done that start the calibration program on the FlexPendant, all joints should be selected, just press next.
 
