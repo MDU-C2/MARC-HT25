@@ -353,8 +353,8 @@ class CupPickingClient:
 
         print("[INFO] Cup pickup position sent successfully")
 
-        while response != "Ask_next":
-            response = self.receive_message()
+        # while response != "Ask_next":
+        #     response = self.receive_message()
 
 def main():
     print("=== Cup Picking Communication Protocol ===")
