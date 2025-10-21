@@ -4,7 +4,7 @@ import numpy as np
 import blobconverter
 import json
 import math
-from send_coords import CupPickingClient
+from send_coords_no_json import CupPickingClient
 
 cam_coords = 'saved_coordinates.txt' 
 robot_file = 'robo_coords.txt'
@@ -242,7 +242,7 @@ with dai.Device(pipeline) as device:
                     continue
                 else:
                     try:
-                        client.send_coordinate(coordinates)
+                        client.handle_moving_cups(coordinates)
                         prev_coord = coordinates
                     #json_converter(coordinates, quaternion)
                     except Exeption as e:
