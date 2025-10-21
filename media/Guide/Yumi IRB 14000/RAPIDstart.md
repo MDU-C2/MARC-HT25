@@ -3,9 +3,13 @@ RAPID is a programming language that ABB gives their customers to program their 
 
 ### Documentation
 ---
-Most of the documentation for RAPID can be found inside RobotStudio.
+Most of the documentation for RAPID can be found inside RobotStudio. You can find some of the documents [here](/media/documents/RAPID%20Manuals) as well.
 
 
 ![RAPID doc](/media/images/RAPID/rapiddoc.png)
 
-You can find some of the documents [here](/media/documents/RAPID%20Manuals) aswell.
+
+
+
+### How to run 
+---
