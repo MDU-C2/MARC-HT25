@@ -242,10 +242,10 @@ with dai.Device(pipeline) as device:
                     continue
                 else:
                     try:
-                        client.move_cup(coordinates)
+                        client.move_cup(coordinates, quaternion)
                         prev_coord = coordinates
                     #json_converter(coordinates, quaternion)
-                    except Exeption as e:
+                    except Exception as e:
                        print(f"Error {e}") 
 
 
