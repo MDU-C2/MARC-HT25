@@ -12,8 +12,74 @@ MODULE movementFunctions
     ! Version: 1.0
     !
     !***********************************************************
-    CONST robtarget home_target := [[609,13,136],[0.56458,0.45107,0.48932,0.48820],[-1,-1,0,4],[-177.987,9E+09,9E+09,9E+09,9E+09,9E+09]];
-    PROC MovementProc(robtarget desired_target, num step_size, num orient_frac, num joint_threshold, speeddata movement_speed)
+    
+!    PROC MovementProc(robtarget desired_target, num step_size, num orient_frac, num joint_threshold, speeddata movement_speed)
+!        VAR robtarget current_target;
+!        VAR robtarget disc_target;
+!        VAR jointtarget desired_joint_value;
+!        VAR bool home;
+!        current_target := CRobT(\Tool:=tGripper);
+!        disc_target := current_target;
+        
+        
+!        desired_joint_value := CalcJointT(desired_target,tGripper);
+!!        disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
+!!        disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+!!        MoveJ disc_target,movement_speed,fine,tGripper;
+!        MoveJ desired_target,movement_speed,fine,tGripper;
+        
+!        ERROR
+!        IF ERRNO = ERR_ROBLIMIT THEN
+
+!            IF HOME THEN
+!                STOP;
+!            ENDIF
+!            disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
+!            disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+            
+!            WHILE NOT checkJointValues(current_target,disc_target, joint_threshold) DO
+!                step_size := step_size + 50;
+!                disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
+!                disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+!                IF step_size > VectMagn(desired_target.trans-current_target.trans) THEN
+!!                    STOP;
+!                    IF HOME THEN
+!                        RETRY;    
+!                    ENDIF
+                    
+!                    ConfJ\On;
+!                    MoveJ home_target,movement_speed,fine,tGripper;
+!                    ConfJ\Off;
+!                    current_target := CrobT(\Tool:=tGripper);
+!                    home := TRUE;
+!                    step_size := 50;
+!                ENDIF
+!            ENDWHILE
+!!            checkJointValues current_target,disc_target, joint_threshold;
+!            MoveJ disc_target,movement_speed,z50,tGripper;
+!!            MoveJ home_target,movement_speed,fine,tool0;
+!            current_target := CRobT(\Tool:=tGripper);
+
+!            RETRY;
+!        ENDIF
+        
+        
+!!        WHILE VectMagn(desired_target.trans-current_target.trans) > 500 DO
+
+!!            disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
+!!            disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+!!            checkJointValues current_target,disc_target, joint_threshold;
+!!            MoveJ disc_target,movement_speed,z50,tGripper;
+!!            current_target := CRobT(\Tool:=tGripper);
+!!        ENDWHILE
+!!        checkJointValues current_target,disc_target, joint_threshold;
+!!        MoveJ desired_target,movement_speed,z100,tool0;
+!    ENDPROC
+    
+
+
+
+        PROC MovementProc(robtarget desired_target, num step_size, num orient_frac, num joint_threshold, speeddata movement_speed)
         VAR robtarget current_target;
         VAR robtarget disc_target;
         VAR jointtarget desired_joint_value;
@@ -22,9 +88,21 @@ MODULE movementFunctions
         disc_target := current_target;
         
         
-        desired_joint_value := CalcJointT(desired_target,tool0);
+        desired_joint_value := CalcJointT(desired_target,tGripper);
         
-        MoveJ desired_target,movement_speed,fine,tool0;
+!        WHILE VectMagn(desired_target.trans-current_target.trans) > 500 DO
+            
+!            disc_target.trans := discretizePosition(current_target.trans,desired_target.trans,step_size);
+!            disc_target.rot := discretizeOrient(current_target.rot,desired_target.rot,orient_frac);
+            
+!            MoveJ disc_target,movement_speed,z50,tGripper;
+!            current_target := CRobT(\Tool:=tGripper);
+            
+!        ENDWHILE
+!        disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
+!        disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+!        MoveJ disc_target,movement_speed,fine,tGripper;
+        MoveJ desired_target,movement_speed,fine,tGripper;
         
         ERROR
         IF ERRNO = ERR_ROBLIMIT THEN
@@ -32,13 +110,13 @@ MODULE movementFunctions
             IF HOME THEN
                 STOP;
             ENDIF
-            disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
-!            disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+            disc_target.trans := discretizePosition(current_target.trans,desired_target.trans,step_size);
+            disc_target.rot := discretizeOrient(current_target.rot,desired_target.rot,orient_frac);
             
             WHILE NOT checkJointValues(current_target,disc_target, joint_threshold) DO
                 step_size := step_size + 50;
-                disc_target.trans := discreteMovement(current_target.trans,desired_target.trans,step_size);
-!                disc_target.rot := discreteOrient(current_target.rot,desired_target.rot,orient_frac);
+                disc_target.trans := discretizePosition(current_target.trans,desired_target.trans,step_size);
+                disc_target.rot := discretizeOrient(current_target.rot,desired_target.rot,orient_frac);
                 IF step_size > VectMagn(desired_target.trans-current_target.trans) THEN
 !                    STOP;
                     IF HOME THEN
@@ -46,9 +124,9 @@ MODULE movementFunctions
                     ENDIF
                     
                     ConfJ\On;
-                    MoveJ home_target,movement_speed,fine,tool0;
+                    MoveJ home_target,movement_speed,fine,tGripper;
                     ConfJ\Off;
-                    current_target := CrobT(\Tool:=tool0);
+                    current_target := CrobT(\Tool:=tGripper);
                     home := TRUE;
                     step_size := 50;
                 ENDIF
@@ -74,7 +152,11 @@ MODULE movementFunctions
 !        MoveJ desired_target,movement_speed,z100,tool0;
     ENDPROC
     
-    FUNC pos discreteMovement(pos current_target,pos desired_target,num step_size)
+!    FUNC robtarget discretizeTarget(robtarget current_target,robtarget desired_target,num step_size,
+    
+    
+    
+    FUNC pos discretizePosition(pos current_target,pos desired_target,num step_size)
     
     VAR pos dir_vector;
     VAR pos return_pos;
@@ -88,7 +170,7 @@ MODULE movementFunctions
     
     ENDFUNC
     
-    FUNC orient discreteOrient(orient current_orient,orient desired_orient,num step_size)
+    FUNC orient discretizeOrient(orient current_orient,orient desired_orient,num step_size)
     
     VAR orient dir_vector;
     VAR orient return_orient;
@@ -96,9 +178,15 @@ MODULE movementFunctions
     VAR num sin_angle;
     VAR num coeff_1;
     VAR num coeff_2;
-
+    VAR num dot_prod;
     
-    angle := ACos(QuaternionDotProd(current_orient,desired_orient));
+    dot_prod := QuaternionDotProd(current_orient,desired_orient);
+
+    IF (dot_prod > 1) OR (dot_prod < -1) THEN
+        RETURN current_orient;
+    ENDIF
+    
+    angle := ACos(dot_prod);
     sin_angle := sin(angle);
     coeff_1 := sin((1-step_size)*angle) / sin_angle;
     coeff_2 := sin(step_size*angle) / sin_angle;
@@ -130,7 +218,7 @@ MODULE movementFunctions
         VAR jointtarget desired_joint_target;
   !      VAR robtarget rob_target;
         
-        desired_joint_target := CalcJointT(desired_target,tool0);
+        desired_joint_target := CalcJointT(desired_target,tGripper);
         RETURN TRUE;
     ERROR
     IF ERRNO = ERR_ROBLIMIT THEN
