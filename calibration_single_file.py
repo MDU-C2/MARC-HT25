@@ -164,6 +164,8 @@ with dai.Device(pipeline) as device:
                     robot_position = get_coords()
                     saved_robo_coordinates.append(robot_position)
                     print("coordinates saved", len(Saved_Coordinates))
+                    print("Robot:", robot_position)
+                    print("Camera", [coords.x,coords.y,coords.z])
 
         # Show the frames in windows
         cv.imshow("RGB", frame)
@@ -181,5 +183,6 @@ with open('robo_coords.txt', 'w') as f:
     for rcoords in saved_robo_coordinates:
         f.write("%s\n" % rcoords)
 
-print(Saved_Coordinates)
+print("Camera coordinates:", Saved_Coordinates)
+print("Robot coordinates:", saved_robo_coordinates)
 cv.destroyAllWindows()
