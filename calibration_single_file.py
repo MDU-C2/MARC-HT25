@@ -18,14 +18,13 @@ except ConnectionRefusedError:
     print(f"Connection refused.")
 
 def get_coords():
-    message = "Coordinates"
+    message = "Pos"
     client_socket.sendall(message.encode())  # Send message
     data = client_socket.recv(1024).decode('utf-8')  # Receive response
     time.sleep(0.1)
     _ = client_socket.recv(1024).decode('utf-8') # throw away ask message
     data_float = ast.literal_eval(data)
     return data_float
-
 
 # Create DepthAI pipeline
 pipeline = dai.Pipeline()
@@ -182,5 +181,5 @@ with open('robo_coords.txt', 'w') as f:
     for rcoords in saved_robo_coordinates:
         f.write("%s\n" % rcoords)
 
-#print(Saved_Coordinates)
+print(Saved_Coordinates)
 cv.destroyAllWindows()
