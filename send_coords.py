@@ -5,34 +5,34 @@ import os
 
 
 class CupPickingClient:
-    def __init__(self, host='192.168.125.1', port=1025, json_file_path="cups.json"):
+    def __init__(self, host='192.168.125.1', port=1025):
         self.host = host
         self.port = port
         self.socket = None
         self.connected = False
-        self.json_file_path = json_file_path
+        #self.json_file_path = json_file_path
         self.cups_data = None
-        self.load_cups_data()
+        #self.load_cups_data()
 
-    def load_cups_data(self, json_file_path=None):
-        """Load cups data from JSON file provided by vision system"""
-        if json_file_path:
-            self.json_file_path = json_file_path
+    # def load_cups_data(self, json_file_path=None):
+    #     """Load cups data from JSON file provided by vision system"""
+    #     if json_file_path:
+    #         self.json_file_path = json_file_path
 
-        try:
-            if os.path.exists(self.json_file_path):
-                with open(self.json_file_path, 'r') as file:
-                    self.cups_data = json.load(file)
-                print(f"[INFO] Loaded {len(self.cups_data['cups'])} cups from {self.json_file_path}")
-                return True
-            else:
-                print(f"[ERROR] JSON file {self.json_file_path} not found")
-                self.cups_data = {"cups": []}
-                return False
-        except Exception as e:
-            print(f"[ERROR] Failed to load JSON file: {e}")
-            self.cups_data = {"cups": []}
-            return False
+    #     try:
+    #         if os.path.exists(self.json_file_path):
+    #             with open(self.json_file_path, 'r') as file:
+    #                 self.cups_data = json.load(file)
+    #             print(f"[INFO] Loaded {len(self.cups_data['cups'])} cups from {self.json_file_path}")
+    #             return True
+    #         else:
+    #             print(f"[ERROR] JSON file {self.json_file_path} not found")
+    #             self.cups_data = {"cups": []}
+    #             return False
+    #     except Exception as e:
+    #         print(f"[ERROR] Failed to load JSON file: {e}")
+    #         self.cups_data = {"cups": []}
+    #         return False
 
     def save_cups_data(self, json_file_path=None):
         """Save updated cups data back to JSON file"""
@@ -351,13 +351,21 @@ class CupPickingClient:
             print(f"[ERROR] Expected Ack_Orientation, got: {response}")
             return False
 
+
+        response = self.receive_message()
+        if response != "Ack_succesfull":
+            print(f"[ERROR] Expected Ack_Orientation, got: {response}")
+            return False
         print("[INFO] Cup pickup position sent successfully")
 
         response = self.receive_message()
         if response != "Ask_next":
-            print(f"[ERROR] Expected Ask_next, got: {response}")
-            return False 
-
+            print(f"[ERROR] Expected Ack_Orientation, got: {response}")
+            return False
+        
+        
+        # while response != "Ask_next":
+        #     response = self.receive_message()
 
 def main():
     print("=== Cup Picking Communication Protocol ===")
