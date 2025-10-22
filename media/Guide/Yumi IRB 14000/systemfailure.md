@@ -8,7 +8,7 @@ When you start the robot you will most likely get the error "SMB communication f
 
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/O1MPd2k_ZHU/0.jpg)](http://www.youtube.com/watch?v=O1MPd2k_ZHU)
 
-To calibrate the right arm you will have to align all the joints on the right arm with the calibration marks. After you have done that start the calibration program on the FlexPendant, all joints should be selected, just press next.
+
 
 
 
