@@ -351,21 +351,17 @@ class CupPickingClient:
             print(f"[ERROR] Expected Ack_Orientation, got: {response}")
             return False
 
-
         response = self.receive_message()
         if response != "Ack_succesfull":
-            print(f"[ERROR] Expected Ack_Orientation, got: {response}")
+            print(f"[ERROR] Expected Ack_succesfull, got: {response}")
             return False
+        
         print("[INFO] Cup pickup position sent successfully")
 
         response = self.receive_message()
         if response != "Ask_next":
-            print(f"[ERROR] Expected Ack_Orientation, got: {response}")
+            print(f"[ERROR] Expected Ask_next, got: {response}")
             return False
-        
-        
-        # while response != "Ask_next":
-        #     response = self.receive_message()
 
 def main():
     print("=== Cup Picking Communication Protocol ===")
