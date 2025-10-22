@@ -6,7 +6,7 @@ import json
 import math
 import time
 from send_coords import CupPickingClient
-
+model = 'best.pt'
 cam_coords = 'saved_coordinates.txt' 
 robot_file = 'robo_coords.txt'
 quaternion = [1,0,0,0] # dump value, not used in robot but needs to be sent.
@@ -146,6 +146,15 @@ stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 stereo.setOutputSize(mono_left.getResolutionWidth(), 
                      mono_left.getResolutionHeight())
 stereo.setSubpixel(True)  # improve depth precision
+
+blobconverter.from_onnx(
+    model="blob_v8/best-simplified.onnx",
+    output_dir="blob_v8/best_openvino_2022.1_6shave.blob",
+    data_type="FP16",
+    shaves=6,
+    use_cache=False,
+    optimizer_params=[]
+)
 
 # Download and set neural network model (Tiny-YOLOv4 COCO 416x416) <------- THIS CAN BE WHATEVER MODEL THAT EXISTS IN THE DEPTHAI ZOO
 blob_path = blobconverter.from_zoo(name="yolov4_tiny_coco_416x416", 
