@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <Program>
-	<Module>Server_functions.mod</Module>
-	<Module>left_main.mod</Module>
 	<Module>server.mod</Module>
+	<Module>left_main.mod</Module>
+	<Module>Server_functions.mod</Module>
 </Program>
