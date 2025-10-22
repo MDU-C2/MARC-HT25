@@ -11,12 +11,7 @@ class CupPickingClient:
         self.socket = None
         self.connected = False
         self.cups_data = None
-        self.load_cups_data()
 
-    def get_available_cups_count(self):
-        available_cups = 1
-        return available_cups
-    
     def connect(self):
         """Connect to RAPID server"""
         try:
@@ -29,7 +24,7 @@ class CupPickingClient:
         except Exception as e:
             print(f"[ERROR] Connection failed: {e}")
             return False
-
+        
     def send_message(self, message):
         """Send message to RAPID"""
         if not self.connected:
@@ -43,7 +38,7 @@ class CupPickingClient:
             print(f"[ERROR] Send error: {e}")
             self.connected = False
             return None
-
+    
     def receive_message(self):
         """Receive message from RAPID"""
         try:
@@ -58,228 +53,3 @@ class CupPickingClient:
             print(f"[ERROR] Receive error: {e}")
             self.connected = False
             return None
-
-    def send_coordinate(self, position):
-        """Send coordinate in format [x,y,z]"""
-        coord_str = f"[{position[0]},{position[1]},{position[2]}]"
-        self.send_message(coord_str)
-
-    def send_orientation(self, orientation):
-        """Send orientation in format [q1,q2,q3,q4]"""
-        orient_str = f"[{orientation['q1']},{orientation['q2']},{orientation['q3']},{orientation['q4']}]"
-        self.send_message(orient_str)
-
-    def execute_cup_picking_protocol(self):
-        """Execute the complete cup picking communication protocol"""
-        try:
-            # Step 1: Initial connection confirmation
-            print("\n=== Step 1: Connection Confirmation ===")
-            self.send_message("Connection_test")
-            response = self.receive_message()
-
-            if response != "Connection_Confirmed":
-                print("[ERROR] Connection confirmation failed")
-                return
-
-            # Step 2: Wait for Ask_next
-            response = self.receive_message()
-            if response != "Ask_next":
-                print(f"[WARNING] Expected 'Ask_next', got: {response}")
-
-            # Step 3: Check if cups are available
-            print("\n=== Step 2: Cup Availability Check ===")
-            available_cups_count = self.get_available_cups_count()
-
-            if available_cups_count > 0:
-                print(f"[INFO] {available_cups_count} cups available")
-                self.send_message("Cups_available")
-
-                # Start the cup moving sequence
-                self.handle_moving_cups()
-
-                # Save updated cup statuses
-                self.save_cups_data()
-            else:
-                print("[INFO] No cups available")
-                self.send_message("Cups_Not_available")
-
-        except Exception as e:
-            print(f"[ERROR] Protocol execution error: {e}")
-        finally:
-            self.disconnect()
-
-    def handle_moving_cups(self, cup):
-        """Handle the MovingCups procedure from RAPID"""
-
-        # Step 1: Respond to Ask_amount_of_cups
-        print("\n=== Step 3: Amount of Cups ===")
-        response = self.receive_message()
-
-        if response == "Ask_amount_of_cups":
-            available_cups_count = self.get_available_cups_count()
-            self.send_message(str(available_cups_count))
-
-            response = self.receive_message()
-            if response == "Ack_amount_of_cups":
-                print(f"[INFO] Robot acknowledged {available_cups_count} cups")
-
-                # Process cups one by one until user says no
-                while self.connected:
-                    success = self.process_single_cup(cup)
-
-                    if not success:
-                        print(f"[WARNING] Failed to process cup")
-                        break
-
-                    # After robot finishes movement, it will ask if we want to continue
-                    print("\n[INFO] Waiting for robot to ask about next cup...")
-                    response = self.receive_message()
-
-                    if response == "Ask_next":
-                        user_input = input("Continue with next cup? (y/n): ").strip().lower()
-
-                        # Keep asking until valid input
-                        while user_input not in ['y', 'n']:
-                            print("[WARNING] Please enter 'y' or 'n'")
-
-                            # Robot will send error and ask again
-                            response = self.receive_message()
-                            if "[ERROR]" in response:
-                                print(f"[ROBOT] {response}")
-
-                            response = self.receive_message()
-                            if response == "Ask_next":
-                                user_input = input("Continue with next cup? (y/n): ").strip().lower()
-
-                        self.send_message(user_input)
-
-                        if user_input == 'n':
-                            print("[INFO] User chose to stop")
-                            break
-                    elif response is None:
-                        print("[ERROR] Lost connection to robot")
-                        break
-                    else:
-                        print(f"[WARNING] Expected 'Ask_next', got: {response}")
-                        break
-
-                # Wait for final Ack_stop
-                print("\n[INFO] Waiting for robot to finish...")
-                response = self.receive_message()
-                if response == "Ack_stop":
-                    print("[INFO] Robot finished all cups, closing connection")
-
-    def process_single_cup(self, cup):
-        """Process a single cup - send start and end positions"""
-
-        try:
-            # Step 1: Wait for Ack_cup_current_position (this is the cup pickup position)
-            response = self.receive_message()
-            if response != "Ack_cup_current_position":
-                print(f"[ERROR] Expected Ack_cup_current_position, got: {response}")
-                return False
-
-            print("[INFO] Sending cup pickup position...")
-
-            # Send cup position (where to pick up the cup)
-            response = self.receive_message()
-            if response != "Ask_Coordinate":
-                print(f"[ERROR] Expected Ask_Coordinate, got: {response}")
-                return False
-
-            self.send_coordinate(cup)
-
-            response = self.receive_message()
-            if response != "Ack_Coordinate":
-                print(f"[ERROR] Expected Ack_Coordinate, got: {response}")
-                return False
-
-            response = self.receive_message()
-            if response != "Ask_Orientation":
-                print(f"[ERROR] Expected Ask_Orientation, got: {response}")
-                return False
-
-            #self.send_orientation(cup['orientation'])
-
-            response = self.receive_message()
-            if response != "Ack_Orientation":
-                print(f"[ERROR] Expected Ack_Orientation, got: {response}")
-                return False
-
-            print("[INFO] Cup pickup position sent successfully")
-
-            # Step 2: Wait for Ack_cup_end_position (where to place the cup)
-            response = self.receive_message()
-            if response != "Ack_cup_end_position":
-                print(f"[ERROR] Expected Ack_cup_end_position, got: {response}")
-                return False
-
-            print("[INFO] Sending cup placement position...")
-
-            # Send release_position as the end position (where to place the cup)
-            response = self.receive_message()
-            if response != "Ask_Coordinate":
-                print(f"[ERROR] Expected Ask_Coordinate, got: {response}")
-                return False
-
-            self.send_coordinate(cup)
-
-            response = self.receive_message()
-            if response != "Ack_Coordinate":
-                print(f"[ERROR] Expected Ack_Coordinate, got: {response}")
-                return False
-
-            response = self.receive_message()
-            if response != "Ask_Orientation":
-                print(f"[ERROR] Expected Ask_Orientation, got: {response}")
-                return False
-
-            response = self.receive_message()
-            if response != "Ack_Orientation":
-                print(f"[ERROR] Expected Ack_Orientation, got: {response}")
-                return False
-
-            print("[INFO] Cup placement position sent successfully")
-
-            # Step 3: Wait for robot movement notification
-            response = self.receive_message()
-            if response == "Ask_Wait":
-                print("[INFO] Robot is now moving to pickup and placement positions...")
-                print("[INFO] This may take some time - please wait...")
-            else:
-                print(f"[WARNING] Expected 'Ask_Wait', got: {response}")
-
-            # Robot will move to both positions and then ask for next cup
-            # That's handled back in handle_moving_cups()
-            return True
-
-        except Exception as e:
-            print(f"[ERROR] Error processing cup: {e}")
-            return False
-
-    def disconnect(self):
-        """Close connection"""
-        if self.socket:
-            try:
-                self.socket.close()
-                self.connected = False
-                print("[INFO] Disconnected from robot")
-            except:
-                pass
-
-
-# def main():
-#     print("=== Cup Picking Communication Protocol ===")
-
-#     # Create client
-#     client = CupPickingClient()
-
-#     # Connect and execute protocol
-#     if client.connect():
-#         client.execute_cup_picking_protocol()
-#     else:
-#         print("[ERROR] Failed to establish connection")
-
-
-# if __name__ == "__main__":
-#     main()
