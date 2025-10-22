@@ -130,7 +130,7 @@ xout_nn.setStreamName("detections")
 # Camera configuration (RGB camera)
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
-cam_rgb.setPreviewSize(416, 416)  # neural network input size for TinyYOLOv4
+cam_rgb.setPreviewSize(640, 640)  # neural network input size for TinyYOLOv4
 cam_rgb.setInterleaved(False)
 cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
@@ -147,7 +147,7 @@ stereo.setOutputSize(mono_left.getResolutionWidth(),
                      mono_left.getResolutionHeight())
 stereo.setSubpixel(True)  # improve depth precision
 
-blobconverter.from_onnx(
+blob_path= blobconverter.from_onnx(
     model="blob_v8/best-simplified.onnx",
     output_dir="blob_v8/best_openvino_2022.1_6shave.blob",
     data_type="FP16",
@@ -157,9 +157,9 @@ blobconverter.from_onnx(
 )
 
 # Download and set neural network model (Tiny-YOLOv4 COCO 416x416) <------- THIS CAN BE WHATEVER MODEL THAT EXISTS IN THE DEPTHAI ZOO
-blob_path = blobconverter.from_zoo(name="yolov4_tiny_coco_416x416", 
-                                   zoo_type="depthai", 
-                                   shaves=6)
+# blob_path = blobconverter.from_zoo(name="yolov4_tiny_coco_416x416", 
+#                                    zoo_type="depthai", 
+#                                    shaves=6)
 detection_nn.setBlobPath(str(blob_path))
 detection_nn.setConfidenceThreshold(0.5)
 detection_nn.input.setBlocking(False)
@@ -168,10 +168,10 @@ detection_nn.setDepthLowerThreshold(100)
 detection_nn.setDepthUpperThreshold(5000)    
 
 # YOLO-specific network settings (for COCO Tiny-YOLOv4 416x416)
-detection_nn.setNumClasses(80)
+detection_nn.setNumClasses(6)
 detection_nn.setCoordinateSize(4)
-detection_nn.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])       
-detection_nn.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })       
+#detection_nn.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])       
+#detection_nn.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })       
 detection_nn.setIouThreshold(0.5)
 
 # Link nodes: RGB -> Neural Network, Mono -> StereoDepth, Depth -> Neural Network
@@ -194,16 +194,7 @@ with dai.Device(pipeline) as device:
 
     # Get label names for COCO classes
     label_map = [
-        "person","bicycle","car","motorbike","aeroplane","bus","train","truck","boat",
-        "traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat",
-        "dog","horse","sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella",
-        "handbag","tie","suitcase","frisbee","skis","snowboard","sports ball","kite",
-        "baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle",
-        "wine glass","cup","fork","knife","spoon","bowl","banana","apple","sandwich",
-        "orange","broccoli","carrot","hot dog","pizza","donut","cake","chair","sofa",
-        "pottedplant","bed","diningtable","toilet","tvmonitor","laptop","mouse","remote",
-        "keyboard","cell phone","microwave","oven","toaster","sink","refrigerator","book",
-        "clock","vase","scissors","teddy bear","hair drier","toothbrush"
+        "Back","Front","left_side","right_side","upright","upside_down"
     ]
     prev_coord = [1,1,1]
     temp = True;
