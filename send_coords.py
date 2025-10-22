@@ -354,7 +354,7 @@ class CupPickingClient:
         print("[INFO] Cup pickup position sent successfully")
 
         response = self.receive_message()
-        if response != "Ack_next":
+        if response != "Ask_next":
             print(f"[ERROR] Expected Ask_next, got: {response}")
             return False 
 

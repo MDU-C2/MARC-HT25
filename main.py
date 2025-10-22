@@ -236,17 +236,18 @@ with dai.Device(pipeline) as device:
                             cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
                 cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65),
                             cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-
-                coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-                if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
-                    continue
-                else:
-                    try:
-                        client.move_cup(coordinates, quaternion)
-                        prev_coord = coordinates
-                    #json_converter(coordinates, quaternion)
-                    except Exception as e:
-                       print(f"Error {e}") 
+                
+                if not coords.z == 0.0:
+                    coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+                    if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
+                        continue
+                    else:
+                        try:
+                            client.move_cup(coordinates, quaternion)
+                            prev_coord = coordinates
+                        #json_converter(coordinates, quaternion)
+                        except Exception as e:
+                            print(f"Error {e}") 
 
 
         # Show the frames in windows
