@@ -3,7 +3,6 @@ import cv2 as cv
 import depthai as dai
 import numpy as np
 import blobconverter
-import json
 import time
 import ast
 
@@ -18,7 +17,7 @@ except ConnectionRefusedError:
     print(f"Connection refused.") # If failure, (server probably not started or wrong values)
 
 def get_coords():
-    message = "Pos" #"Pos" is the command to get coordinates from robot
+    message = "Pos" # "Pos" is the command to get coordinates from robot
     client_socket.sendall(message.encode())  # Send message 
     data = client_socket.recv(1024).decode('utf-8')  # Receive response
     time.sleep(0.1) # To not cause issue with the followup "ask_next" message
@@ -179,12 +178,13 @@ with dai.Device(pipeline) as device:
             print("Connection closed.")
             break # kill pipeline
 
-with open('saved_coordinates.txt', 'w') as f:
+# both these files are needed to run the main file, as they are used when converting camera fram into robot frame 
+with open('saved_coordinates.txt', 'w') as f: 
     for coords in Saved_Coordinates:
-        f.write("%s\n" % coords)
+        f.write("%s\n" % coords) #saves the camera coordinates to a .txt file
 with open('robo_coords.txt', 'w') as f:
     for rcoords in saved_robo_coordinates:
-        f.write("%s\n" % rcoords)
+        f.write("%s\n" % rcoords) # saves the robot coordinates to a .txt file 
 
 print("Camera coordinates:", Saved_Coordinates)
 print("Robot coordinates:", saved_robo_coordinates)
