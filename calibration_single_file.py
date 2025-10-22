@@ -7,23 +7,23 @@ import json
 import time
 import ast
 
-host='192.168.125.1'
-port=1025
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+host='192.168.125.1' #Input server (robot) ip
+port=1025 #Input used port
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #initialize client socket object, (IPv4, TCP)
 
 try:
-    client_socket.connect((host, port))
-    print(f"Connected to {host}:{port}")
+    client_socket.connect((host, port)) #simply connect the client (this code) to the robot
+    print(f"Connected to {host}:{port}") #if successfull
 except ConnectionRefusedError:
-    print(f"Connection refused.")
+    print(f"Connection refused.") # If failure, (server probably not started or wrong values)
 
 def get_coords():
-    message = "Pos"
-    client_socket.sendall(message.encode())  # Send message
+    message = "Pos" #"Pos" is the command to get coordinates from robot
+    client_socket.sendall(message.encode())  # Send message 
     data = client_socket.recv(1024).decode('utf-8')  # Receive response
-    time.sleep(0.1)
+    time.sleep(0.1) # To not cause issue with the followup "ask_next" message
     _ = client_socket.recv(1024).decode('utf-8') # throw away ask message
-    data_float = ast.literal_eval(data)
+    data_float = ast.literal_eval(data) #Covert the string that looks like a list into a actual list
     return data_float
 
 # Create DepthAI pipeline
@@ -160,9 +160,12 @@ with dai.Device(pipeline) as device:
                             cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
                 
                 if cv.waitKey(1) & 0xFF == ord(' '):
-                    Saved_Coordinates.append([coords.x,coords.y,coords.z])
-                    robot_position = get_coords()
-                    saved_robo_coordinates.append(robot_position)
+                    Saved_Coordinates.append([coords.x,coords.y,coords.z]) # save camera coordinates
+                    try:
+                        robot_position = get_coords() # get coordinates from robot
+                    except:
+                        print("error getting coordinates from robot")
+                    saved_robo_coordinates.append(robot_position) # save robot coordinates
                     print("coordinates saved", len(Saved_Coordinates))
                     print("Robot:", robot_position)
                     print("Camera", [coords.x,coords.y,coords.z])
@@ -172,9 +175,9 @@ with dai.Device(pipeline) as device:
 
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
-            client_socket.close()
+            client_socket.close() #close connection to server
             print("Connection closed.")
-            break
+            break # kill pipeline
 
 with open('saved_coordinates.txt', 'w') as f:
     for coords in Saved_Coordinates:
