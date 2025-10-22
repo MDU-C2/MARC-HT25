@@ -17,9 +17,23 @@ MODULE Server_functions
     
         RETURN robtarget_string;
        
-       RETURN robtarget_string;
     ENDFUNC
 
+        
+    FUNC string RobPosToString(pos input_target)
+
+        VAR string robtarget_string;
+        
+        !extracting all single values
+       robtarget_string := "[" +
+            ValToStr(Round(input_target.x)) + "," +
+            ValToStr(Round(input_target.y)) + "," +
+            ValToStr(Round(input_target.z)) + "]";
+    
+        RETURN robtarget_string;
+       
+    ENDFUNC
+    
     FUNC bool rob_coordinates(string input_string,INOUT pos rob_pos)
         
         

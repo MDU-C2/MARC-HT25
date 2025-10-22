@@ -11,10 +11,9 @@ MODULE Processes
     
     !Print current tool position & orientation to the FlexPendant
     PROC printCRobT()
-        
-        currentPos:=CRobT(\Tool:=tGripper);
-        TPWrite "Position:"\Pos:=currentPos.trans;
-        TPWrite "Orientation:"\Orient:=currentPos.rot;
+        VAR robtarget target;
+        target:=CRobT(\Tool:=tGripper);
+        TPWrite "Position:"\Pos:=target.trans;
+        TPWrite "Orientation:"\Orient:=target.rot;
     ENDPROC
-
 ENDMODULE

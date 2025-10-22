@@ -1,0 +1,36 @@
+
+\newcommand\w{5}
+\section{Result}
+
+
+
+\begin{Form} % Start interactive form environment
+\begin{table}[h!]
+
+\renewcommand{\arraystretch}{3} % Increase row height
+\centering
+
+\begin{tabular}{|l|l|l|}
+\hline
+
+\textbf{Metric} & \textbf{Description} & \textbf{Value} \\
+\hline
+
+Accuracy & \TextField[name=accuracy_disc,
+  multiline=true, width=\w cm]{} & 
+  \TextField[name=accuracy,
+  multiline=true, width=\w cm]{} \\
+Percentage correct & \TextField[name=percentage_disc,
+  multiline=true, width=\w cm]{} & \TextField[name=percentage,
+  multiline=true, width=\w cm]{} \\
+Amount of tries & \TextField[name=tries_disc,
+  multiline=true, width=\w cm]{} & \TextField[name=tries,
+  multiline=true, width=\w cm]{} \\
+Total score & \TextField[name=score_disc,
+  multiline=true, width=\w cm]{} & \TextField[name=score,
+  multiline=true, width=\w cm]{} \\
+\hline
+\end{tabular}
+\caption{Result table}
+\end{table}
+\end{Form}
