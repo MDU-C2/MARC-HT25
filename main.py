@@ -102,16 +102,16 @@ def extract_data(file):
             float_list.append(x)
     return list(float_list)
 
-client = CupPickingClient()
-client.connect()
-camera_points = extract_data(cam_coords) # get coordinates from the camera 
-robot_points = extract_data(robot_file) # get coordinats from the robot (both .txt files)
-rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
-homogeneous = build_homogeneous(rotation_matrix,translation_vector) # convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
+# client = CupPickingClient()
+# client.connect()
+# camera_points = extract_data(cam_coords) # get coordinates from the camera 
+# robot_points = extract_data(robot_file) # get coordinats from the robot (both .txt files)
+# rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
+# homogeneous = build_homogeneous(rotation_matrix,translation_vector) # convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
 
 # Create DepthAI pipeline
-pipeline = dai.Pipeline()
 
+pipeline = dai.Pipeline()
 # Define the camera nodes
 cam_rgb   = pipeline.create(dai.node.ColorCamera)
 mono_left  = pipeline.create(dai.node.MonoCamera)
@@ -156,24 +156,53 @@ blob_path= blobconverter.from_onnx(
     optimizer_params=[]
 )
 
+configPath = "blob_v8/best.json"
+with configPath.open() as f:
+    config = json.load(f)
+nnConfig = config.get("nn_config", {})
+
+metadata = nnConfig.get("NN_specific_metadata", {})
+classes = metadata.get("classes", {})
+coordinates = metadata.get("coordinates", {})
+anchors = metadata.get("anchors", {})
+anchorMasks = metadata.get("anchor_masks", {})
+iouThreshold = metadata.get("iou_threshold", {})
+confidenceThreshold = metadata.get("confidence_threshold", {})
+
+print(metadata)
+
+nnMappings = config.get("mappings", {})
+labels = nnMappings.get("labels", {})
+
+nnPath = blob_path
 # Download and set neural network model (Tiny-YOLOv4 COCO 416x416) <------- THIS CAN BE WHATEVER MODEL THAT EXISTS IN THE DEPTHAI ZOO
 # blob_path = blobconverter.from_zoo(name="yolov4_tiny_coco_416x416", 
 #                                    zoo_type="depthai", 
 #                                    shaves=6)
 detection_nn.setBlobPath(str(blob_path))
-detection_nn.setConfidenceThreshold(0.5)
+
+detection_nn.setConfidenceThreshold(confidenceThreshold)
+detection_nn.setNumClasses(classes)
+detection_nn.setCoordinateSize(coordinates)
+detection_nn.setAnchors(anchors)
+detection_nn.setAnchorMasks(anchorMasks)
+detection_nn.setIouThreshold(iouThreshold)
+detection_nn.setBlobPath(nnPath)
+detection_nn.setNumInferenceThreads(2)
 detection_nn.input.setBlocking(False)
-detection_nn.setBoundingBoxScaleFactor(0.5)
-detection_nn.setDepthLowerThreshold(100)     
-detection_nn.setDepthUpperThreshold(5000)    
+# detection_nn.setConfidenceThreshold(0.5)
+# detection_nn.input.setBlocking(False)
+# detection_nn.setBoundingBoxScaleFactor(0.5)
+# detection_nn.setDepthLowerThreshold(100)     
+# detection_nn.setDepthUpperThreshold(5000)    
 
 # YOLO-specific network settings (for COCO Tiny-YOLOv4 416x416)
-detection_nn.setNumClasses(6)
-detection_nn.setCoordinateSize(4)
+# detection_nn.setNumClasses(6)
+# detection_nn.setCoordinateSize(4)
 #detection_nn.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])       
 #detection_nn.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })       
-detection_nn.setIouThreshold(0.5)
-
+# detection_nn.setIouThreshold(0.5)
+syncNN = True
 # Link nodes: RGB -> Neural Network, Mono -> StereoDepth, Depth -> Neural Network
 cam_rgb.preview.link(detection_nn.input)
 mono_left.out.link(stereo.left)
@@ -207,9 +236,9 @@ with dai.Device(pipeline) as device:
         depth_frame = in_depth.getFrame()         # depth data in millimeters
         detections = in_dets.detections           # list of spatial detections
 
-        if(temp):
-            time.sleep(1);
-            temp != temp;
+        # if(temp):
+        #     time.sleep(1);
+        #     temp != temp;
         # Iterate over detections and draw bounding boxes and labels (SET TO ONLY DISPLAY CUPS AT THE MOMENT)
         for det in detections:
             
@@ -219,40 +248,39 @@ with dai.Device(pipeline) as device:
                 label = label_map[det.label]
             conf  = int(det.confidence * 100)  # confidence percentage
 
-            if label == "cup":
-                # Get bounding box coordinates
-                x1 = int(det.xmin * frame.shape[1])
-                y1 = int(det.ymin * frame.shape[0])
-                x2 = int(det.xmax * frame.shape[1])
-                y2 = int(det.ymax * frame.shape[0])
+            # Get bounding box coordinates
+            x1 = int(det.xmin * frame.shape[1])
+            y1 = int(det.ymin * frame.shape[0])
+            x2 = int(det.xmax * frame.shape[1])
+            y2 = int(det.ymax * frame.shape[0])
 
-                # Draw rectangle on RGB frame
-                cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
+            # Draw rectangle on RGB frame
+            cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
-                # Draw label and confidence
-                cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20),
-                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+            # Draw label and confidence
+            cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20),
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
-                # Draw spatial coordinates (X, Y, Z in mm)
-                coords = det.spatialCoordinates  # spatial coordinates relative to camera
-                cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35),
-                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50),
-                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65),
-                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                
+            # Draw spatial coordinates (X, Y, Z in mm)
+            coords = det.spatialCoordinates  # spatial coordinates relative to camera
+            cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35),
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+            cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50),
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+            cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65),
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+            
 
-                if not (coords.z == 0.0 or coords.z > 1500)  :
-                    coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-                    if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
-                        continue
-                    else:
-                        try:
-                            client.move_cup(coordinates, quaternion)
-                            prev_coord = coordinates
-                        except Exception as e:
-                            print(f"Error {e}") 
+            # if not (coords.z == 0.0 or coords.z > 1500)  :
+            #     coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+            #     if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
+            #         continue
+            #     else:
+            #         try:
+            #             client.move_cup(coordinates, quaternion)
+            #             prev_coord = coordinates
+            #         except Exception as e:
+            #             print(f"Error {e}") 
 
 
         # Show the frames in windows
