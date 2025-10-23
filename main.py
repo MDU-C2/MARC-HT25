@@ -147,17 +147,8 @@ stereo.setOutputSize(mono_left.getResolutionWidth(),
                      mono_left.getResolutionHeight())
 stereo.setSubpixel(True)  # improve depth precision
 
-blob_path= blobconverter.from_onnx(
-    model="blob_v8/best-simplified.onnx",
-    output_dir="blob_v8/best_openvino_2022.1_6shave.blob",
-    data_type="FP16",
-    shaves=6,
-    use_cache=False,
-    optimizer_params=[]
-)
-
-configPath = "blob_v8/best.json"
-with configPath.open() as f:
+configPath = "blob/best.json"
+with open(configPath, "r") as f:
     config = json.load(f)
 nnConfig = config.get("nn_config", {})
 
@@ -174,12 +165,7 @@ print(metadata)
 nnMappings = config.get("mappings", {})
 labels = nnMappings.get("labels", {})
 
-nnPath = blob_path
-# Download and set neural network model (Tiny-YOLOv4 COCO 416x416) <------- THIS CAN BE WHATEVER MODEL THAT EXISTS IN THE DEPTHAI ZOO
-# blob_path = blobconverter.from_zoo(name="yolov4_tiny_coco_416x416", 
-#                                    zoo_type="depthai", 
-#                                    shaves=6)
-detection_nn.setBlobPath(str(blob_path))
+nnPath = "blob/best_openvino_2022.1_6shave.blob"
 
 detection_nn.setConfidenceThreshold(confidenceThreshold)
 detection_nn.setNumClasses(classes)
@@ -190,18 +176,7 @@ detection_nn.setIouThreshold(iouThreshold)
 detection_nn.setBlobPath(nnPath)
 detection_nn.setNumInferenceThreads(2)
 detection_nn.input.setBlocking(False)
-# detection_nn.setConfidenceThreshold(0.5)
-# detection_nn.input.setBlocking(False)
-# detection_nn.setBoundingBoxScaleFactor(0.5)
-# detection_nn.setDepthLowerThreshold(100)     
-# detection_nn.setDepthUpperThreshold(5000)    
 
-# YOLO-specific network settings (for COCO Tiny-YOLOv4 416x416)
-# detection_nn.setNumClasses(6)
-# detection_nn.setCoordinateSize(4)
-#detection_nn.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])       
-#detection_nn.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })       
-# detection_nn.setIouThreshold(0.5)
 syncNN = True
 # Link nodes: RGB -> Neural Network, Mono -> StereoDepth, Depth -> Neural Network
 cam_rgb.preview.link(detection_nn.input)
@@ -223,8 +198,13 @@ with dai.Device(pipeline) as device:
 
     # Get label names for COCO classes
     label_map = [
-        "Back","Front","left_side","right_side","upright","upside_down"
-    ]
+            "Back",
+            "Front",
+            "left_side",
+            "right_side",
+            "upright",
+            "upside_down"
+        ]
     prev_coord = [1,1,1]
     temp = True;
     while True:
@@ -237,9 +217,9 @@ with dai.Device(pipeline) as device:
         detections = in_dets.detections           # list of spatial detections
 
         # if(temp):
-        #     time.sleep(1);
-        #     temp != temp;
-        # Iterate over detections and draw bounding boxes and labels (SET TO ONLY DISPLAY CUPS AT THE MOMENT)
+        #      time.sleep(5);
+        #      temp != temp;
+        # Iterate over detections and draw bounding boxes and labels (SEqT TO ONLY DISPLAY CUPS AT THE MOMENT)
         for det in detections:
             
             # Determine label text to display
