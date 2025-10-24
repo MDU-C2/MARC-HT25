@@ -208,6 +208,7 @@ with dai.Device(pipeline) as device:
         depth_frame = in_depth.getFrame() # Depth data in millimeters
         detections = in_dets.detections # List of spatial detections
 
+        # This allows the camera to focus before it starts looking for detections
         if(temp):
              time.sleep(5);
              temp != temp;
