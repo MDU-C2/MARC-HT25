@@ -9,7 +9,7 @@ MODULE SharedAreaFunctions
     ENDRECORD
     
     PERS shared_area_struct shared_area;
-    CONST robtarget cup_origin:=[[111.17,0,-50],[0.00272004,0.292881,0.955993,0.0170228],[-1,3,1,0],[141.996,9E+9,9E+9,9E+9,9E+9,9E+9]];
+    !CONST robtarget cup_origin:=[[111.17,0,-50],[0.00272004,0.292881,0.955993,0.0170228],[-1,3,1,0],[141.996,9E+9,9E+9,9E+9,9E+9,9E+9]];
     
     CONST num high_offset := 300;
     CONST num delay_time := 0.5;
@@ -93,7 +93,7 @@ MODULE SharedAreaFunctions
         
     ENDFUNC
     
-   PROC  PickUp(robtarget target)
+    PROC  PickUp(robtarget target)
         
         ! go and place cup in desired pos
         moveJ Offs(target,0,0,high_offset),movespeed,z50,tool0;
