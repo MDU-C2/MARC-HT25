@@ -44,4 +44,4 @@ Now it's time to install the correct libraries, this is done by running our **re
 #Run the requirements.txt file
 > pip install -r requirements.txt
 ```
-Now the setup is complete and you should be able to run the code by following this [walkthrough](media\Guide\Python\running_code.md)
+Now the setup is complete and you should be able to run the code by following this [walkthrough](/media/Guide/Python/running_code.md)
