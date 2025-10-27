@@ -12,7 +12,7 @@ Now run the code
 ```
 * Move the gripper into a cup using **Leadthrough** on the flexpendant. 
 * When you see a detection in the program press **Space**. Do this atleast 3 times but more position equals better calibration. For our tests we use 10-15 calibration positions.
-* When all positions have been saved, press **Q** on your keyboard to close the program and save the positions to .txt files.
+* When all positions have been saved, press **Q** on your keyboard which will close the program and save the positions to .txt files.
 * Now 2 files should have been created **robo_coords.txt** and **saved_coords.txt** 
 * These coordinates will be used in the main file later to calculate the translation between the camera and the robot.
 ## Running the main code
