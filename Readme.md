@@ -17,8 +17,6 @@
   <a href="#key-features">Key Features</a> •
   <a href="#requirements">Requirements</a> •
   <a href="#how-to-use">How To Use</a> •
-  <a href="#download">Download</a> •
-  <a href="#credits">Credits</a> •
   <a href="#license">License</a>
 </p>
 
@@ -63,7 +61,6 @@ $ cd electron-markdownify
 > **Note**
 > Everything in this guide was tested on windows
 
-## Installation
 There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot. [Python guide](/media/Guide/Python/README.md) for setting up python and the camera to communicate with the robot.
 
 
