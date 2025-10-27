@@ -1,17 +1,15 @@
 import cv2 as cv
 import depthai as dai
 import numpy as np
+import blobconverter
 import json
 import math
 import time
 from send_coords import CupPickingClient
 
-#model = 'best.pt' # Path to the model that should be used
-cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
-robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
-quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
-
-#==================================== FUNCTIONS ====================================
+cam_coords = 'saved_coordinates.txt' 
+robot_file = 'robo_coords.txt'
+quaternion = [1,0,0,0] # dump value, not used in robot but needs to be sent.
 
 def json_converter(coordinates, quaternion):
     data = [coordinates, quaternion] # We store the coordinates and quaternion in a list so that it can be easily accessible.
@@ -45,11 +43,14 @@ def json_converter(coordinates, quaternion):
     except PermissionError:
         print("Error opening json file, retrying.")
 
+
+
 def build_homogeneous(rotation_matrix, translation_vector):
     T_camera_to_base_effector = np.eye(4)
     T_camera_to_base_effector[:3, :3] = rotation_matrix
     T_camera_to_base_effector[:3, 3] = translation_vector.reshape(3)
     return T_camera_to_base_effector
+
 
 def convert_coordinates(x ,y ,z, homogeneous_matrix): # X Y Z coordinates that should be translated into robot frame coordinates
     obj_camera_coordinates = np.array([x, y, z])
@@ -57,8 +58,9 @@ def convert_coordinates(x ,y ,z, homogeneous_matrix): # X Y Z coordinates that s
     obj_base_effector_coordinates_homo = homogeneous_matrix.dot(obj_camera_coordinates_homo)
     obj_base_coordinates = obj_base_effector_coordinates_homo[:3]  
 
-    #return list(map(int, obj_base_coordinates)) # Uncomment this line if you want to send integers instead of floats
+    #return list(map(int, obj_base_coordinates)) # uncomment this line if you want to send integers instead of floats
     return np.around(obj_base_coordinates,2).tolist() # Use this to get a list of new coordinates, chane the number to get the number of decimal numbers
+
 
 def estimate_rigid_transform(camera_points, robot_points):
     cam = np.asarray(camera_points, dtype=np.float64)
@@ -100,14 +102,12 @@ def extract_data(file):
             float_list.append(x)
     return list(float_list)
 
-#==================================== CAMERA & COMMUNICATION SETUP ====================================
-
 client = CupPickingClient()
 client.connect()
-camera_points = extract_data(cam_coords) # Get coordinates from the camera 
-robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
+camera_points = extract_data(cam_coords) # get coordinates from the camera 
+robot_points = extract_data(robot_file) # get coordinats from the robot (both .txt files)
 rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
-homogeneous = build_homogeneous(rotation_matrix,translation_vector) # Convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
+homogeneous = build_homogeneous(rotation_matrix,translation_vector) # convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
 
 # Create DepthAI pipeline
 pipeline = dai.Pipeline()
@@ -129,8 +129,8 @@ xout_nn.setStreamName("detections")
 
 # Camera configuration (RGB camera)
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-cam_rgb.setPreviewSize(640, 640) # Neural network input size. (MUST MATCH THE RUNNING MODELS SIZE)
+cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
+cam_rgb.setPreviewSize(416, 416)  # neural network input size for TinyYOLOv4
 cam_rgb.setInterleaved(False)
 cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
@@ -143,52 +143,38 @@ mono_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 # Stereo depth configuration
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)       
-stereo.setOutputSize(mono_left.getResolutionWidth(), mono_left.getResolutionHeight())
-stereo.setSubpixel(True) 
+stereo.setOutputSize(mono_left.getResolutionWidth(), 
+                     mono_left.getResolutionHeight())
+stereo.setSubpixel(True)  # improve depth precision
 
-configPath = "blob/best.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
-with open(configPath, "r") as f:
-    config = json.load(f)
-nnConfig = config.get("nn_config", {})
-
-# Extract the metadata from the JSON file
-metadata = nnConfig.get("NN_specific_metadata", {})
-classes = metadata.get("classes", {})
-coordinates = metadata.get("coordinates", {})
-anchors = metadata.get("anchors", {})
-anchorMasks = metadata.get("anchor_masks", {})
-iouThreshold = metadata.get("iou_threshold", {})
-confidenceThreshold = metadata.get("confidence_threshold", {})
-
-print(metadata)
-
-nnMappings = config.get("mappings", {})
-labels = nnMappings.get("labels", {})
-
-nnPath = "blob/best_openvino_2022.1_6shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
-
-# Specific settings for the network
-detection_nn.setConfidenceThreshold(confidenceThreshold)
-detection_nn.setNumClasses(classes)
-detection_nn.setCoordinateSize(coordinates)
-detection_nn.setAnchors(anchors)
-detection_nn.setAnchorMasks(anchorMasks)
-detection_nn.setIouThreshold(iouThreshold)
-detection_nn.setBlobPath(nnPath)
-detection_nn.setNumInferenceThreads(2)
+# Download and set neural network model (Tiny-YOLOv4 COCO 416x416) <------- THIS CAN BE WHATEVER MODEL THAT EXISTS IN THE DEPTHAI ZOO
+blob_path = blobconverter.from_zoo(name="yolov4_tiny_coco_416x416", 
+                                   zoo_type="depthai", 
+                                   shaves=6)
+detection_nn.setBlobPath(str(blob_path))
+detection_nn.setConfidenceThreshold(0.5)
 detection_nn.input.setBlocking(False)
+detection_nn.setBoundingBoxScaleFactor(0.5)
+detection_nn.setDepthLowerThreshold(100)     
+detection_nn.setDepthUpperThreshold(5000)    
 
-syncNN = True
+# YOLO-specific network settings (for COCO Tiny-YOLOv4 416x416)
+detection_nn.setNumClasses(80)
+detection_nn.setCoordinateSize(4)
+detection_nn.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])       
+detection_nn.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })       
+detection_nn.setIouThreshold(0.5)
 
-# Linking
+# Link nodes: RGB -> Neural Network, Mono -> StereoDepth, Depth -> Neural Network
 cam_rgb.preview.link(detection_nn.input)
 mono_left.out.link(stereo.left)
 mono_right.out.link(stereo.right)
 stereo.depth.link(detection_nn.inputDepth)
 
-detection_nn.passthrough.link(xout_rgb.input) # Passthrough RGB frames (frames that went into NN)
-detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
-detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
+# Link NN outputs to XLink outputs
+detection_nn.passthrough.link(xout_rgb.input)      # passthrough RGB frames (frames that went into NN)
+detection_nn.passthroughDepth.link(xout_depth.input)  # aligned depth frames
+detection_nn.out.link(xout_nn.input)              # detection outputs (bounding boxes + coordinates)
 
 # Initialize the device and pipeline
 with dai.Device(pipeline) as device:
@@ -197,60 +183,77 @@ with dai.Device(pipeline) as device:
     q_depth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
     q_det   = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
-    prev_coord = [1,1,1] # Temporary starting x,y,z coordinates to compare with
+    # Get label names for COCO classes
+    label_map = [
+        "person","bicycle","car","motorbike","aeroplane","bus","train","truck","boat",
+        "traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat",
+        "dog","horse","sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella",
+        "handbag","tie","suitcase","frisbee","skis","snowboard","sports ball","kite",
+        "baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle",
+        "wine glass","cup","fork","knife","spoon","bowl","banana","apple","sandwich",
+        "orange","broccoli","carrot","hot dog","pizza","donut","cake","chair","sofa",
+        "pottedplant","bed","diningtable","toilet","tvmonitor","laptop","mouse","remote",
+        "keyboard","cell phone","microwave","oven","toaster","sink","refrigerator","book",
+        "clock","vase","scissors","teddy bear","hair drier","toothbrush"
+    ]
+    prev_coord = [1,1,1]
     temp = True;
     while True:
-        in_rgb   = q_rgb.get() # latest RGB frame
-        in_depth = q_depth.get() # latest depth frame (aligned to RGB)
-        in_dets  = q_det.get() # latest detection results
+        in_rgb   = q_rgb.get()      # latest RGB frame
+        in_depth = q_depth.get()    # latest depth frame (aligned to RGB)
+        in_dets  = q_det.get()      # latest detection results
 
-        frame = in_rgb.getCvFrame() # OpenCV BGR frame from color camera
-        depth_frame = in_depth.getFrame() # Depth data in millimeters
-        detections = in_dets.detections # List of spatial detections
+        frame = in_rgb.getCvFrame()               # OpenCV BGR frame from color camera
+        depth_frame = in_depth.getFrame()         # depth data in millimeters
+        detections = in_dets.detections           # list of spatial detections
 
-        # This allows the camera to focus before it starts looking for detections
         if(temp):
-             time.sleep(5);
-             temp != temp;
-        
-        # Iterate over detections and draw bounding boxes and labels
+            time.sleep(1);
+            temp != temp;
+        # Iterate over detections and draw bounding boxes and labels (SET TO ONLY DISPLAY CUPS AT THE MOMENT)
         for det in detections:
             
             # Determine label text to display
             label = str(det.label)
-            if det.label < len(labels):
-                label = labels[det.label]
+            if det.label < len(label_map):
+                label = label_map[det.label]
+            conf  = int(det.confidence * 100)  # confidence percentage
 
-            conf  = int(det.confidence * 100) # Confidence percentage
+            if label == "cup":
+                # Get bounding box coordinates
+                x1 = int(det.xmin * frame.shape[1])
+                y1 = int(det.ymin * frame.shape[0])
+                x2 = int(det.xmax * frame.shape[1])
+                y2 = int(det.ymax * frame.shape[0])
 
-            # Get bounding box coordinates
-            x1 = int(det.xmin * frame.shape[1])
-            y1 = int(det.ymin * frame.shape[0])
-            x2 = int(det.xmax * frame.shape[1])
-            y2 = int(det.ymax * frame.shape[0])
+                # Draw rectangle on RGB frame
+                cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
-            # Draw rectangle on RGB frame
-            cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
+                # Draw label and confidence
+                cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20),
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
-            # Draw label and confidence
-            cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                # Draw spatial coordinates (X, Y, Z in mm)
+                coords = det.spatialCoordinates  # spatial coordinates relative to camera
+                cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35),
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50),
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65),
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                
 
-            # Draw spatial coordinates (X, Y, Z in mm)
-            coords = det.spatialCoordinates  # Spatial coordinates relative to camera
-            cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-            cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-            cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-            
-            if not (coords.z == 0.0 or coords.z > 1500): # Fix to not use invalid coordinates while the camera is auto focusing
-                coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-                if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
-                    continue
-                else:
-                    try:
-                        client.move_cup(coordinates, quaternion)
-                        prev_coord = coordinates
-                    except Exception as e:
-                        print(f"Error {e}") 
+                if not (coords.z == 0.0 or coords.z > 1500)  :
+                    coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+                    if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
+                        continue
+                    else:
+                        try:
+                            client.move_cup(coordinates, quaternion)
+                            prev_coord = coordinates
+                        except Exception as e:
+                            print(f"Error {e}") 
+
 
         # Show the frames in windows
         cv.imshow("RGB", frame)

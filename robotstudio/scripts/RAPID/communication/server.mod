@@ -89,6 +89,11 @@ MODULE server
                 hand_frame:=CRobT(\Tool:=tGripper);
                 SocketSend client_socket\Str:=RobtargetToString(hand_frame)+"_ack";
                 ! add real cordinates here
+         CASE "Pos":
+                TPWrite "[INFO] clinet want cordinates";
+                hand_frame:=CRobT(\Tool:=tGripper);
+                SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
+                ! add real cordinates here
 
             CASE "Move":
                 TPWrite("[INFO] client want to move arm");
@@ -100,6 +105,7 @@ MODULE server
                     SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
                     !move failed
                 ENDIF
+
 
             CASE "Grip":
                 TPWrite("[INFO] client want to grip with gripper");
@@ -166,7 +172,8 @@ MODULE server
 
         shared_vars.wait_flag:=TRUE;
         TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
-
+        
+        WaitUntil shared_vars.wait_flag=FALSE;
         RETURN TRUE;
     ERROR
         IF ERRNO=ERR_ROBLIMIT THEN
