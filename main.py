@@ -159,6 +159,7 @@ detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
 detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
 
 # Initialize the device and pipeline
+first_run = True
 with dai.Device(pipeline) as device:
     # Output queues to retrieve frames and detections
     q_rgb   = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
@@ -167,7 +168,7 @@ with dai.Device(pipeline) as device:
 
     prev_coord = [[1,1,1]] # Temporary starting x,y,z coordinates to compare with
     obj_list = []
-    temp = True
+    
     while True:
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
@@ -179,9 +180,9 @@ with dai.Device(pipeline) as device:
         detections = in_dets.detections # List of spatial detections
 
         # This allows the camera to focus before it starts looking for detections
-        if(temp):
+        if(first_run):
              time.sleep(1)
-             temp != temp
+             first_run = False
         
         # Iterate over detections and draw bounding boxes and labels
         for det in detections:
@@ -211,7 +212,7 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.imshow("RGB", frame)
-            if not (coords.z == 0.0 or coords.z > 1500 or coords.x < -150 and coords.y > 90 and coords.z > 800): # Fix to not use invalid coordinates while the camera is auto focusing
+            if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800)): # Fix to not use invalid coordinates while the camera is auto focusing
                 coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
                 in_list = False
