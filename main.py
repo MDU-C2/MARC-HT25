@@ -189,7 +189,7 @@ stereo.depth.link(detection_nn.inputDepth)
 detection_nn.passthrough.link(xout_rgb.input) # Passthrough RGB frames (frames that went into NN)
 detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
 detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
-temp = True
+first_run = True
 # Initialize the device and pipeline
 with dai.Device(pipeline) as device:
     # Output queues to retrieve frames and detections
@@ -198,20 +198,19 @@ with dai.Device(pipeline) as device:
     q_det   = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
     prev_coord = [1,1,1] # Temporary starting x,y,z coordinates to compare with
-    
     while True:
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
         in_dets  = q_det.get() # latest detection results
-
+        out_frame = in_rgb.getCvFrame()
         frame = in_rgb.getCvFrame() # OpenCV BGR frame from color camera
         depth_frame = in_depth.getFrame() # Depth data in millimeters
         detections = in_dets.detections # List of spatial detections
 
         # This allows the camera to focus before it starts looking for detections
-        if(temp):
+        if(first_run):
              time.sleep(5)
-             temp = False
+             first_run = False
         
         # Iterate over detections and draw bounding boxes and labels
         for det in detections:
@@ -252,12 +251,12 @@ with dai.Device(pipeline) as device:
                     except Exception as e:
                         print(f"Error {e}") 
 
-        # Show the frames in windows
-            cv.imshow("RGB", frame)
+            # Show the frames in windows
+                cv.imshow("RGB", frame)
 
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
-            cv.imwrite("test", frame)
+            cv.imwrite("image.jpg", out_frame)
             break
 
 cv.destroyAllWindows()
