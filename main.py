@@ -5,6 +5,7 @@ import json
 import math
 import time
 from send_coords import CupPickingClient
+from copy import deepcopy
 
 #model = 'best.pt' # Path to the model that should be used
 cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
@@ -12,39 +13,6 @@ robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 
 #==================================== FUNCTIONS ====================================
-
-def json_converter(coordinates, quaternion):
-    data = [coordinates, quaternion] # We store the coordinates and quaternion in a list so that it can be easily accessible.
-
-    # The layout/structure of the JSON file
-    cup = [{
-        "id":"cup_1",
-        "status": "Available",
-        "position":{
-            "x": data[0][0],
-            "y": data[0][1],
-            "z": data[0][2]
-        },
-        "orientation":{
-            "q1": float(data[1][0]),
-            "q2": float(data[1][1]),
-            "q3": float(data[1][2]),
-            "q4": float(data[1][3])
-        },
-        "release_position":{
-            "x": data[0][0],
-            "y": data[0][1],
-            "z": data[0][2]
-        }
-    }]
-
-    cup_data = {"cups": cup}
-    try:
-        with open("cups.json", "w") as f:
-            json.dump(cup_data, f, indent=2)
-    except PermissionError:
-        print("Error opening json file, retrying.")
-
 def build_homogeneous(rotation_matrix, translation_vector):
     T_camera_to_base_effector = np.eye(4)
     T_camera_to_base_effector[:3, :3] = rotation_matrix
@@ -189,7 +157,7 @@ stereo.depth.link(detection_nn.inputDepth)
 detection_nn.passthrough.link(xout_rgb.input) # Passthrough RGB frames (frames that went into NN)
 detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
 detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
-first_run = True
+
 # Initialize the device and pipeline
 with dai.Device(pipeline) as device:
     # Output queues to retrieve frames and detections
@@ -197,20 +165,23 @@ with dai.Device(pipeline) as device:
     q_depth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
     q_det   = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
-    prev_coord = [1,1,1] # Temporary starting x,y,z coordinates to compare with
+    prev_coord = [[1,1,1]] # Temporary starting x,y,z coordinates to compare with
+    obj_list = []
+    temp = True
     while True:
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
         in_dets  = q_det.get() # latest detection results
+
         out_frame = in_rgb.getCvFrame()
         frame = in_rgb.getCvFrame() # OpenCV BGR frame from color camera
         depth_frame = in_depth.getFrame() # Depth data in millimeters
         detections = in_dets.detections # List of spatial detections
 
         # This allows the camera to focus before it starts looking for detections
-        if(first_run):
-             time.sleep(5)
-             first_run = False
+        if(temp):
+             time.sleep(1)
+             temp != temp
         
         # Iterate over detections and draw bounding boxes and labels
         for det in detections:
@@ -239,24 +210,33 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-            
+            cv.imshow("RGB", frame)
             if not (coords.z == 0.0 or coords.z > 1500 or coords.x < -150 and coords.y > 90 and coords.z > 800): # Fix to not use invalid coordinates while the camera is auto focusing
                 coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-                if math.isclose(coordinates[0],prev_coord[0], abs_tol= 10) or math.isclose(coordinates[1],prev_coord[1], abs_tol= 10):
-                    continue
-                else:
+
+                in_list = False
+                for i in prev_coord:
+                    if (math.isclose(coordinates[0],i[0], abs_tol= 10) or math.isclose(coordinates[1],i[1], abs_tol= 10)):
+                        in_list = True
+            
+                if not in_list:
+                    obj_list.append(coordinates)
+                    prev_coord = deepcopy(obj_list)
+
+                if obj_list:
                     try:
-                        client.move_cup(coordinates, quaternion)
-                        prev_coord = coordinates
+                        temp_coords = obj_list.pop(0)
+                        client.move_cup(temp_coords, quaternion)
+                        prev_coord = deepcopy(obj_list)
                     except Exception as e:
-                        print(f"Error {e}") 
+                        print(f"Error {e}")
 
             # Show the frames in windows
-                cv.imshow("RGB", frame)
+            cv.imshow("RGB", frame)
 
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
-            cv.imwrite("image.jpg", out_frame)
+            cv.imwrite("test.jpg", out_frame)
             break
 
 cv.destroyAllWindows()
