@@ -1,4 +1,17 @@
-<h4 align="center">This walkthrough tells how to run the vision system on for this project. </h4>
+<h1 align="center">
+  <br>
+  <br>
+  <img src="../../../media/images/Python/python_walkthrough.png" alt="walkthrough banner" width="600">
+  <br>
+  <br>
+  This walkthrough tells how to run the vision system on for this project.
+  <br>
+</h1>
+<!--
+  Lägg in mer här?
+  <h4 align="center">This walkthrough tells how to run the vision system on for this project. </h4>
+-->
+
 
 ## Calibration
 The first step is to start the server from **RAPID** as shown in [this guide](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md) 
