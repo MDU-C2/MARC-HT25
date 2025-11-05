@@ -9,7 +9,7 @@ When you start the robot you will most likely get the error "SMB communication f
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/O1MPd2k_ZHU/0.jpg)](http://www.youtube.com/watch?v=O1MPd2k_ZHU)
 
 
-
+>**Note:** If system failure persists despite following the above method. Try to "Revert to last auto saved" instead of "Shutdown main computer". This should remove the system failure and the need to calibrate the right arm.
 
 
 
