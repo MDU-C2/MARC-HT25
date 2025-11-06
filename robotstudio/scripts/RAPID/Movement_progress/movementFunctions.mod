@@ -26,14 +26,14 @@ MODULE movementFunctions
         !Check if calculated joint values at robot target configuration is valid
         desired_joint_value := CalcJointT(testtarget,tGripper);
         !Check distance between desired and current targets. Discretize pos & orientation if high distance.
-        WHILE VectMagn(desired_target.trans-current_target.trans) > 100 DO
+        WHILE VectMagn(desired_target.trans-current_target.trans) > 200 DO
             disc_target := discretizeTarget(current_target,desired_target,step_size);
             desired_joint_value := CalcJointT(disc_target,tGripper);
-            MoveJ disc_target,movement_speed,z50,tGripper;
+            MoveY \J,disc_target,movement_speed,z50,tGripper;
             current_target := CRobT(\Tool:=tGripper);
         ENDWHILE
 
-        MoveJ desired_target,movement_speed,fine,tGripper;
+        MoveY \J,desired_target,movement_speed,fine,tGripper;
 !        ProcerrRecovery \SyncOrgMoveInst;
         
         ERROR
@@ -44,9 +44,9 @@ MODULE movementFunctions
                 TPWrite "Failed to reach target";
                 Stop;
             ENDIF
-            IF VectMagn(desired_target.trans-current_target.trans) > 100 THEN
+            IF VectMagn(desired_target.trans-current_target.trans) > 200 THEN
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
-                MoveJ disc_target,movement_speed,z50,tGripper;
+                MoveY \J,disc_target,movement_speed,z50,tGripper;
                 current_target := CRobT(\Tool:=tGripper);
 
                 IF disc_target = home_target THEN
@@ -62,13 +62,15 @@ MODULE movementFunctions
             ELSE
                 moveToHomeTarget;
                 TPWrite "Failed to reach target";
-                Stop;
+
+                RETURN;
             ENDIF
         ELSEIF ERRNO = ERR_OUTSIDE_REACH THEN
             TPWrite "Outside of reach";
             STOP;
         ELSEIF ERRNO = ERR_PATH_STOP THEN
             TPWrite "Movement stopped!";
+            TRYNEXT;
             STOP;
         ENDIF
     ENDPROC
@@ -181,7 +183,7 @@ MODULE movementFunctions
     
     PROC moveToHomeTarget()
         ConfJ\On;
-        MoveJ home_target,v300,fine,tGripper;
+        MoveY \J,home_target,v300,fine,tGripper;
         ConfJ\Off;
     ENDPROC
 ENDMODULE
