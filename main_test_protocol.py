@@ -160,6 +160,7 @@ detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
 detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
 
 # Setup of test_protocol
+count = 0
 file_path = tp.create_today_textfile()
 tp.ask_user(file_path)
 tp.fill_meta_data(file_path)
@@ -176,6 +177,7 @@ with dai.Device(pipeline) as device:
     obj_list = []
     
     while True:
+        count += 1
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
         in_dets  = q_det.get() # latest detection results
@@ -235,6 +237,13 @@ with dai.Device(pipeline) as device:
                     try:
                         temp_coords = obj_list.pop(0)
                         client.move_cup(temp_coords, quaternion)
+                        rob_coords = client.get_coords()
+                        client.leave_cup()
+                        with open(file_path, "w") as f:
+                            f.write(f"----- Cup {count} Coordinates -----\n")
+                            f.write(f"Camera Coordinates: {temp_coords}\n")
+                            f.write(f"Robot Coordinates: {rob_coords}\n\n")
+
                         prev_coord = deepcopy(obj_list)
                     except Exception as e:
                         print(f"Error {e}")

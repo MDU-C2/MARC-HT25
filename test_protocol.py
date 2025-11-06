@@ -32,5 +32,6 @@ def ask_user(file_path):
 
 # main
 file_path = create_today_textfile()
-fill_meta_data(file_path)
 ask_user(file_path)
+fill_meta_data(file_path)
+
