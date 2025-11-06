@@ -85,12 +85,12 @@ MODULE server
                 !break process
 
             CASE "Coordinates":
-                TPWrite "[INFO] clinet want cordinates";
+                TPWrite "[INFO] client want cordinates";
                 hand_frame:=CRobT(\Tool:=tGripper);
                 SocketSend client_socket\Str:=RobtargetToString(hand_frame)+"_ack";
                 ! add real cordinates here
-         CASE "Pos":
-                TPWrite "[INFO] clinet want cordinates";
+            CASE "Pos":
+                TPWrite "[INFO] client want cordinates";
                 hand_frame:=CRobT(\Tool:=tGripper);
                 SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
                 ! add real cordinates here
@@ -105,8 +105,7 @@ MODULE server
                     SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
                     !move failed
                 ENDIF
-
-
+            
             CASE "Grip":
                 TPWrite("[INFO] client want to grip with gripper");
                 SocketSend client_socket\Str:="Ack_wait";
@@ -130,6 +129,20 @@ MODULE server
                 shared_vars.flag:=5; !temporary
                 shared_vars.wait_flag:=TRUE;
                 SocketSend client_socket\Str:="Ack_Release done";
+            CASE "testmove":
+                TPWrite("[INFO] client want to move arm");
+                IF (MoveRob_test(GetRobTarget())) THEN
+                    !Successfull move sequence
+                    SocketSend client_socket\Str:="Ack_succesfull";
+                    ! add real cordinates here
+                ELSE
+                    SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
+                    !move failed
+                ENDIF
+            CASE "LeaveCup":
+                WaitUntil shared_vars.wait_flag=FALSE;
+                shared_vars.flag:=7; !temporary
+                shared_vars.wait_flag:=TRUE;
             DEFAULT:
                 TPWrite("[INFO] message from client: "+message);
                 SocketSend client_socket\Str:="default_"+message;
@@ -360,5 +373,36 @@ MODULE server
         SocketClose client_socket;
     ENDIF
     ENDPROC
+    
+    ! move robot to target
+    FUNC bool MoveRob_test(robtarget target)
+
+        WaitUntil shared_vars.wait_flag=FALSE;
+        shared_vars.flag:=6;
+
+        !EXCLAIMER TEMPORARY CONSTANT ORIENTATION
+        target.rot:=[0.00274,0.75169,0.65950,-0.00414];
+        target.trans.z := -28;
+        IF VectMagn(target.trans) > 560 THEN
+            shared_vars.flag:=0;
+            RETURN FALSE;
+        ENDIF
+
+        shared_vars.target:=target;
+        !        shared_vars.joint_values := CalcJointT(target,tGripper); ! get target joint values
+
+        shared_vars.wait_flag:=TRUE;
+        TPWrite "wait_flag:"\Bool:=shared_vars.wait_flag;
+        
+        WaitUntil shared_vars.wait_flag=FALSE;
+        RETURN TRUE;
+    ERROR
+        IF ERRNO=ERR_ROBLIMIT THEN
+            ! exead limit, send error to client and expect new coordinates
+            RETURN FALSE;
+        ELSEIF ERRNO=ERR_OUTSIDE_REACH THEN
+            RETURN FALSE;
+        ENDIF
+    ENDFUNC
 
 ENDMODULE

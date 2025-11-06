@@ -13,7 +13,8 @@ MODULE movementFunctions
     !
     !***********************************************************
 
-        PROC MovementProc(robtarget desired_target, num step_size, num orient_frac, speeddata movement_speed)
+    PROC MovementProc(robtarget desired_target, num step_size, num orient_frac, speeddata movement_speed)
+        
         VAR robtarget current_target;
         VAR robtarget disc_target;
         VAR robtarget testtarget;
@@ -25,6 +26,7 @@ MODULE movementFunctions
         
         !Check if calculated joint values at robot target configuration is valid
         desired_joint_value := CalcJointT(testtarget,tGripper);
+        
         !Check distance between desired and current targets. Discretize pos & orientation if high distance.
         WHILE VectMagn(desired_target.trans-current_target.trans) > 200 DO
             disc_target := discretizeTarget(current_target,desired_target,step_size);
@@ -37,7 +39,7 @@ MODULE movementFunctions
 !        ProcerrRecovery \SyncOrgMoveInst;
         
         ERROR
-        IF ERRNO = ERR_ROBLIMIT THEN
+        IF ERRNO = ERR_ROBLIMIT THEN !Joint values outside of working range
             ResetRetryCount;
             IF testing > 1 THEN
                 moveToHomeTarget;
@@ -65,9 +67,9 @@ MODULE movementFunctions
 
                 RETURN;
             ENDIF
-        ELSEIF ERRNO = ERR_OUTSIDE_REACH THEN
+        ELSEIF ERRNO = ERR_OUTSIDE_REACH THEN !Robot cannot reach to desired position
             TPWrite "Outside of reach";
-            STOP;
+            Stop;
         ELSEIF ERRNO = ERR_PATH_STOP THEN
             TPWrite "Movement stopped!";
             TRYNEXT;
@@ -75,6 +77,9 @@ MODULE movementFunctions
         ENDIF
     ENDPROC
     
+    
+    !Returns a pos/orient between current and desired target, checking valid pos/orient iterating between the targets by step_size
+    !Moves to predefined HomeTarget if no valid pos/orient.
     FUNC robtarget discretizeTarget(robtarget current_target, robtarget desired_target,num step_size)
         
         VAR robtarget disc_target;
@@ -110,6 +115,7 @@ MODULE movementFunctions
         
     ENDFUNC
     
+    !Returns the point located the given step_size away from current target towards desired target.
     FUNC pos discretizePosition(pos current_target,pos desired_target,num step_size)
     
     VAR pos dir_vector;
@@ -121,9 +127,9 @@ MODULE movementFunctions
 !    return_pos := desired_target - dir_vector * step_size;
     
     RETURN return_pos;
-    
     ENDFUNC
     
+    !Returns the orientation between current and desired orientation dependant on step_size.
     FUNC orient discretizeOrient(orient current_orient,orient desired_orient,num step_size)
     
     VAR orient dir_vector;
@@ -165,7 +171,7 @@ MODULE movementFunctions
         RETURN dot_product;
     ENDFUNC
 
-    
+    !Checks if calculated joint values are valid.
     FUNC BOOL checkJointValues(robtarget desired_target)
         
         VAR jointtarget desired_joint_target;
@@ -180,7 +186,7 @@ MODULE movementFunctions
     ENDIF
     ENDFUNC
     
-    
+    !Move to pre-defined home target.
     PROC moveToHomeTarget()
         ConfJ\On;
         MoveY \J,home_target,v300,fine,tGripper;

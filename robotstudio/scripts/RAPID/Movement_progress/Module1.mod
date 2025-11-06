@@ -59,11 +59,11 @@ MODULE Module1
                 MoveJ home_target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
-            CASE 6:
+            CASE 6: !test movement
                 MovementProc Offs(shared_vars.target,0,0,200), step_size, orient_frac, movement_speed;
                 g_GripOut;
                 MovementProc Offs(shared_vars.target,0,0,0), step_size, orient_frac, movement_speed;
-            CASE 7:!Leave cup
+            CASE 7: !Leave cup
                 ConfJ\On;
                 g_GripIn;
                 MoveJ Offs(cup_target,0,0,200),movement_speed,fine,tGripper;
