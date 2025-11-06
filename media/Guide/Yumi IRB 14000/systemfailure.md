@@ -27,4 +27,4 @@ If you don't shut down the robot with the knob but first go into Restart -> adva
 ### Longterm fix
 As mentioned the long term fix seems to be changing the SMB battery for the ***right arm***. The battery seems to be two 18650 units in series with some built in protection circuits outputting 7.2V 
 
-On [page 331]() you will find the instructions for replacing the battery on the YuMI.
+On [page 131](/media/documents/RAPID%20Manuals/Yumi%20SMB%20battery%20change.pdf) you will find the instructions for replacing the battery on the YuMI.
