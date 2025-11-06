@@ -29,9 +29,3 @@ def ask_user(file_path):
         f.write("---------- Test Information ----------\n")
         f.write(f"Tested Variable: {response}\n")
 
-
-# main
-file_path = create_today_textfile()
-ask_user(file_path)
-fill_meta_data(file_path)
-
