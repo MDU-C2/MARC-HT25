@@ -13,6 +13,13 @@ cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
 robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 
+count = 0
+file_path = tp.create_today_textfile()
+tp.ask_user(file_path)
+tp.fill_meta_data(file_path)
+with open(file_path, "w") as f:
+    f.write("----- Cup Coordinates -----\n\n")
+
 #==================================== FUNCTIONS ====================================
 def build_homogeneous(rotation_matrix, translation_vector):
     T_camera_to_base_effector = np.eye(4)
@@ -159,12 +166,6 @@ detection_nn.passthrough.link(xout_rgb.input) # Passthrough RGB frames (frames t
 detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
 detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
 
-# Setup of test_protocol
-count = 0
-file_path = tp.create_today_textfile()
-tp.ask_user(file_path)
-tp.fill_meta_data(file_path)
-
 # Initialize the device and pipeline
 first_run = True
 with dai.Device(pipeline) as device:
@@ -177,7 +178,7 @@ with dai.Device(pipeline) as device:
     obj_list = []
     
     while True:
-        count += 1
+
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
         in_dets  = q_det.get() # latest detection results
@@ -235,10 +236,15 @@ with dai.Device(pipeline) as device:
 
                 if obj_list:
                     try:
+                        count += 1
                         temp_coords = obj_list.pop(0)
-                        client.move_cup(temp_coords, quaternion)
+                        print("1")
+                        client.move_cup_test(temp_coords, quaternion)
+                        print("2")
                         rob_coords = client.get_coords()
+                        print("3")
                         client.leave_cup()
+                        print("4")
                         with open(file_path, "w") as f:
                             f.write(f"----- Cup {count} Coordinates -----\n")
                             f.write(f"Camera Coordinates: {temp_coords}\n")
@@ -249,7 +255,7 @@ with dai.Device(pipeline) as device:
                         print(f"Error {e}")
 
             # Show the frames in windows
-            cv.imshow("RGB", frame)
+        cv.imshow("RGB", frame)
 
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
