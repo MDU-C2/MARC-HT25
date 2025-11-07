@@ -1,0 +1,47 @@
+<h1 align="center">
+  <br>
+  <br>
+  <img src="../../../media/images/python-3.svg" alt="MARC Logo" width="400">
+  <br>
+  <br>
+  Camera & Python guide
+  <br>
+</h1>
+
+## Requirements
+To run the codes provided in this repository multiple Python libraries needs to be installed. These are:
+
+* OpenCV
+* DepthAI
+* Numpy
+* Blobconverter
+* json
+
+## Installation
+
+Start by cloning this repository to your computer by using the following commands
+
+```bash
+# Clone this repository
+$ git clone https://github.com/MDU-C2/MARC-HT25.git
+
+# Go into the repository
+$ cd MARC-HT25
+```
+
+Next up is to set up a virtual python environment
+
+```bash
+# Create a virtual environment with python 3.11 (Python 3.11 is needed for some libraries used)
+> py -3.11 -m venv .venv
+
+# Activate the virtual environment (make sure you are in the correct folder when doing this)
+> .venv\Scripts\Active
+```
+Now it's time to install the correct libraries, this is done by running our **requirements.txt** file
+
+```bash
+#Run the requirements.txt file
+> pip install -r requirements.txt
+```
+Now the setup is complete and you should be able to run the code by following this [walkthrough](/media/Guide/Python/running_code.md)
