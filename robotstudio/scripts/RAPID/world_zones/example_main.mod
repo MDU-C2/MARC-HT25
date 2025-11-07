@@ -27,5 +27,8 @@ MODULE example_main
         ClearPath;       ! Clear planned path
         StorePath;       ! Save path so new moves are allowed
         TPWrite("[ERROR] collided with floor");
+        
+        !stop program?
+        Stop;
     ENDTRAP
 ENDMODULE

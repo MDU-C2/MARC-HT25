@@ -1,0 +1,12 @@
+# RAPID cheat sheet
+
+- **ctrl + m** -> set pointer to main
+- **f8**-> start program
+- **:**= -> equals
+- **f10** -> step over durin debug mode
+- **f11** -> setp in function durin debug mode
+
+## good to know
+- to run scrips, robot need to be in automatic mode
+- to run scripts on real life robot, need to **Controller -> Add Controller ->One CLick Connect**. Then **Controller ->Request Write Access**
+![write code to robot](/media/images/RAPID/request_access_rapid.png)
