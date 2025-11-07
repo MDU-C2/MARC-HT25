@@ -9,7 +9,7 @@ When you start the robot you will most likely get the error "SMB communication f
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/O1MPd2k_ZHU/0.jpg)](http://www.youtube.com/watch?v=O1MPd2k_ZHU)
 
 
-
+>**Note:** If system failure persists despite following the above method. Try to "Revert to last auto saved" instead of "Shutdown main computer". This should remove the system failure and the need to calibrate the right arm.
 
 
 
@@ -25,6 +25,6 @@ Each arm has its own SMB and its own battery to power it. Since it is always the
 If you don't shut down the robot with the knob but first go into Restart -> advanced -> shutdown main computer, ***Then*** turn off the robot with the knob. You should not have system failure if you turn on the robot again within one day. (Off at 15:00, On at 09:00).
 
 ### Longterm fix
-As mentioned the long term fix seems to switch the SMB battery for the ***right arm***. The battery seems to be two 18650 units in series with some built in protection circuits outputting 7.2V 
+As mentioned the long term fix seems to be changing the SMB battery for the ***right arm***. The battery seems to be two 18650 units in series with some built in protection circuits outputting 7.2V 
 
-On [page 331]() you will find the instructions for replacing the battery on the YuMI.
+On [page 131](/media/documents/RAPID%20Manuals/Yumi%20SMB%20battery%20change.pdf) you will find the instructions for replacing the battery on the YuMI.
