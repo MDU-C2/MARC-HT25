@@ -2,7 +2,7 @@ MODULE world_zones
         
     VAR wztemporary floor;
     VAR shapedata floor_mech;
-    CONST pos corner1:=[-600,-600,100]; 
+    CONST pos corner1:=[-600,-600,150]; 
     CONST pos corner2:=[600,600,-400];
     
     
