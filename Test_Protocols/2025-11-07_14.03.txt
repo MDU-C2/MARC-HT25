@@ -1,0 +1,11 @@
+File created on 2025-11-07_14.03
+---------- Test Information ----------
+Tested Variable: The protocol
+---------- Meta Data ----------
+Number of calibration positions: 5
+----- Cup 1 Coordinates -----
+Camera Coordinates: [322.46, 184.43, -95.71]
+Robot Coordinates: [322, 184, -28]
+
+Time taken for pick and place: 4.992 seconds
+

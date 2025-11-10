@@ -1,0 +1,11 @@
+File created on 2025-11-07_14.01
+---------- Test Information ----------
+Tested Variable: tess
+---------- Meta Data ----------
+Number of calibration positions: 5
+----- Cup 1 Coordinates -----
+Camera Coordinates: [322.21, 115.47, -97.22]
+Robot Coordinates: [322, 115, -28]
+
+Time taken for pick and place: 4.5861828327178955 seconds
+

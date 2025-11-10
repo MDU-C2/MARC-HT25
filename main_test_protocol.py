@@ -13,12 +13,13 @@ cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
 robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 
+#==================================== TEST PROTOCOL SETUP ====================================
 count = 0
-file_path = tp.create_today_textfile()
-tp.ask_user(file_path)
-tp.fill_meta_data(file_path)
-with open(file_path, "w") as f:
-    f.write("----- Cup Coordinates -----\n\n")
+save_protocol = input("Do you want to save the test protocol? (y/n): ").lower() == 'y'
+if save_protocol:
+    file_path = tp.create_today_textfile()
+    tp.ask_user(file_path)
+    tp.fill_meta_data(file_path)
 
 #==================================== FUNCTIONS ====================================
 def build_homogeneous(rotation_matrix, translation_vector):
@@ -236,19 +237,24 @@ with dai.Device(pipeline) as device:
 
                 if obj_list:
                     try:
-                        count += 1
+
                         temp_coords = obj_list.pop(0)
-                        print("1")
+                        start_time = time.time()
                         client.move_cup_test(temp_coords, quaternion)
-                        print("2")
+
                         rob_coords = client.get_coords()
-                        print("3")
+
                         client.leave_cup()
-                        print("4")
-                        with open(file_path, "w") as f:
-                            f.write(f"----- Cup {count} Coordinates -----\n")
-                            f.write(f"Camera Coordinates: {temp_coords}\n")
-                            f.write(f"Robot Coordinates: {rob_coords}\n\n")
+                        end_time = time.time()
+                        if save_protocol:
+                            count += 1
+
+                            with open(file_path, "a") as f:
+                                f.write(f"------- Cup {count} Coordinates -------\n")
+                                f.write(f"Camera Coordinates: {temp_coords}\n")
+                                f.write(f"Robot Coordinates: {rob_coords}\n\n")
+                                f.write(f"Time taken for pick and place: {end_time - start_time:.3f} seconds\n\n")
+                                f.write(f"RMS Alignment Error: {rms_alignment_error(temp_coords, rob_coords, rotation_matrix, translation_vector):.3f} mm\n\n")
 
                         prev_coord = deepcopy(obj_list)
                     except Exception as e:
