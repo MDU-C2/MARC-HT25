@@ -37,10 +37,14 @@
   - RAPID
 
 
+
 ## Requirements
   - Python 3.11
     - OpenCV
-    - 
+    - DepthAI
+    - Numpy
+    - Blobconverter
+    - json
 <!--
   Lägg in mer här?
 -->
