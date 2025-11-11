@@ -89,13 +89,8 @@ MODULE server
                 hand_frame:=CRobT(\Tool:=tGripper);
                 SocketSend client_socket\Str:=RobtargetToString(hand_frame)+"_ack";
                 ! add real cordinates here
-<<<<<<< HEAD
             CASE "Pos":
                 TPWrite "[INFO] client want cordinates";
-=======
-         CASE "Pos":
-                TPWrite "[INFO] clinet want cordinates";
->>>>>>> 9fe38a9e314cbf842b46340891247146b6c111b2
                 hand_frame:=CRobT(\Tool:=tGripper);
                 SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
                 ! add real cordinates here
@@ -110,12 +105,7 @@ MODULE server
                     SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
                     !move failed
                 ENDIF
-<<<<<<< HEAD
             
-=======
-
-
->>>>>>> 9fe38a9e314cbf842b46340891247146b6c111b2
             CASE "Grip":
                 TPWrite("[INFO] client want to grip with gripper");
                 SocketSend client_socket\Str:="Ack_wait";
