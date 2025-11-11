@@ -11,7 +11,7 @@ class Communication():
 
     def __init__(self):
         self._mutex_orientation = threading.Lock()  #mutex for accessing variables
-        self._mutex_coordinates = threading.Lock()
+        self._mutex_coordinates = threading.Lock() # unused?
         self.coordinates = None
         self.orientation = None
         self.socket = None
@@ -62,27 +62,81 @@ class Communication():
             self.connected = False
             return None
         
-    def _handle_response(self):
-        while True:
-            response = self._receive_message()
-            if response == "send coordinates":
-                self._send_message(self.coordinates)
-            if response == "send orientation":
-                self._send_message(self.orientation)
-            if response == "Ack_Coordinates":
-                continue
-            if response == "Ack_Orientation":
-                continue
-            if response == "Ask_Next":
-                break
     
     def GetPosition(self):
         #"""Get current position from RAPID"""
         self._send_message("get coordinates")
-        response = self._handle_response()
-        if response:
-            with self._mutex_coordinates:
-                self.coordinates = ast.literal_eval(response)
-            self._send_message("Ack_Coordinates")
-            return self.coordinates
-        return None
+        response = self._receive_message()
+
+        return response
+    
+    def Move(self, coordinates, orientation):
+
+        #"""Move robot to specified coordinates and orientation"""
+        self._send_message("move")
+        self._receive_message()  # Wait for "ACK" so we dont read both messages at once, not sure if this is correct
+        self._send_message(coordinates)
+        self._receive_message()
+        self._send_message(orientation)
+        self._receive_message()  # Wait for Movement to complete
+
+        return
+
+    def PickUpSequence(self, coordinates, orientation):
+        self._send_message("pick up mug")
+        self._receive_message()  # Wait for "ACK"
+        self._send_message(coordinates)
+        self._receive_message()
+        self._send_message(orientation)
+        self._receive_message()  # Wait for pick-up to complete
+
+        #"""Perform pick-up sequence"""
+        return
+
+    def LeaveSequence(self, coordinates, orientation):
+        self._send_message("leave mug")
+        self._receive_message()  # Wait for "ACK"
+        self._send_message(coordinates)
+        self._receive_message()
+        self._send_message(orientation)
+        self._receive_message()  # Wait for leave to complete
+
+        #"""Perform leave sequence"""
+        return
+    
+
+class RobotInterface():
+    """Class to interface with robot for mug handling"""
+
+    def __init__(self):
+        self.comms = Communication()
+        self.MugCoordinates = None
+        self.MugOrientation = None
+
+    def GetPosition(self):
+        return self.comms.GetPosition()
+    def Move(self, coordinates, orientation):
+        return self.comms.Move(coordinates, orientation)
+    def PickUpSequence(self, coordinates, orientation):
+        return self.comms.PickUpSequence(coordinates, orientation)
+    def LeaveSequence(self, coordinates, orientation):
+        return self.comms.LeaveSequence(coordinates, orientation)
+    
+    def MugProcess(self):
+        #"""Perform mug handling process"""
+        # Current mug coordinate and orientation, leave position, coordinates and orientation, If there is a next mug.
+        time.sleep(1)
+        MugsInFrame = True
+        UpdateMugCoordinates()  # Placeholder for code to update mug coordinates
+        while MugsInFrame:
+
+            self.comms.PickUpSequence(self.MugCoordinates, self.MugOrientation)
+            self.comms.LeaveSequence(self.MugCoordinates, self.MugOrientation)
+            UpdateMugCoordinates()  # Placeholder for code to update mug coordinates
+        return
+
+    def Calibration():
+        #"""Calibrate robot position"""
+
+        return
+
