@@ -83,8 +83,8 @@ def extract_data(file):
 
 #==================================== CAMERA & COMMUNICATION SETUP ====================================
 
-client = CupPickingClient()
-client.connect()
+#client = CupPickingClient()
+#client.connect()
 camera_points = extract_data(cam_coords) # Get coordinates from the camera 
 robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
 rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
@@ -187,8 +187,8 @@ with dai.Device(pipeline) as device:
     prev_coord = [[1,1,1]] # Temporary starting x,y,z coordinates to compare with
     obj_list = []
     
-    while True:
-
+    #while True:
+    while count < 5: # Limit to 5 picks for testing purposes
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
         in_dets  = q_det.get() # latest detection results
@@ -249,11 +249,11 @@ with dai.Device(pipeline) as device:
 
                         temp_coords = obj_list.pop(0)
                         start_time = time.time()
-                        client.move_cup_test(temp_coords, quaternion)
+                        #client.move_cup_test(temp_coords, quaternion)
 
-                        rob_coords = client.get_coords()
-
-                        client.leave_cup()
+                        #rob_coords = client.get_coords()
+                        rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
+                        #client.leave_cup()
                         end_time = time.time()
                         process_time = end_time - start_time
                         if save_protocol:
