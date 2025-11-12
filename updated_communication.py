@@ -4,6 +4,8 @@ import time
 import os
 import ast
 import threading
+import numpy as np
+import math
 
 
 class Communication():
@@ -29,6 +31,25 @@ class Communication():
         except Exception as e:
             print(f"[ERROR] Connection failed: {e}")
 
+
+        
+
+    def disconnect(self):
+        if not self.socket:
+            return
+        try:
+            self._send_message("disconnect")
+            try:
+                self.socket.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass  # socket may already be closed or not connected
+            self.socket.close()
+            print("[INFO] Socket closed")
+        except Exception as e:
+            print(f"[ERROR] Close error: {e}")
+        finally:
+            self.connected = False
+            self.socket = None
 
         
     def _send_message(self, message):
@@ -102,14 +123,25 @@ class Communication():
         #"""Perform leave sequence"""
         return
     
+    def MoveRobtarget(self, robtarget):
+        self._send_message("send robtarget")
+        self._receive_message()  # Wait for "ACK"
+        self._send_message(robtarget)
+        self._receive_message()  # Wait for movement to complete
+        return
+    
+
+
+
+
+
+
+
 
 class RobotInterface():
-    """Class to interface with robot for mug handling"""
 
     def __init__(self):
         self.comms = Communication()
-        self.MugCoordinates = None
-        self.MugOrientation = None
         self.CalibrationRobtarget = [] # these values should be copied from robotstudio
 
 
@@ -121,33 +153,38 @@ class RobotInterface():
         return self.comms.PickUpSequence(coordinates, orientation)
     def LeaveSequence(self, coordinates, orientation):
         return self.comms.LeaveSequence(coordinates, orientation)
+    def MoveRobtarget(self, robtarget):
+        return self.comms.MoveRobtarget(robtarget)
+    def Disconnect(self):
+        return self.comms.disconnect()
+    
+
     
     def MugProcess(self, PickUpcoordinates, PickUpOrientation, LeaveCoordinates, LeaveOrientation):
-        # Current mug coordinate and orientation, leave coordinates and orientation.
-        # This function will pick up one mug and leave it at a specified point.
-        #  If you have multiple mugs you need to call it multiple times
-
-
-        #time.sleep(1)
-        #MugsInFrame = True
+        # Current mug coordinate and orientation, leave coordinates and orientation, Camera detection
+        # This function only handles one mug/cup at a time. Call it multiple times for multiple mugs/cups.
 
         self.comms.PickUpSequence(PickUpcoordinates, PickUpOrientation)
         self.comms.LeaveSequence(LeaveCoordinates, LeaveOrientation)
 
 
-    def Calibration(self, NumberOfPositions = 10, q_rgb=None, q_depth=None, q_det=None):
+    def Calibration(self, position):
+        # Move to a calibration point and get the coordinates from it.
 
-        if q_rgb is None or q_depth is None or q_det is None:
-            raise ValueError("Calibration requires q_rgb, q_depth and q_det to be provided (none of them may be None)")
+        # LOAD ROBTARGETS FROM FILE HERE
 
-        for i in range(1, NumberOfPositions + 1):
+        self.MoveRobtarget(self.CalibrationRobtarget[position]) # Move to calibration position
+        coordinates = self.GetPosition() # Get current robot coordinates
 
-            print(f"[CAL] Position {position_id}/{NumberOfPositions}")
-            # ...existing code...
-            # Use position_id for naming/saving per-position data if needed
+        Robotcoordinates = self.comms.GetPosition() # In string format
 
-        return position_ids
+        Robotcoordinates = ast.literal_eval(Robotcoordinates) # Convert string to list
+
+        return Robotcoordinates
 
 
 
-        return 
+
+
+
+
