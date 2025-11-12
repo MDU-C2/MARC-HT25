@@ -15,10 +15,12 @@ quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 
 #==================================== TEST PROTOCOL SETUP ====================================
 count = 0
+times_sec = []
+
 save_protocol = input("Do you want to save the test protocol? (y/n): ").lower() == 'y'
 if save_protocol:
     file_path = tp.create_today_textfile()
-    tp.ask_user(file_path)
+    tp.ask_user(file_path, "start")
     tp.fill_meta_data(file_path)
 
 #==================================== FUNCTIONS ====================================
@@ -77,6 +79,8 @@ def extract_data(file):
             float_list.append(x)
     return list(float_list)
 
+
+
 #==================================== CAMERA & COMMUNICATION SETUP ====================================
 
 client = CupPickingClient()
@@ -85,6 +89,11 @@ camera_points = extract_data(cam_coords) # Get coordinates from the camera
 robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
 rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
 homogeneous = build_homogeneous(rotation_matrix,translation_vector) # Convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
+
+# Log RMS error to test protocol
+rms_error = rms_alignment_error(camera_points, robot_points, rotation_matrix, translation_vector)
+if save_protocol:
+    tp.log_rms_error(file_path, rms_error)
 
 # Create DepthAI pipeline
 pipeline = dai.Pipeline()
@@ -246,15 +255,11 @@ with dai.Device(pipeline) as device:
 
                         client.leave_cup()
                         end_time = time.time()
+                        process_time = end_time - start_time
                         if save_protocol:
                             count += 1
-
-                            with open(file_path, "a") as f:
-                                f.write(f"------- Cup {count} Coordinates -------\n")
-                                f.write(f"Camera Coordinates: {temp_coords}\n")
-                                f.write(f"Robot Coordinates: {rob_coords}\n\n")
-                                f.write(f"Time taken for pick and place: {end_time - start_time:.3f} seconds\n\n")
-                                f.write(f"RMS Alignment Error: {rms_alignment_error(temp_coords, rob_coords, rotation_matrix, translation_vector):.3f} mm\n\n")
+                            tp.cup_information(file_path, count, temp_coords, rob_coords, process_time , confidence = conf, label= label)
+                            times_sec.append(process_time)
 
                         prev_coord = deepcopy(obj_list)
                     except Exception as e:
@@ -269,3 +274,7 @@ with dai.Device(pipeline) as device:
             break
 
 cv.destroyAllWindows()
+
+if save_protocol:
+    tp.ask_user(file_path, "end")
+    tp.log_time_summary(file_path, times_sec)
