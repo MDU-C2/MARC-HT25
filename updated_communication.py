@@ -123,21 +123,13 @@ class Communication():
         #"""Perform leave sequence"""
         return
     
-    def MoveRobtarget(self, robtarget):
-        self._send_message("send robtarget")
+    def MoveCalibrationPosition(self, position):
+        self._send_message("move calibration position")
         self._receive_message()  # Wait for "ACK"
-        self._send_message(robtarget)
+        self._send_message(position)
         self._receive_message()  # Wait for movement to complete
         return
     
-
-
-
-
-
-
-
-
 class RobotInterface():
 
     def __init__(self):
@@ -153,8 +145,8 @@ class RobotInterface():
         return self.comms.PickUpSequence(coordinates, orientation)
     def LeaveSequence(self, coordinates, orientation):
         return self.comms.LeaveSequence(coordinates, orientation)
-    def MoveRobtarget(self, robtarget):
-        return self.comms.MoveRobtarget(robtarget)
+    def MoveCalibrationPosition(self, position):
+        return self.comms.MoveRobtarget(position)
     def Disconnect(self):
         return self.comms.disconnect()
     
@@ -171,9 +163,7 @@ class RobotInterface():
     def Calibration(self, position):
         # Move to a calibration point and get the coordinates from it.
 
-        # LOAD ROBTARGETS FROM FILE HERE
-
-        self.MoveRobtarget(self.CalibrationRobtarget[position]) # Move to calibration position
+        self.MoveCalibrationPosition(position) # Move to calibration position
         coordinates = self.GetPosition() # Get current robot coordinates
 
         Robotcoordinates = self.comms.GetPosition() # In string format
