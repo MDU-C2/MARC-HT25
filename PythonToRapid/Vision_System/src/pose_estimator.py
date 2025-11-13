@@ -131,8 +131,8 @@ class PoseEstimator:
             orientation = np.array([0.0, 0.0, 1.0])
 
         return {
-            'position': position,
-            'orientation': orientation,
+            'position': position, # [x,y,z]
+            'orientation': orientation, # [x,y,z]
             'class': detection['class'],
             'confidence': detection['confidence'],
             'frame': 'robot' if in_robot_frame else 'screen',
