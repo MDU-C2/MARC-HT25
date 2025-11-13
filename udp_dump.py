@@ -1,4 +1,5 @@
 import socket
+import egm_pb2 as egm
 
 HOST = "127.0.0.1"  # localhost
 PORT = 6510         # change if you want
@@ -14,7 +15,9 @@ def main():
         while True:
             try:
                 data, addr = sock.recvfrom(65535)
-                text = data.decode(errors="replace")
+                # text = data.decode(errors="replace")
+                text =egm.EgmRobot()
+                text.ParseFromString(data)
                 print(f"Got UDP message from {addr}: {text}")
             except socket.timeout:
                 continue  # just loop back and check again

@@ -11,7 +11,7 @@ num=0
 robot_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 #Binds the client to listen on your IP and port (same as specified in Controller-Configuration-
-#robot_socket.bind((computer_ip, robot_port))
+# robot_socket.bind((computer_ip, robot_port))
 
 
 def CreateSensorMessage(egmSensor, pos, quat):
@@ -35,15 +35,17 @@ def CreateSensorMessage(egmSensor, pos, quat):
     
     return egmSensor
 
-Pos=[0,0,0] #[x,y,z] chords
+Pos=[600,13,136] #[x,y,z] chords
 Quat=[1,0,0,0] #[q0,q1,q2,q3] quaternion
 
 for i in range(500):
     i += 1
-    Pos[1] = i
-    Pos [2] = i
+    Pos[1] = 13 + i
     Quat = [1,0,0,0]
     egmSensor=egm.EgmSensor()
     egmSensor=CreateSensorMessage(egmSensor,Pos,Quat)
-    robot_socket.sendto(str(egmSensor).encode(), (robot_ip, robot_port))
-    time.sleep(0.01)
+    mess=egmSensor.SerializeToString()
+    #print(egmSensor)
+    print(mess)
+    robot_socket.sendto(mess, (robot_ip, robot_port))  
+    time.sleep(0.004)
