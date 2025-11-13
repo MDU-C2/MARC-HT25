@@ -1,18 +1,14 @@
-########## For presenting ##########
-####################################
-
-""" Main script - AUTOMATIC Cup Detection and Robot Communication
-With background threading - camera never freezes
+"""
+Main script - Cup Detection System
+REFACTORED: Only handles detection + visualization
+All robot logic moved to PythonToRapid.py
 """
 
 import cv2
 import sys
 import time
-import threading
-import numpy as np
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
@@ -27,42 +23,29 @@ from PythonToRapid import RobotCommunication
 class CupDetectionSystem:
     def __init__(self):
         """Initialize cup detection system"""
-        self.cups = []
-        self.gripper = None
-        self.robot_base = None
-        
-        # Robot communication (all robot details in PythonToRapid)
-        self.robot = RobotCommunication()
-        self.robot_thread = None
-        self.robot_busy = False
-        
-        # Visual servoing
-        self.visual_servoing_enabled = False
-        self.expected_gripper_position = None
-        
-        # Status tracking
-        self.total_cups_sent = 0
-        
         print("=" * 60)
         print("Cup Detection System - YuMi Robot")
-        print("AUTOMATIC MODE")
+        print("REFACTORED - Dynamic Protocol")
         print("=" * 60)
 
         # Initialize components
-        print("\n[1/4] Initializing OAK-D Pro camera...")
+        print("\n[1/5] Initializing OAK-D Pro camera...")
         self.camera = OAKDCamera()
 
-        print("[2/4] Loading detection model...")
+        print("[2/5] Loading detection model...")
         self.detector = CupDetector(
-            model_path='best.pt',
+            model_path='best_cup_orientation_New.pt',
             confidence_threshold=0.6
         )
 
-        print("[3/4] Initializing pose estimator...")
+        print("[3/5] Initializing pose estimator...")
         self.pose_estimator = PoseEstimator(self.camera.intrinsics)
 
-        print("[4/4] Setting up visualizer...")
+        print("[4/5] Setting up visualizer...")
         self.visualizer = Visualizer()
+        
+        print("[5/5] Initializing robot communication...")
+        self.robot = RobotCommunication()
 
         print("\n✓ System ready!")
         self._print_controls()
@@ -71,25 +54,33 @@ class CupDetectionSystem:
         """Print control instructions"""
         print("\nControls:")
         print("  'q' - Quit")
-        print("  's' - Save frame (debug)")
-        print("  'p' - Print detections (debug)")
-        print("  'v' - Toggle visual servoing (gripper tracking)")
+        print("  's' - Save frame")
+        print("  'p' - Print status")
+        print("  'r' - Start robot (manual)")
+        print("  'a' - Toggle auto-start robot")
         print("\nMode: AUTOMATIC")
-        print("  - Auto-connects to robot")
-        print("  - Auto-sends cups when detected")
-        print("  - Camera runs continuously (no freezing)")
+        print("  - Auto-detects cups")
+        print("  - Auto-starts robot when cups found")
         print("-" * 60)
 
-    def update_detections(self, detections, rgb_frame):
-        """Update internal detection storage"""
-        # Clear previous
-        self.cups = []
-        self.gripper = None
-        self.robot_base = None
+    def process_detections(self, detections, rgb_frame):
+        """
+        Process detections and update robot queue
         
-        # Process detections
+        Args:
+            detections: Raw detections from detector
+            rgb_frame: RGB frame for pose estimation
+            
+        Returns:
+            list: Processed cup data
+        """
+        cups_data = []
+        
         for detection in detections:
             obj_class = detection['class']
+            
+            if obj_class != 'cup':
+                continue
             
             # Get pose in robot frame
             pose = self.pose_estimator.get_full_pose(detection, rgb_frame, in_robot_frame=True)
@@ -97,65 +88,54 @@ class CupDetectionSystem:
             if pose is None:
                 continue
             
-            if obj_class == 'cup':
-                cup_index = detection.get('cup_index', len(self.cups) + 1)
-                
-                cup_data = {
-                    'id': f'cup_{cup_index}',
-                    'cup_number': cup_index,
-                    'position': {
-                        'x': float(pose['position'][0]),
-                        'y': float(pose['position'][1]),
-                        'z': float(pose['position'][2])
-                    },
-                    'orientation': {
-                        'q1': float(pose['orientation'][0]),
-                        'q2': float(pose['orientation'][1]),
-                        'q3': float(pose['orientation'][2]),
-                        'q4': float(pose['orientation'][3])
-                    },
-                    'orientation_state': pose['orientation_state'],
-                    'confidence': detection['confidence']
-                }
-                self.cups.append(cup_data)
+            cup_index = detection.get('cup_index', len(cups_data) + 1)
             
-            elif obj_class == 'gripper':
-                self.gripper = {
-                    'position': {
-                        'x': float(pose['position'][0]),
-                        'y': float(pose['position'][1]),
-                        'z': float(pose['position'][2])
-                    },
-                    'confidence': detection['confidence']
-                }
-            
-            elif obj_class == 'robot_base':
-                self.robot_base = {
-                    'position': {
-                        'x': float(pose['position'][0]),
-                        'y': float(pose['position'][1]),
-                        'z': float(pose['position'][2])
-                    },
-                    'confidence': detection['confidence']
-                }
+            cup_data = {
+                'id': f'cup_{cup_index}',
+                'cup_number': cup_index,
+                'position': {
+                    'x': float(pose['position'][0]),
+                    'y': float(pose['position'][1]),
+                    'z': float(pose['position'][2])
+                },
+                'orientation': {
+                    'x': float(pose['orientation'][0]),
+                    'y': float(pose['orientation'][1]),
+                    'z': float(pose['orientation'][2])
+                },
+                'orientation_state': pose['orientation_state'],
+                'confidence': detection['confidence']
+            }
+            cups_data.append(cup_data)
+        
+        return cups_data
 
-    def print_detections(self):
-        """Print current detections"""
+    def print_status(self):
+        """Print current system status"""
         print("\n" + "=" * 60)
-        print("CURRENT DETECTIONS")
+        print("SYSTEM STATUS")
         print("=" * 60)
         
-        print(f"\n🥤 CUPS: {len(self.cups)}")
-        for cup in self.cups:
-            pos = cup['position']
-            state = cup['orientation_state']
-            num = cup['cup_number']
-            print(f"  Cup_{num} [{state}]: x={pos['x']:.1f}, y={pos['y']:.1f}, z={pos['z']:.1f}")
+        # Robot status
+        status = self.robot.get_status()
+        print(f"\n ROBOT:")
+        print(f"  Connected: {status['connected']}")
+        print(f"  Busy: {status['busy']}")
+        print(f"  State: {status['state']}")
+        print(f"  Total cups: {status['total_cups']}")
+        print(f"  Unsent cups: {status['unsent_cups']}")
+        print(f"  Cups sent: {status['cups_sent']}")
         
-        print(f"\n🤖 GRIPPER: {'Detected' if self.gripper else 'Not detected'}")
-        if self.gripper:
-            pos = self.gripper['position']
-            print(f"  Position: x={pos['x']:.1f}, y={pos['y']:.1f}, z={pos['z']:.1f}")
+        print("\n CUP QUEUE:")
+        unsent = self.robot.get_unsent_cups()
+        if len(unsent) > 0:
+            for cup in unsent:
+                pos = cup['position']
+                state = cup['orientation_state']
+                num = cup['cup_number']
+                print(f"  Cup_{num} [{state}]: x={pos['x']:.1f}, y={pos['y']:.1f}, z={pos['z']:.1f}")
+        else:
+            print("  (empty)")
         
         print("=" * 60 + "\n")
 
@@ -166,138 +146,14 @@ class CupDetectionSystem:
         cv2.imwrite(filename, display_frame)
         print(f"\n[SAVE] Frame saved: {filename}")
 
-    def toggle_visual_servoing(self):
-        """Toggle visual servoing mode"""
-        self.visual_servoing_enabled = not self.visual_servoing_enabled
-        
-        if self.visual_servoing_enabled:
-            print("\n[SERVOING] ✓ Visual servoing ENABLED")
-            print("[SERVOING] Gripper tracking active - will send corrections during movement")
-        else:
-            print("\n[SERVOING] Visual servoing DISABLED")
-
-    def check_gripper_tracking(self):
-        """Check gripper position and send corrections if needed"""
-        if not self.visual_servoing_enabled:
-            return
-        
-        if not self.robot_busy:
-            return
-        
-        if self.gripper is None:
-            return
-        
-        if self.expected_gripper_position is None:
-            # Store initial expected position when robot starts moving
-            if len(self.cups) > 0:
-                self.expected_gripper_position = self.cups[0]['position'].copy()
-            return
-        
-        # Get current gripper position
-        current_pos = self.gripper['position']
-        expected_pos = self.expected_gripper_position
-        
-        # Calculate error
-        dx = current_pos['x'] - expected_pos['x']
-        dy = current_pos['y'] - expected_pos['y']
-        dz = current_pos['z'] - expected_pos['z']
-        
-        error_magnitude = np.sqrt(dx**2 + dy**2 + dz**2)
-        
-        # Update same line using \r
-        print(f"\r[SERVOING] Gripper error: {error_magnitude:.1f}mm (dx={dx:.1f}, dy={dy:.1f}, dz={dz:.1f})", end='', flush=True)
-        
-        # Send correction if error > 15mm (print on new line)
-        if error_magnitude > 15.0:
-            print()  # New line before correction message
-            print(f"[SERVOING] ⚠ Error too large! Sending correction...")
-            correction = {
-                'x': current_pos['x'],
-                'y': current_pos['y'],
-                'z': current_pos['z']
-            }
-            
-            # Note: This would require additional socket communication during movement
-            # For now, just log it
-            print(f"[SERVOING] → Would send correction: {correction}")
-            self.expected_gripper_position = current_pos.copy()
-
-    def robot_communication_thread(self):
-        """Background thread for robot communication - STAYS CONNECTED"""
-        try:
-            # Connect ONCE
-            if not self.robot.connect():
-                print("[ROBOT] ✗ Connection failed")
-                self.robot_busy = False
-                return
-            
-            if not self.robot.start_session():
-                print("[ROBOT] ✗ Session start failed")
-                self.robot.disconnect()
-                self.robot_busy = False
-                return
-            
-            print("[ROBOT] ✓ Connected and ready")
-            
-            # CONTINUOUS LOOP - never disconnect
-            while self.robot.is_connected():
-                # Wait for cups
-                if len(self.cups) == 0:
-                    time.sleep(0.5)
-                    continue
-                
-                # Send all detected cups
-                cups_to_send = self.cups.copy()
-                
-                for i, cup in enumerate(cups_to_send):
-                    remaining = len(cups_to_send) - i
-                    
-                    print(f"\n[STATUS] Sending Cup {i+1}/{len(cups_to_send)}")
-                    print(f"[STATUS] {remaining} cups remaining")
-                    
-                    # Send cup
-                    success = self.robot.send_cup(cup)
-                    
-                    if success:
-                        self.total_cups_sent += 1
-                        print(f"[STATUS] ✓ Cup {i+1} completed")
-                    else:
-                        print(f"[STATUS] ✗ Failed to send cup {i+1}")
-                        # Don't break - keep trying
-                
-                # Wait before checking for new cups
-                print("\n[STATUS] Waiting for new cups...")
-                time.sleep(1.0)
-            
-        except Exception as e:
-            print(f"[ROBOT] ✗ Thread error: {e}")
-        
-        finally:
-            self.robot.end_session()
-            self.robot.disconnect()
-            self.robot_busy = False
-
-    def start_robot_session(self):
-        """Start robot session in background thread - ONLY ONCE"""
-        if self.robot_busy or self.robot.is_connected():
-            return
-        
-        if len(self.cups) == 0:
-            return
-        
-        print(f"\n[ROBOT] Starting continuous session...")
-        
-        self.robot_busy = True
-        self.robot_thread = threading.Thread(target=self.robot_communication_thread, daemon=True)
-        self.robot_thread.start()
-
     def run(self):
-        """Main detection loop - NEVER BLOCKS"""
+        """Main detection loop"""
+        auto_start = True
+        last_auto_start_check = 0
+        
         try:
-            last_connection_attempt = 0
-
             while True:
-                # Get frames (always runs - never freezes)
+                # Get frames
                 rgb_frame, depth_frame = self.camera.get_frames()
 
                 if rgb_frame is None:
@@ -306,19 +162,21 @@ class CupDetectionSystem:
                 # Detect
                 detections = self.detector.detect(rgb_frame, depth_frame)
 
-                # Update internal storage
-                self.update_detections(detections, rgb_frame)
+                # Process detections → cup data
+                cups_data = self.process_detections(detections, rgb_frame)
+                
+                # Add to robot queue
+                if len(cups_data) > 0:
+                    self.robot.add_cups(cups_data)
 
-                # Visual servoing: check gripper tracking
-                if self.visual_servoing_enabled:
-                    self.check_gripper_tracking()
-
-                # Try connect if not busy and cups detected (every 5 seconds)
+                # Auto-start robot (every 5 seconds)
                 current_time = time.time()
-                if not self.robot_busy and not self.robot.is_connected() and len(self.cups) > 0:
-                    if current_time - last_connection_attempt > 5.0:
-                        self.start_robot_session()
-                        last_connection_attempt = current_time
+                if auto_start and not self.robot.is_busy():
+                    if current_time - last_auto_start_check > 5.0:
+                        if len(self.robot.get_unsent_cups()) > 0:
+                            print("\n[AUTO] Starting robot...")
+                            self.robot.start_robot_thread()
+                        last_auto_start_check = current_time
 
                 # Visualize
                 display_frame = self.visualizer.draw_detections(
@@ -328,10 +186,10 @@ class CupDetectionSystem:
                 )
 
                 # Add status overlay
-                self._draw_status_overlay(display_frame)
+                self._draw_status_overlay(display_frame, auto_start)
 
-                # Show frame (ALWAYS updates - constant window name)
-                cv2.imshow("Cup Detection - AUTOMATIC", display_frame)
+                # Show frame
+                cv2.imshow("Cup Detection System - REFACTORED", display_frame)
 
                 # Handle keys
                 key = cv2.waitKey(1) & 0xFF
@@ -342,9 +200,14 @@ class CupDetectionSystem:
                 elif key == ord('s'):
                     self.save_frame(display_frame)
                 elif key == ord('p'):
-                    self.print_detections()
-                elif key == ord('v'):
-                    self.toggle_visual_servoing()
+                    self.print_status()
+                elif key == ord('r'):
+                    print("\n[MANUAL] Starting robot...")
+                    self.robot.start_robot_thread()
+                elif key == ord('a'):
+                    auto_start = not auto_start
+                    status = "ON" if auto_start else "OFF"
+                    print(f"\n[AUTO] Auto-start: {status}")
 
         except KeyboardInterrupt:
             print("\n[EXIT] Interrupted by user")
@@ -354,39 +217,37 @@ class CupDetectionSystem:
             traceback.print_exc()
         finally:
             # Cleanup
-            self.robot_busy = False
-            if self.robot_thread and self.robot_thread.is_alive():
-                self.robot_thread.join(timeout=2.0)
-            if self.robot.is_connected():
-                self.robot.end_session()
-                self.robot.disconnect()
+            self.robot.stop_robot_thread()
             self.camera.close()
             cv2.destroyAllWindows()
             print("[CLEANUP] Done")
             print("=" * 60)
 
-    def _draw_status_overlay(self, frame):
+    def _draw_status_overlay(self, frame, auto_start):
         """Draw status on frame"""
         h, w = frame.shape[:2]
         
-        # Status box (expanded for 4 lines)
+        # Status box
         y = 50
-        cv2.rectangle(frame, (10, y), (400, y + 130), (0, 0, 0), -1)
-        cv2.rectangle(frame, (10, y), (400, y + 130), (0, 255, 0), 2)
+        cv2.rectangle(frame, (10, y), (450, y + 120), (0, 0, 0), -1)
+        cv2.rectangle(frame, (10, y), (450, y + 120), (0, 255, 0), 2)
+        
+        # Get status
+        status = self.robot.get_status()
         
         # Status text
         status_lines = [
-            f"CUPS DETECTED: {len(self.cups)}",
-            f"CUPS SENT: {self.total_cups_sent}",
-            f"ROBOT: {'BUSY' if self.robot_busy else 'CONNECTED' if self.robot.is_connected() else 'DISCONNECTED'}",
-            f"SERVOING: {'ON' if self.visual_servoing_enabled else 'OFF'}"
+            f"CUPS IN QUEUE: {status['total_cups']} (Unsent: {status['unsent_cups']})",
+            f"CUPS SENT: {status['cups_sent']}",
+            f"ROBOT: {'BUSY' if status['busy'] else 'CONNECTED' if status['connected'] else 'DISCONNECTED'}",
+            f"AUTO-START: {'ON' if auto_start else 'OFF'}"
         ]
         
         y_offset = y + 25
         for line in status_lines:
             cv2.putText(frame, line, (20, y_offset),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            y_offset += 30
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            y_offset += 28
 
 
 def main():
@@ -396,6 +257,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-################## For Testing ###################
-##################################################

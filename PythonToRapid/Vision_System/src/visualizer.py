@@ -28,7 +28,7 @@ class Visualizer:
         self.font_scale = 0.5
         self.font_thickness = 1
 
-        print("   ✓ Visualizer initialized")
+        print("  [OK] Visualizer initialized")
 
     def draw_detections(self, rgb_frame, depth_frame, detections):
         """
@@ -155,13 +155,13 @@ class Visualizer:
                 cv2.LINE_AA
             )
 
-        # Draw orientation quaternion for cups
+        # Draw orientation vector for cups
         if obj_class == 'cup' and self.show_orientation:
-            quat = detection.get('orientation_quat', [1, 0, 0, 0])
-            quat_text = f"q:[{quat[0]:.2f},{quat[1]:.2f},{quat[2]:.2f},{quat[3]:.2f}]"
+            vec = detection.get('orientation_quat', [0, 0, 1])  # Note: still called quat in detection
+            vec_text = f"v:[{vec[0]:.2f},{vec[1]:.2f},{vec[2]:.2f}]"
             cv2.putText(
                 frame,
-                quat_text,
+                vec_text,
                 (x, y + h + 50),
                 self.font,
                 0.35,

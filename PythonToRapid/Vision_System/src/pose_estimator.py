@@ -35,7 +35,7 @@ class PoseEstimator:
         calib_file = Path(__file__).parent.parent / 'calibration_params.json'
 
         if not calib_file.exists():
-            print("   ⚠️ WARNING: calibration_params.json not found!")
+            print("   WARNING: calibration_params.json not found!")
             print("   Run: python calibrate.py first")
             self._use_fallback()
             return
@@ -52,11 +52,11 @@ class PoseEstimator:
             # USE GLOBAL MODEL AS PRIMARY
             self.use_global_model = True
 
-            print(f"   ✓ Loaded pixel-based calibration")
+            print(f"   [OK] Loaded pixel-based calibration")
             print(f"     Method: GLOBAL MODEL")
 
         except Exception as e:
-            print(f"   ✗ ERROR loading calibration: {e}")
+            print(f"   [ERROR] ERROR loading calibration: {e}")
             self._use_fallback()
 
     def _use_fallback(self):
@@ -128,7 +128,7 @@ class PoseEstimator:
             orientation = np.array(detection['orientation_quat'])
         else:
             # Default orientation for non-cups
-            orientation = np.array([1.0, 0.0, 0.0, 0.0])
+            orientation = np.array([0.0, 0.0, 1.0])
 
         return {
             'position': position,

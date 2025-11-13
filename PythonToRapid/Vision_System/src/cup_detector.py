@@ -1,6 +1,6 @@
 """
 Cup Detector V5
-Detects cups using trained YOLOv8 model (best.pt)
+Detects cups using trained YOLOv8 model best_cup_orientation_New.pt)
 Detects gripper and robot markers
 Orientation from YOLO class names
 """
@@ -11,28 +11,28 @@ from pathlib import Path
 
 
 class CupDetector:
-    def __init__(self, use_yolo=True, model_path='best.pt', confidence_threshold=0.25):
+    def __init__(self, use_yolo=True, model_path='best_cup_orientation.pt', confidence_threshold=0.25):
         """
         Initialize cup detector with trained YOLOv8 model
 
         Args:
             use_yolo: Use YOLO neural network (True recommended)
-            model_path: Path to trained YOLO model (default: 'best.pt')
+            model_path: Path to trained YOLO model (default: 'best_cup_orientation.pt')
             confidence_threshold: Detection confidence threshold (0.0-1.0)
         """
         self.use_yolo = use_yolo
         self.confidence_threshold = confidence_threshold
         self.model_path = model_path
 
-        # Orientation quaternions for each YOLO class
+        # Orientation vectors for each YOLO class (3D directional vectors)
+        # Model has 8 classes: Back, Front, left_side, right_side, upright, upside_down, Gripper, handle
         self.orientation_map = {
-            'upright': [0.01289, 0.65871, -0.75215, -0.01388],
-            'upside_down': [0.02136, 0.59655, -0.80229, -0.00243],
-            'Front': [0.03265, 0.89004, -0.07447, -0.44858],
-            'Back': [0.04289, -0.82325, 0.06891, -0.56184],
-            'right_side': [0.24959, -0.75167, -0.56767, -0.22461],
-            'left_side': [0.19943, -0.65641, -0.67691, -0.226657],
-            'Gripper': [1.0, 0.0, 0.0, 0.0]  # Default orientation for gripper
+            'Back': [-1.0, 0.0, 0.0],
+            'Front': [1.0, 0.0, 0.0],
+            'left_side': [0.0, -1.0, 0.0],
+            'right_side': [0.0, 1.0, 0.0],
+            'upright': [0.0, 0.0, 1.0],
+            'upside_down': [0.0, 0.0, -1.0],
         }
 
         if use_yolo:
@@ -43,19 +43,19 @@ class CupDetector:
                 # Load trained model
                 self.model = YOLO(model_path)
 
-                print(f"   ✓ YOLOv8 model loaded: {model_path}")
+                print(f"   [OK] YOLOv8 model loaded: {model_path}")
                 print(f"   - Confidence threshold: {confidence_threshold}")
                 print(f"   - Classes: {list(self.orientation_map.keys())}")
 
             except ImportError:
-                print("   ✗ Ultralytics not installed!")
+                print("   [ERROR] Ultralytics not installed!")
                 print("   Run: pip install ultralytics")
                 raise
             except Exception as e:
-                print(f"   ✗ Error loading YOLO model: {e}")
+                print(f"   [ERROR] Error loading YOLO model: {e}")
                 raise
         else:
-            print("   ✓ YOLO disabled")
+            print("   [OK] YOLO disabled")
 
         # Setup color detection for robot base marker
         self._setup_marker_detection()
