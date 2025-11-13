@@ -38,7 +38,7 @@ def CreateSensorMessage(egmSensor, pos, quat):
 
 
 
-print(f"Listening on {robot_ip}:{robot_port}")
+""" print(f"Listening on {robot_ip}:{robot_port}")
 data, addr = robot_socket.recvfrom(1024)  # Buffer size is 1024 bytes
 
 print(f"Received message from {addr}")
@@ -54,10 +54,10 @@ CurX=message.feedBack.cartesian.pos.x
 CurY=message.feedBack.cartesian.pos.y
 CurZ=message.feedBack.cartesian.pos.z
 print(f"SeqNum={Seq}, Time={Time}, X={CurX}, Y={CurY}, Z={CurZ}")
+ """
 
 
-
-Pos=[600,13,136] #[x,y,z] chords
+""" Pos=[600,13,136] #[x,y,z] chords
 Quat=[1,0,0,0] #[q0,q1,q2,q3] quaternion      
 for i in range(50):
     i += 1
@@ -69,4 +69,44 @@ for i in range(50):
     #print(egmSensor)
     print(msg)
     robot_socket.sendto(msg, (robot_ip, robot_port))  
-    time.sleep(0.002)
+    time.sleep(0.002) """
+
+while True:
+    data, addr = robot_socket.recvfrom(1024)  # Buffer size is 1024 bytes
+    
+    print(f"Received message from {addr}")
+
+    #Reads-in and deserializes the protocol buffer message from controller
+    message=egm.EgmRobot()
+    message.ParseFromString(data)
+    
+    #print(message)
+    
+    Seq=message.header.seqno
+    Time=message.header.tm
+    CurX=message.feedBack.cartesian.pos.x
+    CurY=message.feedBack.cartesian.pos.y
+    CurZ=message.feedBack.cartesian.pos.z
+    
+    print(f"SeqNum={Seq}, Time={Time}, X={CurX}, Y={CurY}, Z={CurZ}")
+    
+    ####Setup for message back to Robot Controller for Position Guidance and Path Correction modes(see readme and EGM manual for specifics)####
+    
+    # #To create Position Guidance message
+    Pos=[100,100,300] #[x,y,z] chords
+    Quat=[1,0,0,0] #[q0,q1,q2,q3] quaternion
+    egmSensor=egm.EgmSensor()
+    egmSensor=CreateSensorMessage(egmSensor,Pos,Quat)
+    
+    # #To create Path Correction message 
+    # Pos=[0,0,20] # y,z adjustments off of the planned path
+    # egmPathCorr=egm.EgmSensorPathCorr()
+    # egmPathCorr=CreateSensorPathCorr(egmPathCorr,Pos)
+    
+    # #To Serialize with protocol buffer and transmit message to Controller (either message type)
+    #mess=egmSensor.SerializeToString()
+    # mess=egmPathCorr.SerializeToString()
+    
+    #robot_socket.sendto(mess, addr)
+    
+    num+=1
