@@ -11,8 +11,9 @@ num=0
 robot_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 #Binds the client to listen on your IP and port (same as specified in Controller-Configuration-
-# robot_socket.bind((computer_ip, robot_port))
-
+robot_socket.bind((robot_ip, robot_port))
+print("TEST")
+robot_socket.settimeout(5)
 
 def CreateSensorMessage(egmSensor, pos, quat):
     headerOne=egmSensor.header
@@ -21,7 +22,7 @@ def CreateSensorMessage(egmSensor, pos, quat):
     
     #to change the position and/or orientation of the robot, change values of input vectors
     planned=egmSensor.planned
-    pose=planned.cartesian
+    pose=planned.cartesian #ändra denna?
     Position=pose.pos
     Quaternion=pose.orient
     Position.x=pos[0]
@@ -35,17 +36,37 @@ def CreateSensorMessage(egmSensor, pos, quat):
     
     return egmSensor
 
-Pos=[600,13,136] #[x,y,z] chords
-Quat=[1,0,0,0] #[q0,q1,q2,q3] quaternion
 
-for i in range(500):
+
+print(f"Listening on {robot_ip}:{robot_port}")
+data, addr = robot_socket.recvfrom(1024)  # Buffer size is 1024 bytes
+
+print(f"Received message from {addr}")
+
+#Reads-in and deserializes the protocol buffer message from controller
+message=egm.EgmRobot()
+message.ParseFromString(data)
+
+#print(message)
+Seq=message.header.seqno
+Time=message.header.tm
+CurX=message.feedBack.cartesian.pos.x
+CurY=message.feedBack.cartesian.pos.y
+CurZ=message.feedBack.cartesian.pos.z
+print(f"SeqNum={Seq}, Time={Time}, X={CurX}, Y={CurY}, Z={CurZ}")
+
+
+
+Pos=[600,13,136] #[x,y,z] chords
+Quat=[1,0,0,0] #[q0,q1,q2,q3] quaternion      
+for i in range(50):
     i += 1
-    Pos[1] = 13 + i
+    Pos[1] = i
     Quat = [1,0,0,0]
     egmSensor=egm.EgmSensor()
     egmSensor=CreateSensorMessage(egmSensor,Pos,Quat)
-    mess=egmSensor.SerializeToString()
+    msg=egmSensor.SerializeToString()
     #print(egmSensor)
-    print(mess)
-    robot_socket.sendto(mess, (robot_ip, robot_port))  
-    time.sleep(0.004)
+    print(msg)
+    robot_socket.sendto(msg, (robot_ip, robot_port))  
+    time.sleep(0.002)
