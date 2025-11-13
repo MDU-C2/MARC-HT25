@@ -13,16 +13,16 @@ MODULE LeftArmExample
         VAR num val;
         
         mug := fetch_cup_target;
-        mug_normal := [0,0,1];
+        mug_normal := [1,1,0];
         
-        ! for + or - does not mater!
-        ! ======================================
-            mug_normal.x := Abs(mug_normal.x);
-            mug_normal.y := Abs(mug_normal.y);
-            mug_normal.z := Abs(mug_normal.z);
-        ! ======================================
+!        ! for + or - does not mater!
+!        ! ======================================
+!            mug_normal.x := Abs(mug_normal.x);
+!            mug_normal.y := Abs(mug_normal.y);
+!            mug_normal.z := Abs(mug_normal.z);
+!        ! ======================================
         
-        mug_offset := 100;
+        mug_offset := 50;
         
         TPErase;
         moveJ home,movespeed,z50,tGripper;

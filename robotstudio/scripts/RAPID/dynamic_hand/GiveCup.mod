@@ -20,6 +20,9 @@ MODULE GiveCup
         target.rot := hand_rotation;
         target.trans := mug_position - offset;
         moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
+        ! grippers out
+        
         WaitTime(1);
                 
         !ask for confermation
@@ -28,15 +31,20 @@ MODULE GiveCup
         !pick up mug
         target.trans := mug_position;
         moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
+        ! grippers in
         WaitTime(1);
         
         target.trans := mug_position - offset;
         moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         
     ENDPROC
     
     ! hand over mug to other hand
     PROC HandOverMug()
+        
+        
         
     ENDPROC
     
