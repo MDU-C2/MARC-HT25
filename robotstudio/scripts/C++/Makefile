@@ -1,23 +1,15 @@
-# Compiler
-COMPILER = g++
-CXXFLAGS = -Wall -Wextra -std=c++17
+COMPILER = cl
+CXXFLAGS = /nologo /EHsc /std:c++17 /MT
 
-# Source file to build (set to server or client)
-# FILENAME = server
 FILENAME = client
-
 SRC = $(FILENAME).cpp
 OUT = $(FILENAME).exe
 
-# Winsock library
-LIBS = -lws2_32
-
 build:
-	$(COMPILER)  -o $(OUT) $(SRC) $(LIBS)
-	./$(OUT)
-
-clean:
-	del *.o $(OUT)
+	$(COMPILER) $(CXXFLAGS) $(SRC) /Fe$(OUT)
 
 run:
-	./$(OUT)
+	$(OUT)
+
+clean:
+	del $(OUT) *.obj

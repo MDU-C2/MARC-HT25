@@ -209,7 +209,7 @@ class CupPickingClient:
                         if response == "Ack_Orientation":
                             print("[INFO] Cup placement position sent successfully")
                             # Update cup status to 'Sent' after successfully sending all data
-                            #cup['status'] = 'Sent'
+                            # cup['status'] = 'Sent'
                             print(f"[INFO] Updated cup {cup.get('id')} status to 'Sent'")
 
         # Step 3: Wait for robot movement to pickup position (Ask_Wait)
@@ -217,10 +217,10 @@ class CupPickingClient:
         if response == "Ask_Wait":
             print("[INFO] Robot is moving to cup pickup position...")
 
-        # Step 4: Wait for robot movement to placement position (Ask_Wait)
-        response = self.receive_message()
-        if response == "Ask_Wait":
-            print("[INFO] Robot is moving to cup placement position...")
+        # # Step 4: Wait for robot movement to placement position (Ask_Wait)
+        # response = self.receive_message()
+        # if response == "Ask_Wait":
+        #     print("[INFO] Robot is moving to cup placement position...")
 
         # Step 5: Wait for Ask_amount_of_cups (checking for more cups)
         response = self.receive_message()
@@ -229,6 +229,11 @@ class CupPickingClient:
             remaining_cups = self.get_available_cups_count()
             self.send_message(str(remaining_cups))
             print(f"[INFO] Sent remaining cups: {remaining_cups}")
+            
+        response = self.receive_message()
+        if response == "Ack_amount_of_cups":
+            print(f"[RECEIVED] Ack_cup_current_position")
+                  
 
     def disconnect(self):
         """Close connection"""
