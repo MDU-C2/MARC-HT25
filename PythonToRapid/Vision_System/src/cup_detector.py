@@ -11,13 +11,13 @@ from pathlib import Path
 
 
 class CupDetector:
-    def __init__(self, use_yolo=True, model_path='best_cup_orientation.pt', confidence_threshold=0.25):
+    def __init__(self, use_yolo=True, model_path='best_cup_orientation_New.pt', confidence_threshold=0.25):
         """
         Initialize cup detector with trained YOLOv8 model
 
         Args:
             use_yolo: Use YOLO neural network (True recommended)
-            model_path: Path to trained YOLO model (default: 'best_cup_orientation.pt')
+            model_path: Path to trained YOLO model (default: 'best.pt')
             confidence_threshold: Detection confidence threshold (0.0-1.0)
         """
         self.use_yolo = use_yolo

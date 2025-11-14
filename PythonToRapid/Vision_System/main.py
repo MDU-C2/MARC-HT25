@@ -13,11 +13,11 @@ from datetime import datetime
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from camera_manager import OAKDCamera
-from cup_detector import CupDetector
-from pose_estimator import PoseEstimator
-from visualizer import Visualizer
-from PythonToRapid import RobotCommunication
+from src.camera_manager import OAKDCamera
+from src.cup_detector import CupDetector
+from src.pose_estimator import PoseEstimator
+from src.visualizer import Visualizer
+from src.PythonToRapid import RobotCommunication
 
 
 class CupDetectionSystem:
