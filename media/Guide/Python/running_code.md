@@ -1,7 +1,7 @@
 <h1 align="center">
   <br>
   <br>
-  <img src="../../media/images/camera_to_rob_frame.png" alt="walkthrough banner" width="600">
+  <img src="https://raw.githubusercontent.com/MDU-C2/MARC-HT25/developer/media/images/camera_to_rob_frame.png" width="600" alt="walkthrough banner">
   <br>
   <br>
   This walkthrough tells how to run the vision system on for this project.
