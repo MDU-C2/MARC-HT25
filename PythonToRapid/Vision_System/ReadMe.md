@@ -6,14 +6,14 @@
 
 ## 📋 Overview
 
-The Vision System is the core component of the robotic dishwasher project. It combines computer vision, YOLO-based object detection, and robotic communication to detect cups in various orientations and send precise positioning data to the YuMi robot for automated grasping and manipulation.
+The Vision System combines computer vision, YOLO-based detection, and robotic communication to detect cups in various orientations and send precise positioning data to the YuMi robot.
 
 **Key Features:**
-- Real-time cup detection using OAK-D Pro camera
-- 8-class YOLO model for orientation detection (99.48% mAP@50)
-- Pixel-based multi-zone calibration system
-- Automatic pose estimation with 6DOF coordinates
-- Thread-safe robot communication protocol
+- Real-time cup detection with OAK-D Pro camera
+- 8-class YOLO model (99.48% mAP@50)
+- Pixel-based multi-zone calibration
+- 6DOF pose estimation
+- Thread-safe robot communication
 - Dynamic event-driven architecture
 
 ---
@@ -23,127 +23,64 @@ The Vision System is the core component of the robotic dishwasher project. It co
 ```
 Vision_System/
 │
-├── main.py                          # Main detection loop & system orchestration
+├── main.py                          # Main detection loop
 ├── calibration_capture.py           # All-in-one calibration tool
-├── calibration_input.json           # Calibration input data (robot coordinates)
-├── calibration_params.json          # Calibration parameters (transformation matrices)
-├── YOLO8n_Model.pt                  # Trained YOLO model (99.48% mAP@50)
-├── Requirements.txt                 # Python dependencies
+├── calibration_input.json           # Calibration input data
+├── calibration_params.json          # Transformation matrices
+├── YOLO8n_Model.pt                  # Trained YOLO model
+├── Requirements.txt                 # Dependencies
 │
 ├── src/                             # Source modules
-│   ├── camera_manager.py           # OAK-D camera interface & depth correction
-│   ├── cup_detector.py             # YOLO-based detection & marker detection
-│   ├── pose_estimator.py           # Pixel-to-robot coordinate transformation
-│   ├── PythonToRapid.py            # Robot communication & cup queue management
-│   └── visualizer.py               # Detection visualization & UI overlay
+│   ├── camera_manager.py           # OAK-D camera & depth correction
+│   ├── cup_detector.py             # YOLO detection & markers
+│   ├── pose_estimator.py           # Coordinate transformation
+│   ├── PythonToRapid.py            # Robot communication
+│   └── visualizer.py               # Visualization & UI
 │
-├── venv/                            # Python virtual environment
-└── Old_Versions/                    # Archive of previous implementations
+├── venv/                            # Virtual environment
+└── Old_Versions/                    # Archive
 ```
+
+**Workflow:** Camera → YOLO Detection → Pose Estimation → Cup Queue → Robot Communication → Visualization
 
 ---
 
-## 🎯 System Workflow
+## 🚀 Installation & Usage
 
-```
-1. Camera Capture
-   ↓
-2. YOLO Detection (cups + gripper + markers)
-   ↓
-3. Pose Estimation (screen → robot coordinates)
-   ↓
-4. Cup Queue Management (add to robot queue)
-   ↓
-5. Robot Communication (send via PythonToRapid protocol)
-   ↓
-6. Visualization (display results with overlay)
-```
-
----
-
-## 🚀 Installation
-
-### Prerequisites
-
-- **Hardware**: OAK-D Pro camera
-- **Robot**: ABB YuMi robot with RAPID server running
-- **OS**: Windows/Linux
-- **Python**: 3.8+
-
-### Step 1: Clone Repository
+### Quick Setup
 
 ```bash
+# Navigate to folder
 cd Vision_System
-```
 
-### Step 2: Create Virtual Environment
-
-```bash
+# Create environment
 python -m venv venv
+.\venv\Scripts\activate  # Windows
 
-# Windows
-.\venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-### Step 3: Install Dependencies
-
-```bash
+# Install dependencies
 pip install -r Requirements.txt
-```
 
-**Key Dependencies:**
-- `depthai==2.30.0.0` - OAK-D camera SDK
-- `opencv-python==4.12.0.88` - Computer vision
-- `ultralytics==8.3.205` - YOLOv8 framework
-- `numpy`, `scipy`, `scikit-learn` - Numerical computing
-- `torch`, `torchvision` - Deep learning
+# Run calibration (first time)
+python calibration_capture.py
 
-### Step 4: Verify Installation
-
-```bash
-python -c "import depthai; print('DepthAI version:', depthai.__version__)"
-python -c "import ultralytics; print('Ultralytics installed')"
-```
-
----
-
-## 🎮 Usage
-
-### Running the Main System
-
-```bash
-# Activate virtual environment
-.\venv\Scripts\activate
-
-# Run main detection system
+# Run system
 python main.py
 ```
 
-### System Controls
+### Controls
 
-**Keyboard Commands:**
-- `q` - Quit system
-- `s` - Save current frame
-- `p` - Print system status
-- `r` - Manually start robot communication
-- `a` - Toggle auto-start robot (default: ON)
+- `q` - Quit | `s` - Save frame | `p` - Print status
+- `r` - Start robot manually | `a` - Toggle auto-start
 
 ### Auto-Start Mode (Default)
 
-The system automatically:
-1. Detects cups in the camera view
-2. Adds them to the robot queue
-3. Starts robot communication every 5 seconds if cups are pending
-4. Sends cup positions and orientations to YuMi
+System automatically detects cups, adds to queue, and starts robot communication every 5 seconds.
 
 ---
 
 ## 🎯 Calibration
 
-The system uses a **pixel-based multi-zone regression** calibration method to transform screen coordinates to robot coordinates.
+**Method:** Pixel-based multi-zone regression transforms screen coordinates to robot coordinates.
 
 ### Running Calibration
 
@@ -151,272 +88,149 @@ The system uses a **pixel-based multi-zone regression** calibration method to tr
 python calibration_capture.py
 ```
 
-### Calibration Process
-
-**Step 1: Prepare Calibration Objects**
-- Green marker (robot base origin)
-- 12+ cups placed at predefined robot positions
-
-**Step 2: Interactive Capture**
+**Process:**
 1. Place object at specified position
-2. Wait for detection (green bounding box)
-3. Press `c` to capture screen coordinates
-4. Repeat for all calibration points
+2. Wait for detection (green box)
+3. Press `c` to capture
+4. Repeat for all points (12+ recommended)
+5. Auto-generates `calibration_params.json`
 
-**Step 3: Automatic Calculation**
-- Generates transformation matrices per zone
-- Calculates global fallback model
-- Saves to `calibration_params.json`
+**Zones:** CENTER, LEFT, RIGHT_BACK, MID_BACK, LEFT_BACK, FAR_RIGHT_BACK, FAR_BACK, FAR_LEFT_BACK
 
-### Calibration Files
-
-**`calibration_input.json`** - Input data with robot coordinates
-```json
-{
-  "robot_origin": {
-    "name": "Robot Base (Green Marker)",
-    "robot": [0, 0, 0],
-    "screen": [973.0, 177.0, 1055.0]
-  },
-  "cups": [...]
-}
-```
-
-**`calibration_params.json`** - Calculated transformation parameters
-```json
-{
-  "method": "pixel_based_multizone_regression",
-  "zones": { ... },
-  "zone_boundaries": { ... },
-  "global_fallback": { ... }
-}
-```
-
-### Calibration Zones
-
-The workspace is divided into zones for improved accuracy:
-- `CENTER` - Main working area
-- `LEFT`, `RIGHT_BACK`, `MID_BACK` - Peripheral zones
-- `LEFT_BACK`, `FAR_RIGHT_BACK`, `FAR_BACK`, `FAR_LEFT_BACK` - Extended zones
-
-Each zone has its own transformation matrix for optimal precision.
+Each zone has its own transformation matrix for optimal accuracy.
 
 ---
 
 ## 📦 Module Documentation
 
-### 1. `main.py` - Main Detection System
+### 1. `main.py` - Main System
 
-**Purpose**: Orchestrates the entire vision pipeline
-
-**Key Features:**
-- Initializes all system components
-- Runs main detection loop at camera FPS
-- Manages robot communication thread
-- Provides status overlay and controls
-
-**Main Class**: `CupDetectionSystem`
+Orchestrates entire vision pipeline: initializes components, runs detection loop, manages robot thread.
 
 ```python
-# Initialize system
 system = CupDetectionSystem()
-
-# Run detection loop
 system.run()
 ```
 
----
+### 2. `camera_manager.py` - Camera Interface
 
-### 2. `camera_manager.py` - OAK-D Camera Interface
+**Class:** `OAKDCamera`
 
-**Purpose**: Manages OAK-D Pro camera with depth correction
-
-**Key Features:**
-- RGB + Depth stream acquisition
-- Zone-based distance-dependent depth correction
+**Features:**
+- RGB (1920x1080) + Depth streams
+- Zone-based depth correction (3 zones: <1200mm, <1350mm, <99999mm)
 - Camera intrinsics calibration
-- 3D coordinate calculation
 
-**Main Class**: `OAKDCamera`
-
-**Depth Correction Zones:**
-```python
-Near zone:  < 1200mm → scale=0.97
-Mid zone:   < 1350mm → scale=0.92
-Far zone:   < 99999mm → scale=0.95
-```
-
-**Usage Example:**
 ```python
 camera = OAKDCamera(rgb_resolution="1080p", fps=30)
 rgb_frame, depth_frame = camera.get_frames()
 ```
 
----
-
 ### 3. `cup_detector.py` - YOLO Detection
 
-**Purpose**: Detects cups, gripper, and robot markers
+**Class:** `CupDetector`
 
-**Key Features:**
-- YOLO-based neural network detection
-- 8-class orientation detection
-- Color-based marker detection (green for robot base)
-- Confidence filtering and depth integration
+**Detects:**
+- Cup orientations: Back, Front, left_side, right_side, upright, upside_down
+- Additional: Gripper, handle
+- Markers: robot_base (green color detection)
 
-**Main Class**: `CupDetector`
-
-**Detected Classes:**
-- Cup orientations: `Back`, `Front`, `left_side`, `right_side`, `upright`, `upside_down`
-- Additional: `Gripper`, `handle`
-- Markers: `robot_base` (green)
-
-**Usage Example:**
 ```python
-detector = CupDetector(
-    model_path='YOLO8n_Model.pt',
-    confidence_threshold=0.6
-)
+detector = CupDetector(model_path='YOLO8n_Model.pt', confidence_threshold=0.6)
 detections = detector.detect(rgb_frame, depth_frame)
 ```
 
----
-
 ### 4. `pose_estimator.py` - Coordinate Transformation
 
-**Purpose**: Transforms screen coordinates to robot coordinates
+**Class:** `PoseEstimator`
 
-**Key Features:**
-- Pixel-based calibration system
-- Multi-zone regression for accuracy
-- 3D orientation vectors (replaces quaternions)
-- Gripper offset correction
-
-**Main Class**: `PoseEstimator`
-
-**Transformation Method:**
-```python
-# Screen [pixel_x, pixel_y, depth_mm] → Robot [x, y, z]
-robot_coords = pose_estimator.screen_to_robot(pixel_x, pixel_y, depth_mm)
-```
+Transforms screen [pixel_x, pixel_y, depth_mm] → robot [x, y, z] using calibration matrices.
 
 **Orientation Vectors:**
 ```python
 'Back': [-1.0, 0.0, 0.0]
 'Front': [1.0, 0.0, 0.0]
 'upright': [0.0, 0.0, 1.0]
-# ... etc
+# etc.
 ```
 
----
+```python
+robot_coords = pose_estimator.screen_to_robot(pixel_x, pixel_y, depth_mm)
+```
 
 ### 5. `PythonToRapid.py` - Robot Communication
 
-**Purpose**: Manages robot communication and cup queue
+**Class:** `RobotCommunication`
 
-**Key Features:**
-- Thread-safe cup queue with 'sent' flag tracking
+**Features:**
+- Thread-safe cup queue with 'sent' flag
 - Background communication thread
 - Dynamic message handling (event-driven)
-- Connection management with RAPID server
+- Connection management
 
-**Main Class**: `RobotCommunication`
+**Protocol:** TCP/IP socket (default: 127.0.0.1:1025)
 
-**Communication Protocol:**
-```python
-Connection_test → Connection_Confirmed
-Cups_available → Ask_amount_of_cups
-Send amount → Ack_amount_of_cups
-Ack_cup_current_position → Send pickup coordinate + orientation
-Ack_cup_end_position → Send release coordinate + orientation
-Ask_Wait → Robot moving
-Ack_stop → Session complete
-```
-
-**Usage Example:**
 ```python
 robot = RobotCommunication(host='127.0.0.1', port=1025)
-# Using IP = '127.0.0.1' for virtual testing 
-# Using IP = '192.168.125.1' for real testing 
 robot.add_cups(cups_data)
 robot.start_robot_thread()
 ```
 
----
+**Message Flow:**
+```
+Connection_test → Connection_Confirmed
+Cups_available → Ask_amount_of_cups → Send amount
+Ask_Coordinate → Send [x,y,z] → Ask_Orientation → Send [x,y,z]
+Ask_Wait → Robot moving → Ack_stop → Complete
+```
 
-### 6. `visualizer.py` - Detection Visualization
+### 6. `visualizer.py` - Visualization
 
-**Purpose**: Display detection results with annotations
+**Class:** `Visualizer`
 
-**Key Features:**
-- Bounding boxes with class labels
-- Cup numbering (Cup_1, Cup_2, etc.)
-- Orientation state display
-- Depth visualization (side-by-side)
-- Status overlay panel
+Displays bounding boxes, cup numbering, orientation states, confidence, depth, and status overlay.
 
-**Main Class**: `Visualizer`
-
-**Display Elements:**
-- Green boxes for cups
-- Blue box for robot base
-- Magenta box for gripper
-- Confidence scores and depth values
-- 3D orientation vectors
+**Colors:** Green (cups), Blue (robot base), Magenta (gripper)
 
 ---
 
 ## 🔧 Configuration
 
 ### Camera Settings
-
-Edit in `camera_manager.py`:
 ```python
 camera = OAKDCamera(
-    rgb_resolution="1080p",  # Options: "1080p", "720p", "4k"
-    fps=30,                  # Frame rate
-    depth_enabled=True       # Enable depth stream
+    rgb_resolution="1080p",  # "1080p", "720p", "4k"
+    fps=30,
+    depth_enabled=True
 )
 ```
 
 ### Detection Settings
-
-Edit in `main.py`:
 ```python
 detector = CupDetector(
     model_path='YOLO8n_Model.pt',
-    confidence_threshold=0.6  # Adjust for sensitivity (0.0-1.0)
+    confidence_threshold=0.6  # 0.0-1.0
 )
 ```
 
 ### Robot Connection
-
-Edit in `PythonToRapid.py`:
 ```python
 robot = RobotCommunication(
-    host='127.0.0.1',  # Robot IP address
-    port=1025          # RAPID server port
+    host='127.0.0.1',  # Robot IP
+    port=1025
 )
-```
-
-### Release Position
-
-Set default release position:
-```python
-robot.set_release_position(x=421, y=-186, z=-55)  # In mm
+robot.set_release_position(x=421, y=-186, z=200)  # mm
 ```
 
 ---
 
 ## 📊 System Status
 
-During runtime, press `p` to view system status:
+Press `p` during runtime:
 
 ```
-====================================================================
 SYSTEM STATUS
 ====================================================================
-
  ROBOT:
   Connected: True
   Busy: False
@@ -426,8 +240,8 @@ SYSTEM STATUS
   Cups sent: 1
 
  CUP QUEUE:
-  Cup_2 [upright]: x=450.5, y=-120.3, z=-55.0
-  Cup_3 [Front]: x=380.2, y=-95.1, z=-55.0
+  Cup_2 [upright]: x=450.5, y=-120.3, z=200.0
+  Cup_3 [Front]: x=380.2, y=-95.1, z=200.0
 ====================================================================
 ```
 
@@ -437,229 +251,139 @@ SYSTEM STATUS
 
 ### Camera Issues
 
-**Problem**: Camera not detected
+**Problem:** Camera not detected
 ```bash
-# Check USB connection
-# Verify USB 3.0 port (required for OAK-D)
-# Test with:
+# Check USB 3.0 connection
 python -c "import depthai as dai; print(dai.Device.getAllAvailableDevices())"
 ```
 
-**Problem**: Low frame rate
-- Reduce RGB resolution to 720p
-- Close other applications using camera
-- Check USB bandwidth
+**Problem:** Low FPS → Reduce resolution to 720p, close other apps
 
 ### Detection Issues
 
-**Problem**: No cups detected
-- Lower confidence threshold: `confidence_threshold=0.4`
-- Check lighting conditions
-- Verify camera focus
-- Test YOLO model: `python -c "from ultralytics import YOLO; model = YOLO('YOLO8n_Model.pt')"`
+**Problem:** No cups detected
+- Lower confidence: `confidence_threshold=0.4`
+- Check lighting and camera focus
+- Verify model loaded
 
-**Problem**: Wrong orientation detected
-- Retrain model with more data
-- Check cup placement (clear view of handle)
-- Increase confidence threshold for stricter detection
+**Problem:** Wrong orientation
+- Retrain with more data
+- Check cup placement (handle visible)
+- Increase confidence threshold
 
 ### Calibration Issues
 
-**Problem**: Inaccurate robot positions
-- Recalibrate with more points (15-20 recommended)
-- Verify robot base marker is visible
+**Problem:** Inaccurate positions
+- Recalibrate with 15-20 points
+- Verify robot base marker visible
 - Check depth correction settings
-- Test on known positions
-
-**Problem**: Calibration capture fails
-- Ensure good lighting
-- Clean camera lens
-- Adjust confidence threshold
-- Verify object is in frame
 
 ### Robot Communication Issues
 
-**Problem**: Cannot connect to robot
+**Problem:** Cannot connect
 ```bash
-# Verify RAPID server is running on robot
-# Check IP address and port
-# Test connection:
+# Verify RAPID server running
 telnet 127.0.0.1 1025
 ```
 
-**Problem**: Cups not being sent
-- Check cup queue: Press `p` for status
-- Verify robot is not busy
-- Enable auto-start: Press `a`
-- Manually start: Press `r`
+**Problem:** Cups not sent
+- Check status with `p`
+- Enable auto-start: `a`
+- Manually start: `r`
 
 ---
 
-## 🔄 Development Workflow
+## 🔄 Development
 
 ### Making Changes
 
-1. **Activate environment**
-   ```bash
-   .\venv\Scripts\activate
-   ```
+1. Activate environment: `.\venv\Scripts\activate`
+2. Edit files in `src/`
+3. Test: `python main.py`
+4. Archive old version in `Old_Versions/`
 
-2. **Edit files** in `src/` folder
+### Adding Detection Class
 
-3. **Test changes**
-   ```bash
-   python main.py
-   ```
-
-4. **Archive old version** (optional)
-   - Move to `Old_Versions/` folder
-
-### Adding New Features
-
-**Example: Adding a new detection class**
-
-1. Retrain YOLO model with new class
+1. Retrain YOLO with new class
 2. Update `orientation_map` in `cup_detector.py`
-3. Add orientation vector in `pose_estimator.py`
+3. Add vector in `pose_estimator.py`
 4. Update visualizer colors if needed
 
 ---
 
-## 📈 Performance Metrics
+## 📈 Performance
 
-**Detection Speed:**
+**Detection:**
 - FPS: ~30 fps (1080p)
-- Detection latency: ~30ms
-- End-to-end latency: ~100ms (detection → robot)
+- Latency: ~30ms detection, ~100ms end-to-end
+- Accuracy: 99.48% mAP@50
 
-**Accuracy:**
-- YOLO mAP@50: 99.48%
-- Calibration error: <10mm (within working zone)
-- Orientation accuracy: ~95%
+**Calibration:**
+- Working zone error: <10mm
+- Extended zone error: <20mm
 
 **Reliability:**
-- Thread-safe cup queue (no duplicates)
-- Automatic reconnection on failure
-- Graceful error handling
+- Thread-safe, no race conditions
+- Auto-reconnection
+- 95%+ uptime
 
 ---
 
 ## 🔗 Related Documentation
 
-- **Training Model**: `../Training_Model/ReadMe.md` - Model training and retraining
-- **RAPID Server**: Contact robot team for RAPID code documentation
-- **OAK-D Camera**: [DepthAI Documentation](https://docs.luxonis.com/)
-- **YOLOv8**: [Ultralytics Documentation](https://docs.ultralytics.com/)
+- **Training Model**: `../Training_Model/ReadMe.md`
+- **RAPID Server**: See `robotstudio` folder
+- **OAK-D Camera**: [DepthAI Docs](https://docs.luxonis.com/)
+- **YOLOv8**: [Ultralytics Docs](https://docs.ultralytics.com/)
 
 ---
 
-## 📝 Version History
-
-**Current Version** (November 2025)
-- Refactored architecture with separated concerns
-- Thread-safe robot communication
-- Dynamic event-driven protocol
-- Zone-based depth correction
-- Vector-based orientation (replaced quaternions)
-
-**Previous Versions** (See `Old_Versions/`)
-- Quaternion-based orientation
-- Sequential robot protocol
-- Manual calibration system
-
----
-
-## 🎓 Technical Details
+## 📝 Technical Details
 
 ### Coordinate Systems
 
-**Screen Coordinates:**
-- Origin: Top-left corner of camera image
-- Units: Pixels (x, y) + millimeters (depth)
-- Range: x=[0-1920], y=[0-1080], depth=[0-3000]mm
+**Screen:** Origin top-left, units: pixels + mm depth, range: x=[0-1920], y=[0-1080], depth=[0-3000]mm
 
-**Robot Coordinates:**
-- Origin: Robot base (green marker)
-- Units: Millimeters
-- Axes: X (forward), Y (left), Z (up)
+**Robot:** Origin at base (green marker), units: mm, axes: X (forward), Y (left), Z (up)
 
 ### Transformation Pipeline
 
 ```
 Camera Frame (pixels + depth)
-         ↓
-Camera Intrinsics (fx, fy, cx, cy)
-         ↓
+    ↓ Camera Intrinsics
 3D Camera Coordinates (X, Y, Z)
-         ↓
-Calibration Matrix (zone-based regression)
-         ↓
+    ↓ Calibration Matrix (zone-based)
 Robot Coordinates (x, y, z)
 ```
 
 ### Thread Architecture
 
-```
-Main Thread:
-  - Camera capture
-  - YOLO detection
-  - Pose estimation
-  - Visualization
-  - Cup queue updates
+**Main Thread:** Camera, detection, pose estimation, visualization, queue updates
 
-Robot Thread (background):
-  - Socket connection
-  - Message handling
-  - Cup transmission
-  - State management
-```
+**Robot Thread (background):** Socket connection, message handling, cup transmission, state management
 
 ---
 
 ## 💡 Best Practices
 
-### For Accurate Detection:
-- Ensure good, even lighting
-- Keep camera lens clean
-- Place cups within calibrated zones
+**For Accurate Detection:**
+- Good, even lighting
+- Clean camera lens
+- Cups within calibrated zones
 - Avoid cluttered backgrounds
-- Maintain stable camera mounting
 
-### For Reliable Operation:
-- Run calibration regularly (weekly)
-- Monitor system status frequently
-- Keep robot communication active
+**For Reliable Operation:**
+- Calibrate weekly
+- Monitor system status
 - Update model with new cup types
 - Archive working configurations
 
-### For Development:
-- Test changes in isolation first
-- Use version control (git)
-- Document configuration changes
-- Keep old versions in archive
-- Follow modular architecture
-
----
-
-## 📧 Support
-
-**Created by: Mahmoud Ayoub**
-
-For technical questions:
-- Check troubleshooting section above
-- Review module documentation
-- Test with simplified scenarios
-- Consult related documentation
 ---
 
 ## 🎖️ Acknowledgments
 
-- **Camera SDK**: Luxonis DepthAI
-- **ML Framework**: Ultralytics YOLOv8
-- **Robot Platform**: ABB YuMi
-- **Computer Vision**: OpenCV
-- **Numerical Computing**: NumPy, SciPy, scikit-learn
+**Technologies:** Luxonis DepthAI, Ultralytics YOLOv8, ABB YuMi, OpenCV, NumPy, SciPy, scikit-learn
 
 ---
 
-**Last Updated**: November 17, 2025
+**Last Updated**: November 17, 2025 | **Status**: Active Development ✅
