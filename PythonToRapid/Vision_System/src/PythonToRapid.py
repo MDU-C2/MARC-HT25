@@ -15,7 +15,7 @@ from typing import List, Dict, Optional, Callable
 
 
 class RobotCommunication:
-    def __init__(self, host='127.0.0.1', port=1025):
+    def __init__(self, host='192.168.125.1', port=1025):
         """
         Initialize robot communication with full cup management
         
