@@ -3,6 +3,7 @@ Cup Detector V5
 Detects cups using trained YOLOv8 model best_cup_orientation_New.pt)
 Detects gripper and robot markers
 Orientation from YOLO class names
+.\PythonToRapid\Vision_System\venv\Scripts\activate
 """
 
 import cv2

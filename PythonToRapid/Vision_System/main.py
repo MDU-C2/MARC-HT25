@@ -2,6 +2,7 @@
 Main script - Cup Detection System
 REFACTORED: Only handles detection + visualization
 All robot logic moved to PythonToRapid.py
+.\PythonToRapid\Vision_System\venv\Scripts\activate
 """
 
 import cv2
