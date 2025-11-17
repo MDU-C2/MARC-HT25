@@ -50,12 +50,12 @@ The model achieved exceptional performance across all metrics:
 
 ### Confusion Matrix
 
-![Confusion Matrix](confusion_matrix.png)
+![Confusion Matrix](confusion_matrix.jpg)
 *Confusion matrix demonstrating high classification accuracy across all 8 classes*
 
 ### Training Metrics
 
-![Training Results](results.png)
+![Training Results](results.jpg)
 *Comprehensive training metrics including mAP, precision, recall, and loss curves*
 
 **Key Achievements:**
@@ -69,7 +69,7 @@ The model achieved exceptional performance across all metrics:
 ## 📁 Folder Contents
 
 ```
-Training_Model/
+Training Model/
 │
 ├── YOLO8n_Model.pt                          # Trained model weights (50.8 MB)
 ├── Cup_Orientation_Training_Colab.ipynb     # Google Colab training notebook
