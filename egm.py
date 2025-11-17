@@ -67,7 +67,8 @@ for i in range(500):
     m = egm.EgmRobot()
     m.ParseFromString(data)
     i += 1
-    Pos[1] = 13 + i
+    # Pos[1] = 13 + i
+    Pos[1] = m.feedBack.cartesian.pos.y + 1
 
     CurW = m.feedBack.cartesian.orient.u0
     CurX = m.feedBack.cartesian.orient.u1
@@ -77,7 +78,7 @@ for i in range(500):
     egmSensor=egm.EgmSensor()
     egmSensor=CreateSensorMessage(egmSensor,Pos,Quat)
     msg=egmSensor.SerializeToString()
-    print(egmSensor)
+    # print(egmSensor)
     # print(msg)
     robot_socket.sendto(msg, (robot_ip, robot_port))  
     time.sleep(0.004)

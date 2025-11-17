@@ -18,7 +18,7 @@
     PROC main()
         CONST robtarget cup_target := [[499.548,-110.253,-46.3938],[0.0565402,0.114235,0.990146,-0.0580089],[-2,-3,-1,4],[-177.807,9E+09,9E+09,9E+09,9E+09,9E+09]];
         VAR robtarget cur_target;
-        ConfJ\on;
+        ConfJ\off;
         cur_target := CRobT(\Tool:=tGripper);
         
 !        MoveJ Offs(cur_target,0,20,0),v1000,fine,tGripper;
