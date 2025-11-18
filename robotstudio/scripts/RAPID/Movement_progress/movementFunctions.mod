@@ -31,11 +31,11 @@ MODULE movementFunctions
         WHILE VectMagn(desired_target.trans-current_target.trans) > max_magnitude DO
             disc_target := discretizeTarget(current_target,desired_target,step_size);
             desired_joint_value := CalcJointT(disc_target,tGripper);
-            MoveY \J,disc_target,movement_speed,z50,tGripper;
+            Movej disc_target,movement_speed,z50,tGripper;
             current_target := CRobT(\Tool:=tGripper);
         ENDWHILE
 
-        MoveY \J,desired_target,movement_speed,fine,tGripper;
+        Movej desired_target,movement_speed,fine,tGripper;
 !        ProcerrRecovery \SyncOrgMoveInst;
         
         ERROR
@@ -48,7 +48,7 @@ MODULE movementFunctions
             ENDIF
             IF VectMagn(desired_target.trans-current_target.trans) > max_magnitude THEN
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
-                MoveY \J,disc_target,movement_speed,z50,tGripper;
+                Movej disc_target,movement_speed,z50,tGripper;
                 current_target := CRobT(\Tool:=tGripper);
 
                 IF disc_target = home_target THEN
@@ -189,7 +189,7 @@ MODULE movementFunctions
     !Move to pre-defined home target.
     PROC moveToHomeTarget()
         ConfJ\On;
-        MoveY \J,home_target,v300,fine,tGripper;
+        Movej home_target,v300,fine,tGripper;
         ConfJ\Off;
     ENDPROC
 ENDMODULE
