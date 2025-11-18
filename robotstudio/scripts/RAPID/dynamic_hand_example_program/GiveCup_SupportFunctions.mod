@@ -63,16 +63,15 @@ MODULE GiveCup_SupportFunctions
        
        
        ! to make equations more consistant with documentation
-       PosToNumArr e{1},x;
-       PosToNumArr e{2},y;
-       PosToNumArr e{3},z;
+!       PosToNumArr e{1},x;
+!       PosToNumArr e{2},y;
+!       PosToNumArr e{3},z;
+        
+        ! To make the frame "right" compared to the wated outcome
+       PosToNumArr e{1},y;
+       PosToNumArr e{2},z;
+       PosToNumArr e{3},x;
 
-
-    ! ===== uggly and hard coded version of what is above
-    buffer := x;
-    x := [-y{1},-y{2},-y{3}];
-    y:= buffer;
-    
     
     !%Chiaverini-Siciliano method
     q := ChiaveriniSiciliano(x,y,z);!now we have a queternium from a normal vector!
@@ -140,9 +139,6 @@ MODULE GiveCup_SupportFunctions
       e{1} := e1;
       e{2} := e2;
       e{3} := e3;
-!      e{1} := e1;
-!      e{2} := e3;
-!      e{3} := e2;
       
    ENDPROC 
    
