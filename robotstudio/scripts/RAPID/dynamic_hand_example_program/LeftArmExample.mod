@@ -8,7 +8,7 @@ MODULE LeftArmExample
 
     CONST robtarget home_target:=[[339.81,263.01,178.28],[0.465383,0.56304,0.301843,0.612614],[0,0,-1,4],[121.274,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget fetch_cup_target:=[[355.37,13.65,50.38],[0.0303038,0.909324,-0.409024,0.0700746],[-1,2,-2,4],[132.67,9E+09,9E+09,9E+09,9E+09,9E+09]];
-    
+    CONST pos sholder_pos := [110,100,460];
    ! PERS tooldata tGripper := [TRUE, [[0, 0, 0], [1, 0, 0, 0]], [0.001, [0, 0, 0.001],[1, 0, 0, 0], 0, 0, 0]];
     
     PROC main()
@@ -19,7 +19,7 @@ MODULE LeftArmExample
         VAR num val;
         
         mug := fetch_cup_target;
-        mug_normal := [0,0,1];
+        mug_normal := [1,0,1];
         
 !        ! for + or - does not mater!
 !        ! ======================================
@@ -28,7 +28,7 @@ MODULE LeftArmExample
 !            mug_normal.z := Abs(mug_normal.z);
 !        ! ======================================
         
-        mug_offset := 50;
+        mug_offset := 100;
         
         TPErase;
         moveJ home_target,movespeed,z50,tGripper;
@@ -38,7 +38,7 @@ MODULE LeftArmExample
         TPErase;
 !        moveJ home_target,movespeed,z50,tGripper;
         
-        FetchMug home_target.trans,mug_offset,mug_normal; !
+        FetchMug fetch_cup_target.trans,mug_offset,mug_normal; !
 !        WaitTime(1);m
         
         

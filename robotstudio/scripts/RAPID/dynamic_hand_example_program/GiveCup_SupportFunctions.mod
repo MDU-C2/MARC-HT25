@@ -153,16 +153,18 @@ MODULE GiveCup_SupportFunctions
        VAR pos v;
        VAR num scaler;
        scaler := .8;
+       
+       position := position - sholder_pos; ! this to gain the vector from the sholder and not the base.
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
             ! generate "easy" vector to span plane
         !NOTE: we want to grip y and z from negativ to positive  
            IF Abs(normal.z) <= Abs(normal.y) AND Abs(normal.z) <= Abs(normal.x) THEN ! z is smallest numeric 
-             v := [0,0,sign(normal.z)*scaler];
+             v := [0,0,sign(u.z)*scaler];
           ELSEIF Abs(normal.y) <= Abs(normal.x) AND Abs(normal.y) <= Abs(normal.z) THEN ! y is smallest numeric 
-             v := [0,sign(normal.y)*scaler,0];
+             v := [0,sign(u.y)*scaler,0];
           ELSE !x is smallest numeric 
-            v := [sign(normal.x)*scaler,0,0];
+            v := [sign(u.x)*scaler,0,0];
           ENDIF
        
        v := v + u;
