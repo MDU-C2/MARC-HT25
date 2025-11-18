@@ -6,8 +6,8 @@ MODULE GiveCup
         VAR orient hand_rotation;
         VAR pos offset;
         !go to postion
-        
-        hand_rotation := NormalToOrientation(mug_normal);
+        hand_rotation := NormalToOrientationSemiOptimal(mug_position,mug_normal);
+!        hand_rotation := NormalToOrientation(mug_normal);
         
         offset := RotatePointUsingQuaternion([0,0,1],hand_rotation)*offset_lenght;
         offset.x := Round(offset.x \Dec:=4);
@@ -20,6 +20,9 @@ MODULE GiveCup
         target.rot := hand_rotation;
         target.trans := mug_position - offset;
         moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
+        ! grippers out
+        
         WaitTime(1);
                 
         !ask for confermation
@@ -28,15 +31,20 @@ MODULE GiveCup
         !pick up mug
         target.trans := mug_position;
         moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
+        ! grippers in
         WaitTime(1);
         
         target.trans := mug_position - offset;
         moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         
     ENDPROC
     
     ! hand over mug to other hand
     PROC HandOverMug()
+        
+        
         
     ENDPROC
     

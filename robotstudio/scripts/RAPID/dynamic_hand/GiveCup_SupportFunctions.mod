@@ -29,19 +29,6 @@ MODULE GiveCup_SupportFunctions
        PosToNumArr e{1},x;
        PosToNumArr e{2},y;
        PosToNumArr e{3},z;
-  
-       
-    ! ===== Not working correctly version 
-        !NOTE: Here we declare that the Yaxes will align with the orientation
-        ! rotate pi/2 around z axes to get y to align with normal
-!!        R := [[0,-1,0],[1,0,0],[0,0,1]];
-!        R := [[1,0,0],[0,1,0],[0,0,1]];
-!        MatrixMult3x3 Matrix,[x,y,z],R;
-        
-!   ! to make equations more consistant with documentation
-!    x := [Matrix{1,1},Matrix{1,2},Matrix{1,3}];
-!    y := [Matrix{2,1},Matrix{2,2},Matrix{2,3}];
-!    z := [Matrix{3,1},Matrix{3,2},Matrix{3,3}];
 
     ! ===== uggly and hard coded version of what is above
     buffer := x;
@@ -54,7 +41,43 @@ MODULE GiveCup_SupportFunctions
  
       RETURN q;
    ENDFUNC
-   
+   FUNC orient NormalToOrientationSemiOptimal(pos mug_position,pos normal)
+       
+       VAR pos e{3}; ! base frame vectors
+       ! to make it consistant with documentation
+       VAR num x{3};
+       VAR num y{3};
+       VAR num z{3};
+       VAR num buffer{3};
+       VAR num Matrix{3,3};
+       VAR num R{3,3};
+       VAR orient q;
+       
+       Normilize normal;
+       
+       ! span the R3 Space
+       SpanPlaneFromNormalSemiOptimal mug_position,normal,e;
+      
+       ! make the Span ortogonal to get proporties of Rotation matrix
+       OrtogonalMatrix3x3 e;
+       
+       
+       ! to make equations more consistant with documentation
+       PosToNumArr e{1},x;
+       PosToNumArr e{2},y;
+       PosToNumArr e{3},z;
+
+    ! ===== uggly and hard coded version of what is above
+    buffer := x;
+    x := [-y{1},-y{2},-y{3}];
+    y:= buffer;
+    
+    
+    !%Chiaverini-Siciliano method
+    q := ChiaveriniSiciliano(x,y,z);!now we have a queternium from a normal vector!
+ 
+      RETURN q;
+   ENDFUNC
    PROC PosToNumArr(pos p, INOUT num e{*})
        e{1} := p.x;
        e{2} := p.y;
@@ -81,6 +104,7 @@ MODULE GiveCup_SupportFunctions
        e1 := normal;
        Normilize e1;
        
+<<<<<<< Updated upstream
     ! generate "easy" vector to span plane
     !NOTE: we want to grip y and z from negativ to positive  
        IF Abs(e1.x) <= Abs(e1.y) AND Abs(e1.x) <= Abs(e1.z) THEN ! x is smallest numeric 
@@ -90,7 +114,20 @@ MODULE GiveCup_SupportFunctions
       ELSE !z is smallest numeric 
         e2 := [0,0,-1]; 
       ENDIF
-    
+
+
+=======
+!    ! generate "easy" vector to span plane
+!    !NOTE: we want to grip y and z from negativ to positive  
+!       IF Abs(e1.x) <= Abs(e1.y) AND Abs(e1.x) <= Abs(e1.z) THEN ! x is smallest numeric 
+!        e2 := [1,0,0]; 
+!      ELSEIF Abs(e1.y) <= Abs(e1.x) AND Abs(e1.y) <= Abs(e1.z) THEN ! y is smallest numeric 
+!        e2 := [0,-1,0];  
+!      ELSE !z is smallest numeric 
+!        e2 := [0,0,-1]; 
+!      ENDIF
+    e2 := SemiOptimalOrtogonalVector(normal,fetch_cup_target.trans);
+>>>>>>> Stashed changes
       e3 := CrossProd(e1,e2);
       
       e{1} := e1;
@@ -98,6 +135,85 @@ MODULE GiveCup_SupportFunctions
       e{3} := e3;
       
    ENDPROC 
+     
+   PROC SpanPlaneFromNormalSemiOptimal(pos mug_position, pos normal, INOUT pos e{*})
+       VAR pos e1;
+       VAR pos e2;
+       VAR pos e3;
+       
+       !normilze normal and add it to e1
+       e1 := normal;
+       Normilize e1;
+
+       e2 := SemiOptimalPickUpOrientation(mug_position,normal);
+
+       e3 := CrossProd(e1,e2);
+      
+      e{1} := e1;
+      e{2} := e2;
+      e{3} := e3;
+      
+   ENDPROC 
+   
+   FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
+       
+       ! We want to make the magnitude of cross product of n and v1 to be as big as possible,
+       ! This to make the area between them as big as possible, aka include more information and less distortion
+       
+       ! We also want to make sure that if the mug is laying down (n = [?,?,0]) the vector should be close to [small,small,sgn(mug.pos.z - robtarget.pos.z)] 
+       
+       VAR pos u;
+       VAR pos v;
+       VAR num scaler;
+       scaler := .8;
+       u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
+       
+            ! generate "easy" vector to span plane
+        !NOTE: we want to grip y and z from negativ to positive  
+           IF Abs(normal.z) <= Abs(normal.y) AND Abs(normal.z) <= Abs(normal.x) THEN ! z is smallest numeric 
+             v := [0,0,sign(normal.z)*scaler];
+          ELSEIF Abs(normal.y) <= Abs(normal.x) AND Abs(normal.y) <= Abs(normal.z) THEN ! y is smallest numeric 
+             v := [0,sign(normal.y)*scaler,0];
+          ELSE !x is smallest numeric 
+            v := [sign(normal.x)*scaler,0,0];
+          ENDIF
+       
+       v := v + u;
+       
+       v := v/sqrt(DotProd(v,v));
+       
+       v := v - Project(v,normal);
+       
+       RETURN v;
+       
+   ENDFUNC
+   
+   FUNC pos SemiOptimalOrtogonalVector(pos normal,pos mug_pos)
+       
+       VAR pos v;
+       ! mug_pos is position from robot to mug
+       mug_pos := mug_pos/sqrt(DotProd(mug_pos,mug_pos));
+       
+       v :=  mug_pos - Project(mug_pos,normal);
+       
+       ! if the normal and robotvector are to similer
+       IF sqrt(DotProd(v,v)) < .5 THEN
+            ! generate "easy" vector to span plane
+            !NOTE: we want to grip y and z from negativ to positive  
+               IF Abs(normal.x) <= Abs(normal.y) AND Abs(normal.x) <= Abs(normal.z) THEN ! x is smallest numeric 
+               v := [1,0,0]; 
+              ELSEIF Abs(normal.y) <= Abs(normal.x) AND Abs(normal.y) <= Abs(normal.z) THEN ! y is smallest numeric 
+                v := [0,-1,0];  
+              ELSE !z is smallest numeric 
+                v := [0,0,-1]; 
+              ENDIF
+       ELSE
+           v := v/sqrt(DotProd(v,v));
+       ENDIF
+       
+       RETURN v;
+       
+   ENDFUNC
    
    PROC Normilize(INOUT pos v)
        VAR num size;
