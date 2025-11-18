@@ -21,13 +21,13 @@ To run the codes provided in this repository multiple Python libraries needs to 
 
 You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
 
-In the installer check the box to add python to the PATH
+In the installer check the box to add Python to the PATH
 
 
-Next step is to set up a virtual python environment
+Next step is to set up a virtual Python environment
 
 ```bash
-# Create a virtual environment with python 3.11 (Python 3.11 is needed for some libraries used)
+# Create a virtual environment with Python 3.11 (Python 3.11 is needed for some libraries used)
 > py -3.11 -m venv .venv
 
 # Activate the virtual environment (make sure you are in the correct folder when doing this)

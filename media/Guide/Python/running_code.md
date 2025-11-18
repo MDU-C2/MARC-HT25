@@ -23,17 +23,17 @@ Now run the code
 > py calibration_single_file.py
 # Now a program should start
 ```
-It is important to note that the quality of the calibration relies on how many positions are captured and that the calibration is done thoroughly and precise. It is also very important to have the gripper in the same position as you want it to grab the mug, since the calibration will capture the coordinates with the grippers relation to the mug. For example: If you want the robot to grab the mug from the right hand side, you would calibrate with positions where the gripper is grasping from the right hand side.
+It is important to note that the quality of the calibration relies on how many positions are captured and that the calibration is done thoroughly and precise. It is also very important to have the gripper in the same position as you want it to grab the mug, since the calibration will capture the coordinates with the grippers relation to the mug. **For example:** If you want the robot to grab the mug from the right hand side, you would calibrate with positions where the gripper is grasping from the right hand side.
 
 * Move the gripper into a desired grabbing position of a mug using **Leadthrough** on the flexpendant. It is important that the Gripper is in the exact same position relative to the mug troughtout the entire calibration process. 
-* When you see a stable detection in the program press **Space** in the running python program. This needs to be done atleast 3 times otherwise it will not work, but more position equals better calibration. For our tests we use 10-15 calibration positions. 
+* When you see a stable detection in the program press **Space** in the running Python program. This needs to be done atleast 3 times otherwise it will not work, but more position equals better calibration. For our tests we use 10-15 calibration positions. 
 * When all desired positions have been captured, press **Q** on your keyboard which will close the program and save the positions to .txt files.
 * Now 2 files should have been created **robo_coords.txt** and **saved_coords.txt**. These files contain positions of the mug captured in the camera frame and where the grippers location in the robots frame.
 * These coordinates are used in the main file to calculate the translation between the camera and the robot, so that coordinates of objects in the camera frame can be translated to the robot frame.
 ## Running the main code
-To run the main python script the server needs to be started from RAPID first. When the server is up and running do:
+To run the main Python script the server needs to be started from RAPID first. When the server is up and running do:
 ```bash
 # Run the main code 
 > py main.py
 ```
-This code will run the object detection and send the coordinates of the mugs to the robot. The robot will then go to the mug, attempt to pick it up and place it in a set location, then send a confirmation to the python script that the task is done. Python will then send the next cup location (if there are any) and this will continue until the program is closed.
+This code will run the object detection and send the coordinates of the mugs to the robot. The robot will then go to the mug, attempt to pick it up and place it in a set location, then send a confirmation to the Python script that the task is done. Python will then send the next cup location (if there are any) and this will continue until the program is closed.
