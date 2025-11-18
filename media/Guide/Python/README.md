@@ -24,7 +24,7 @@ You need to install [Python 3.11](https://www.python.org/downloads/release/pytho
 In the installer check the box to add python to the PATH
 
 
-Next up is to set up a virtual python environment
+Next step is to set up a virtual python environment
 
 ```bash
 # Create a virtual environment with python 3.11 (Python 3.11 is needed for some libraries used)
@@ -33,7 +33,7 @@ Next up is to set up a virtual python environment
 # Activate the virtual environment (make sure you are in the correct folder when doing this)
 > .venv\Scripts\activate
 ```
-Now it's time to install the correct libraries, this is done by running our **requirements.txt** file
+Now it's time to install the correct libraries, this is done by running the **requirements.txt** file included in the Git repository
 
 ```bash
 #Run the requirements.txt file

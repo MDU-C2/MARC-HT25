@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/MDU-C2/MARC-HT25/developer/media/images/camera_to_rob_frame.png" width="600" alt="walkthrough banner">
   <br>
   <br>
-  This walkthrough tells how to run the vision system on for this project.
+  This walkthrough showcases how to run the vision system for this project.
   <br>
 </h1>
 <!--
@@ -23,15 +23,15 @@ Now run the code
 > py calibration_single_file.py
 # Now a program should start
 ```
-It is important to note that the quality of the calibration relies on how many positions are captured and that the calibration is done thoroughly and precise. It is also very important to have the gripper in a position as in you want it to grap the mug, since the calibration will capture the coordinates with the grippers relation to the mug.
+It is important to note that the quality of the calibration relies on how many positions are captured and that the calibration is done thoroughly and precise. It is also very important to have the gripper in the same position as you want it to grab the mug, since the calibration will capture the coordinates with the grippers relation to the mug. For example: If you want the robot to grab the mug from the right hand side, you would calibrate with positions where the gripper is grasping from the right hand side.
 
 * Move the gripper into a desired grabbing position of a mug using **Leadthrough** on the flexpendant. It is important that the Gripper is in the exact same position relative to the mug troughtout the entire calibration process. 
-* When you see a stable detection in the program press **Space** in the running python program. This needs to be one atleast 3 times otherwise it will not work, but more position equals better calibration. For our tests we use 10-15 calibration positions. 
+* When you see a stable detection in the program press **Space** in the running python program. This needs to be done atleast 3 times otherwise it will not work, but more position equals better calibration. For our tests we use 10-15 calibration positions. 
 * When all desired positions have been captured, press **Q** on your keyboard which will close the program and save the positions to .txt files.
 * Now 2 files should have been created **robo_coords.txt** and **saved_coords.txt**. These files contain positions of the mug captured in the camera frame and where the grippers location in the robots frame.
 * These coordinates are used in the main file to calculate the translation between the camera and the robot, so that coordinates of objects in the camera frame can be translated to the robot frame.
 ## Running the main code
-To run the main python script, first the server needs to be started from RAPID.
+To run the main python script the server needs to be started from RAPID first. When the server is up and running do:
 ```bash
 # Run the main code 
 > py main.py
