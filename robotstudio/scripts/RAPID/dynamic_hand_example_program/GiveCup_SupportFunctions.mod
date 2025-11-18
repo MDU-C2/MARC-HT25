@@ -67,6 +67,7 @@ MODULE GiveCup_SupportFunctions
        PosToNumArr e{2},y;
        PosToNumArr e{3},z;
 
+
     ! ===== uggly and hard coded version of what is above
     buffer := x;
     x := [-y{1},-y{2},-y{3}];
@@ -132,13 +133,16 @@ MODULE GiveCup_SupportFunctions
        e1 := normal;
        Normilize e1;
 
-       e2 := SemiOptimalPickUpOrientation(mug_position,normal);
+       e2 := SemiOptimalPickUpOrientation(mug_position,e1);
 
        e3 := CrossProd(e1,e2);
       
       e{1} := e1;
       e{2} := e2;
       e{3} := e3;
+!      e{1} := e1;
+!      e{2} := e3;
+!      e{3} := e2;
       
    ENDPROC 
    
