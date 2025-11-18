@@ -41,7 +41,7 @@ class RobotCommunication:
         self.total_cups_sent = 0
         
         # Default release position
-        self.release_position = [421, -186, 200]  # [x, y, z] in mm
+        self.release_position = [421, -186, -55]  # [x, y, z] in mm
         
         # Message handlers (dynamic dispatch)
         self.message_handlers = {

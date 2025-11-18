@@ -33,6 +33,8 @@ class CupDetector:
             'right_side': [0.0, 1.0, 0.0],
             'upright': [0.0, 0.0, 1.0],
             'upside_down': [0.0, 0.0, -1.0],
+            'handle': [0.0, 0.0, -1.0],
+            'gripper': [0.0, 0.0, -1.0],
         }
 
         if use_yolo:
