@@ -19,16 +19,6 @@ To run the codes provided in this repository multiple Python libraries needs to 
 
 ## Installation
 
-Start by cloning this repository to your computer by using the following commands
-
-```bash
-# Clone this repository
-$ git clone https://github.com/MDU-C2/MARC-HT25.git
-
-# Go into the repository
-$ cd MARC-HT25
-```
-
 You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
 
 In the installer check the box to add python to the PATH

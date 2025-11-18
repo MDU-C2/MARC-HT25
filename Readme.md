@@ -59,7 +59,7 @@ Clone this repo , you'll need [Git](https://git-scm.com) installed on your compu
 $ git clone https://github.com/MDU-C2/MARC-HT25.git
 
 # Go into the repository
-$ cd electron-markdownify
+$ cd MARC-HT25
 ```
 > [!Note]
 > Everything in this guide was tested on windows
