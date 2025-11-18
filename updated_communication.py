@@ -18,12 +18,123 @@ class Communication():
         self.port = 1025
         self.host = '192.168.125.1'
         self.connected = False
+    
+        ## What python can recive SEE BELOW
+        self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
+                "Ack_succesfull", "ACK","Ack_Coordinate", ] # these should be removed except ACK, not in the switch but handled inside a case
+        self.CLOSE = ["Disconnect", ]
+        self.ASKROBOTCOORDINATES = ["Ask_RobotCoordinate", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
+        self.ASKROBOTORIENTATION = ["Ask_RobotOrientation", ] # RAPID gives the robots coordinates
 
+        self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
+        self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
+        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", ] # RAPID is ready for the next command
+        self.ASKCALPOINT = ["AskCalPoint", ] 
+
+        ## TODO List of what python can send
+
+        '''
+        "Connection_test"
+        "Cups_available"
+        "Coordinates" dont add this one
+        "Pos" 
+        "Move"
+        "Grip"
+        "Release"
+        "Home"
+        "testmove" dont add this one
+        "LeaveCup"
+
+
+        TO BE ADDED LATER:
+
+        "Get_Coordinates"
+        "Move_Calibration_Position"
+        "Pick_Up_Mug"
+        "Leave_Mug"
+
+        "Ack_AskRobotCoordinate" # these are for getting the robots coordinates
+        "ACK" 
+        '''
+
+
+
+
+
+        
+        self.MugCoordinates = [200,-200,100] # x,y,z coordinates of the mug
+        self.MugOrientation = [1,0,0,0] # quaternion, mug orientation
+        self.CalPoint = 1 # calibration point number, corresponds to a point in RAPID
+        self.RobTarget = [[200,-200,100],[1,0,0,0],[-1,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]] # RAPID format
+        self.Robotcoordinates = [100,100,100] # Robot hand coordinates
+        self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
+
+        #self.RobTarget = []
+        #self.Pos = []
+        #self.Orient = []
+
+        #self.RobTarget.append([[200,-200,100],[1,0,0,0],[-1,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]])
+        #self.Pos.append([200,-200,100])
+        #self.Orient.append([1,0,0,0])
+
+    
+
+
+
+
+
+
+    def _handle_response(self):
+        """Handle response from RAPID"""
+        
+        while True: # It will loop until the response is "AskNext" or RAPID wants to close the connection.
+
+            response = self._receive_message()
+
+
+            match response:
+                case next if next in self.ASKNEXT:
+                    return None
+                
+                case ack if ack in self.ACKS:
+                    continue
+
+                case close if close in self.CLOSE:
+                    self.disconnect() # Disconnect, don't send anything to RAPID
+                    return None
+                
+                case ask_robot_coordinates if ask_robot_coordinates in self.ASKROBOTCOORDINATES: # RAPID wants to send robot coordinates
+                    self._send_message("Ack_AskRobotCoordinate") # Tell RAPID to send coordinates
+                    self.Robotcoordinates =  self._receive_message() # Receive coordinates
+                    self._send_message("ACK") # Acknowledge so it can send AskNext or other commands
+
+                case ask_robot_orientation if ask_robot_orientation in self.ASKROBOTORIENTATION: # RAPID wants to send robot orientation
+                    self._send_message("Ack_AskRobotOrientation")
+                    self.Robotorientation = self._receive_message()
+                    self._send_message("ACK")
+
+                case askmug_coordinates if askmug_coordinates in self.ASKMUGCOORDINATES: # RAPID wants mug coordinates
+                    self._send_message(str(self.MugCoordinates)) # Send mug coordinates
+
+                case askmug_orientation if askmug_orientation in self.ASKMUGORIENTATION: # RAPID wants mug orientation
+                    self._send_message(str(self.MugOrientation)) # Send mug orientation
+
+                case askcal_point if askcal_point in self.ASKCALPOINT: # RAPID wants calibration point number
+                    self._send_message(str(self.CalPoint)) # Send calibration point number
+                    self._handle_response()
+
+                case _: # Error and unexpected response handling
+                    #self.ErrorHandling()
+                    print(f"[ERROR] Unexpected response: {response}")
+                    self.disconnect()
+                    exit(1)
+
+    def connect(self):
 
         """Connect to RAPID server"""
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #socket.settimeout(120)  # Increased to 120 seconds for robot movement
+            #socket.settimeout(120)  # Increased to 120 seconds for robot movement, Dont use time out
             self.socket.connect((self.host, self.port))
             self.connected = True
             print(f"[INFO] Connected to RAPID server at {self.host}:{self.port}")
@@ -32,7 +143,6 @@ class Communication():
             print(f"[ERROR] Connection failed: {e}")
 
 
-        
 
     def disconnect(self):
         if not self.socket:
@@ -80,97 +190,101 @@ class Communication():
             print(f"[ERROR] Receive error: {e}")
             self.connected = False
             return None
-        
+      
     
     def GetPosition(self):
         #"""Get current position from RAPID"""
-        self._send_message("get coordinates")
-        response = self._receive_message()
+        self._send_message("Get_Coordinates")
+        self._handle_response() # stores respone in self.Robotcoordinates
+        self.Robotcoordinates = ast.literal_eval(self.Robotcoordinates) # Convert string to variable
 
-        return response
+        return self.Robotcoordinates # RobotCoordinates can be both string and a variable depending on when you check it.
     
     def Move(self, coordinates, orientation):
 
-        #"""Move robot to specified coordinates and orientation"""
-        self._send_message("move")
-        self._receive_message()  # Wait for "ACK" so we dont read both messages at once, not sure if this is correct
-        self._send_message(coordinates)
-        self._receive_message()
-        self._send_message(orientation)
-        self._receive_message()  # Wait for Movement to complete
+        """Move robot to specified coordinates and orientation"""
+        self.MugCoordinates = coordinates
+        self.MugOrientation = orientation
+        self._send_message("Move")
+        self._handle_response()  # Wait for "AskNext"
+
 
         return
 
     def PickUpSequence(self, coordinates, orientation):
-        self._send_message("pick up mug")
-        self._receive_message()  # Wait for "ACK"
-        self._send_message(coordinates)
-        self._receive_message()
-        self._send_message(orientation)
-        self._receive_message()  # Wait for pick-up to complete
+        self._send_message("Pick_Up_Mug")
+        self.MugCoordinates = coordinates
+        self.MugOrientation = orientation
+        self._handle_response()
 
         #"""Perform pick-up sequence"""
-        return
+        return None
 
     def LeaveSequence(self, coordinates, orientation):
-        self._send_message("leave mug")
-        self._receive_message()  # Wait for "ACK"
-        self._send_message(coordinates)
-        self._receive_message()
-        self._send_message(orientation)
-        self._receive_message()  # Wait for leave to complete
+        self._send_message("Leave_Mug")
+        self.MugCoordinates = coordinates
+        self.MugOrientation = orientation
+        self._handle_response()
 
         #"""Perform leave sequence"""
-        return
+        return None
+    
+    def OpenGripper(self):
+        self._send_message("Release")
+        self._handle_response()
+        return None
+    
+    def CloseGripper(self):
+        self._send_message("Grip")
+        self._handle_response()
+        return None
     
     def MoveCalibrationPosition(self, position):
-        self._send_message("move calibration position")
-        self._receive_message()  # Wait for "ACK"
-        self._send_message(position)
-        self._receive_message()  # Wait for movement to complete
-        return
+        self._send_message("Move_Calibration_Position")
+        self.CalPoint = position
+        self._handle_response()
+        return None
     
-class RobotInterface():
-
-    def __init__(self):
-        self.comms = Communication()
-        self.CalibrationRobtarget = [] # these values should be copied from robotstudio
-
-
-    def GetPosition(self):
-        return self.comms.GetPosition()
-    def Move(self, coordinates, orientation):
-        return self.comms.Move(coordinates, orientation)
-    def PickUpSequence(self, coordinates, orientation):
-        return self.comms.PickUpSequence(coordinates, orientation)
-    def LeaveSequence(self, coordinates, orientation):
-        return self.comms.LeaveSequence(coordinates, orientation)
-    def MoveCalibrationPosition(self, position):
-        return self.comms.MoveRobtarget(position)
-    def Disconnect(self):
-        return self.comms.disconnect()
+    def MoveHome(self):
+        self._send_message("Home")
+        self._handle_response()
+        return None
     
+
+
+
+
+
 
     
     def MugProcess(self, PickUpcoordinates, PickUpOrientation, LeaveCoordinates, LeaveOrientation):
         # Current mug coordinate and orientation, leave coordinates and orientation, Camera detection
         # This function only handles one mug/cup at a time. Call it multiple times for multiple mugs/cups.
 
-        self.comms.PickUpSequence(PickUpcoordinates, PickUpOrientation)
-        self.comms.LeaveSequence(LeaveCoordinates, LeaveOrientation)
+        # update this if it needs to run in a loop
+
+        self.PickUpSequence(PickUpcoordinates, PickUpOrientation)
+        self.LeaveSequence(LeaveCoordinates, LeaveOrientation)
 
 
-    def Calibration(self, position):
+    def Calibration(self,MAX):
         # Move to a calibration point and get the coordinates from it.
+        position = 1
+        CalibrationMatrix = None
+        while position in range(1,MAX): 
+            self.MoveCalibrationPosition(position) # Move to calibration position
+            self.Robotcoordinates = self.GetPosition() # Get current robot coordinates
 
-        self.MoveCalibrationPosition(position) # Move to calibration position
-        coordinates = self.GetPosition() # Get current robot coordinates
+            Robotcoordinates = self.GetPosition() # In string format
 
-        Robotcoordinates = self.comms.GetPosition() # In string format
+            CameraCoordinates = self.GetCameraData() 
 
-        Robotcoordinates = ast.literal_eval(Robotcoordinates) # Convert string to list
+            # add the pair of coordinates to a list and at the end of the function do the matrix calculation
 
-        return Robotcoordinates
+            Robotcoordinates = ast.literal_eval(Robotcoordinates) # Convert string to list
+
+
+        return CalibrationMatrix
 
 
 
