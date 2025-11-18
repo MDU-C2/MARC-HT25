@@ -104,6 +104,7 @@ MODULE GiveCup_SupportFunctions
        e1 := normal;
        Normilize e1;
        
+<<<<<<< Updated upstream
     ! generate "easy" vector to span plane
     !NOTE: we want to grip y and z from negativ to positive  
        IF Abs(e1.x) <= Abs(e1.y) AND Abs(e1.x) <= Abs(e1.z) THEN ! x is smallest numeric 
@@ -115,6 +116,18 @@ MODULE GiveCup_SupportFunctions
       ENDIF
 
 
+=======
+!    ! generate "easy" vector to span plane
+!    !NOTE: we want to grip y and z from negativ to positive  
+!       IF Abs(e1.x) <= Abs(e1.y) AND Abs(e1.x) <= Abs(e1.z) THEN ! x is smallest numeric 
+!        e2 := [1,0,0]; 
+!      ELSEIF Abs(e1.y) <= Abs(e1.x) AND Abs(e1.y) <= Abs(e1.z) THEN ! y is smallest numeric 
+!        e2 := [0,-1,0];  
+!      ELSE !z is smallest numeric 
+!        e2 := [0,0,-1]; 
+!      ENDIF
+    e2 := SemiOptimalOrtogonalVector(normal,fetch_cup_target.trans);
+>>>>>>> Stashed changes
       e3 := CrossProd(e1,e2);
       
       e{1} := e1;
@@ -170,6 +183,33 @@ MODULE GiveCup_SupportFunctions
        v := v/sqrt(DotProd(v,v));
        
        v := v - Project(v,normal);
+       
+       RETURN v;
+       
+   ENDFUNC
+   
+   FUNC pos SemiOptimalOrtogonalVector(pos normal,pos mug_pos)
+       
+       VAR pos v;
+       ! mug_pos is position from robot to mug
+       mug_pos := mug_pos/sqrt(DotProd(mug_pos,mug_pos));
+       
+       v :=  mug_pos - Project(mug_pos,normal);
+       
+       ! if the normal and robotvector are to similer
+       IF sqrt(DotProd(v,v)) < .5 THEN
+            ! generate "easy" vector to span plane
+            !NOTE: we want to grip y and z from negativ to positive  
+               IF Abs(normal.x) <= Abs(normal.y) AND Abs(normal.x) <= Abs(normal.z) THEN ! x is smallest numeric 
+               v := [1,0,0]; 
+              ELSEIF Abs(normal.y) <= Abs(normal.x) AND Abs(normal.y) <= Abs(normal.z) THEN ! y is smallest numeric 
+                v := [0,-1,0];  
+              ELSE !z is smallest numeric 
+                v := [0,0,-1]; 
+              ENDIF
+       ELSE
+           v := v/sqrt(DotProd(v,v));
+       ENDIF
        
        RETURN v;
        
