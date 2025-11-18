@@ -1,94 +1,17 @@
 {
     "robot_origin": {
         "name": "Robot Base (Green Marker)",
-        "screen": [1500, 300,1000],
-        "robot": [0, 0, 0],
+        "robot": [
+            0,
+            0,
+            0
+        ],
+        "screen": [
+            973.0,
+            177.0,
+            1055.0
+        ],
         "description": "Robot coordinate system origin - UPDATED CAMERA POSITION"
     },
-    "cups": [
-        {
-            "name": "Cup 1 (Center)",
-            "zone": "CENTER",
-            "screen": [750, 386, 760],
-            "robot": [570, 22, -53],
-            "description": "55cm away from robot"
-        },
-        {
-            "name": "Cup 2 (Left)",
-            "zone": "LEFT",
-            "screen": [493, 219, 640],
-            "robot": [544, 238, -50],
-            "description": "22cm left of center"
-        },
-        {
-            "name": "Cup 3 (Right-Back)",
-            "zone": "RIGHT_BACK",
-            "screen": [812, 181, 1350],
-            "robot": [421, -186, -53],
-            "description": "13cm back, 21cm right"
-        },
-        {
-            "name": "Cup 4 (Mid-Back)",
-            "zone": "MID_BACK",
-            "screen": [1033, 315, 801],
-            "robot": [407, 42, -55],
-            "description": "15cm back of center"
-        },
-        {
-            "name": "Cup 5 (Left-Back)",
-            "zone": "LEFT_BACK",
-            "screen": [1320, 497, 767],
-            "robot": [400, 262, -55],
-            "description": "15cm back, 21cm left"
-        },
-        {
-            "name": "Cup 6 (Far Right-Back)",
-            "zone": "FAR_RIGHT_BACK",
-            "screen": [1025, 128, 1200],
-            "robot": [278, -173, -55],
-            "description": "16cm back, 21cm right"
-        },
-        {
-            "name": "Cup 7 (Far Back)",
-            "zone": "FAR_BACK",
-            "screen": [1266, 244, 1100],
-            "robot": [253, 53, -55],
-            "description": "32cm back of center"
-        },
-        {
-            "name": "Cup 8 (Far Left-Back)",
-            "zone": "FAR_LEFT_BACK",
-            "screen": [1493, 350, 920],
-            "robot": [263, 218, -55],
-            "description": "32cm back, 22cm left"
-        },
-        {
-            "name": "Cup 9 (Right-Back Middle)",
-            "zone": "RIGHT_BACK",
-            "screen": [1038, 214, 1120],
-            "robot": [316, -90, -55],
-            "description": "Between cups 4,3,6,7 - fills right-back gap"
-        },
-        {
-            "name": "Cup 10 (Back-Center)",
-            "zone": "MID_BACK",
-            "screen": [1298, 347, 900],
-            "robot": [313, 131, -55],
-            "description": "Between cups 5,4,7,8 - fills back-center gap"
-        },
-        {
-            "name": "Cup 11 (Center-Left)",
-            "zone": "CENTER",
-            "screen": [1015, 434, 720],
-            "robot": [484, 103, -55],
-            "description": "Between cups 2,1,5,4 - fills center-left gap"
-        },
-        {
-            "name": "Cup 12 (Center-Right)",
-            "zone": "CENTER",
-            "screen": [817, 272, 844],
-            "robot": [467, -100, -55],
-            "description": "Between cups 1,4,3 - fills center-right gap"
-        }
-    ]
+    "cups": []
 }
