@@ -57,8 +57,8 @@ def extract_data(file):
     #==================================== CAMERA & COMMUNICATION SETUP ====================================
 def camera_setup():
 
-    cam_coords = 'C:\Users\david\MARC-HT25\saved_coordinates.txt' # Path to camera coordinates .txt file
-    robot_file = 'C:\Users\david\MARC-HT25\robo_coords.txt' # Path to robot coordinates .txt file
+    cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
+    robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
     camera_points = extract_data(cam_coords) # Get coordinates from the camera 
     robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
     rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
@@ -145,4 +145,4 @@ def camera_setup():
     detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
     detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
 
-    return homogeneous, syncNN, pipeline
+    return homogeneous, syncNN, pipeline, labels

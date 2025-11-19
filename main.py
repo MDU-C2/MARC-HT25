@@ -6,11 +6,13 @@ import math
 import time
 from send_coords import CupPickingClient
 from copy import deepcopy
-from Camera
+import Camera_Setup as cs
 
 
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 
+
+homogeneous, syncNN, pipeline, labels = cs.camera_setup()
 
 first_run = True
 with dai.Device(pipeline) as device:
@@ -66,7 +68,7 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.imshow("RGB", frame)
             if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046)): # Fix to not use invalid coordinates while the camera is auto focusing
-                coordinates = convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+                coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
                 in_list = False
                 for i in prev_coord:
@@ -81,7 +83,7 @@ with dai.Device(pipeline) as device:
                 if obj_list:
                     try:
                         temp_coords = obj_list.pop(0)
-                        client.move_cup(temp_coords, quaternion)
+                        #client.move_cup(temp_coords, quaternion)
                         prev_coord = deepcopy(obj_list)
                     except Exception as e:
                         print(f"Error {e}")
