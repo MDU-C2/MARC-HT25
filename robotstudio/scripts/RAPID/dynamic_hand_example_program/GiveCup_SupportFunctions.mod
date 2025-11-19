@@ -1,9 +1,7 @@
 MODULE GiveCup_SupportFunctions
-    
-   
    !!! ================== SUPPORT FUNCTIONS =========================== !!!
    
-   !this function will align the y axes to the normal axes
+   !Align the y axes to the normal axes
    FUNC orient NormalToOrientation(pos normal)
        
        VAR pos e{3}; ! base frame vectors
@@ -41,6 +39,8 @@ MODULE GiveCup_SupportFunctions
  
       RETURN q;
    ENDFUNC
+   
+   !Align y axes with normal and align zaxes to a semi optimal vector from robot to mug
    FUNC orient NormalToOrientationSemiOptimal(pos mug_position,pos normal)
        
        VAR pos e{3}; ! base frame vectors
@@ -78,12 +78,15 @@ MODULE GiveCup_SupportFunctions
  
       RETURN q;
    ENDFUNC
+  
+   ! Convert position to num array
    PROC PosToNumArr(pos p, INOUT num e{*})
        e{1} := p.x;
        e{2} := p.y;
        e{3} := p.z;
    ENDPROC
    
+   ! matrix multiplication
    PROC  MatrixMult3x3(INOUT num M{*,*},num M1{*,*}, num M2{*,*})
        
      FOR i FROM 1 TO 3 DO
@@ -95,6 +98,7 @@ MODULE GiveCup_SupportFunctions
        
    ENDPROC
    
+   ! get 2 vector non parallel to normal
    PROC SpanPlaneFromNormal(pos normal, INOUT pos e{*})
        VAR pos e1;
        VAR pos e2;
@@ -123,6 +127,7 @@ MODULE GiveCup_SupportFunctions
       
    ENDPROC 
      
+   ! get 2 vector non parallel to normal, but one of them is in specific direction
    PROC SpanPlaneFromNormalSemiOptimal(pos mug_position, pos normal, INOUT pos e{*})
        VAR pos e1;
        VAR pos e2;
@@ -142,6 +147,7 @@ MODULE GiveCup_SupportFunctions
       
    ENDPROC 
    
+   ! support function to span plane to find the specifit directional vector
    FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
        
        ! We want to make the magnitude of cross product of n and v1 to be as big as possible,
@@ -177,6 +183,7 @@ MODULE GiveCup_SupportFunctions
        
    ENDFUNC
    
+   ! normilize position variable
    PROC Normilize(INOUT pos v)
        VAR num size;
        size := sqrt(DotProd(v,v));
@@ -187,6 +194,7 @@ MODULE GiveCup_SupportFunctions
        
    ENDPROC
    
+   ! make a 3x3 matrix ortogonal
    PROC OrtogonalMatrix3x3(INOUT pos e{*})
        
        !e1 is ortogonal to nothing
@@ -205,6 +213,7 @@ MODULE GiveCup_SupportFunctions
        RETURN v2*(DotProd(v1,v2)/(sqrt(DotProd(v2,v2))));
    ENDFUNC
    
+   ! convert 3x3 matrix to queternion
    FUNC orient ChiaveriniSiciliano(num x{*},num y{*},num z{*}) 
    
        VAR orient q;
@@ -230,12 +239,14 @@ MODULE GiveCup_SupportFunctions
        
    ENDFUNC
        
+   ! return i +1, -1 or 0 depending of sign of number
     FUNC num sign(num eq)
         IF(eq >= 0) THEN RETURN 1;
         ELSE RETURN -1;
         ENDIF
     ENDFUNC
 
+    ! rotate a point using a queterion
     FUNC pos RotatePointUsingQuaternion(pos p, orient q)
         
         VAR orient q_inv;
@@ -269,6 +280,7 @@ MODULE GiveCup_SupportFunctions
         return result;
     ENDFUNC
     
+    ! get inverse or queternion
     FUNC orient QuaternionInverse(orient q)
         VAR orient q_inv;
         q_inv.q1 := q.q1;
@@ -278,6 +290,7 @@ MODULE GiveCup_SupportFunctions
         RETURN q_inv;
     ENDFUNC
     
+    ! make a point into orinet (w = 0)
     FUNC orient PointToOrinet(pos p)
         VAR orient q;
         q.q1 := 0;

@@ -23,22 +23,22 @@ MODULE GiveCup
 !        MovementProc target,50,300,movespeed;
         ! grippers out
         WaitTime(1);
-         g_GripOut;
+!         g_GripOut;
                 
         !ask for confermation
         TPWrite("At mug picking frame");
         
         !pick up mug
         target.trans := mug_position;
-!        moveJ target,movespeed,z50,tGripper;
-        MovementProc target,50,300,movespeed;
+        moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         ! grippers in
         WaitTime(1);
-         g_GripIn;
+!         g_GripIn;
         
         target.trans := mug_position - offset;
-!        moveJ target,movespeed,z50,tGripper;
-        MovementProc target,50,300,movespeed;
+        moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         
     ENDPROC
     
@@ -46,17 +46,42 @@ MODULE GiveCup
     PROC HandOverMug()
         
         
-        
     ENDPROC
-    
     
     ! leave mug
    PROC LeaveMug(pos mug_end_position, pos mug_end_normal)
+        VAR robtarget target;
+        VAR orient hand_rotation;
+        VAR pos offset;
+        VAR num offset_lenght;
+        offset_lenght := 50;
+        
+        hand_rotation := NormalToOrientationSemiOptimal(mug_end_position,mug_end_normal);
+        offset := [0,0,1]*offset_lenght; ! we always want to move straight up after leaving mug
+        target := CRobT(\Tool := tGripper);
+        ConfJ \Off;
+
+       
+        target.rot := hand_rotation;
+        target.trans := mug_end_position + offset;
+        moveJ target,movespeed,z50,tGripper;
+        WaitTime(1);
+                
+        !ask for confermation
+        TPWrite("At mug picking frame");
+        
+        ! Leave mug
+        target.trans := mug_end_position;
+        moveJ target,movespeed,z50,tGripper;
+        
+        ! grippers out
+        WaitTime(1);
+        
+        target.trans := mug_end_position + offset;
+        moveJ target,movespeed,z50,tGripper;
+        
        
    ENDPROC
-    
-   
-   
     
 ENDMODULE
 
