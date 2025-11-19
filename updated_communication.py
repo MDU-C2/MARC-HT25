@@ -134,8 +134,9 @@ class Communication():
                 case _: # Error and unexpected response handling
                     #self.ErrorHandling()
                     print(f"[ERROR] Unexpected response: {response}")
-                    self.disconnect()
-                    exit(1)
+                    #self.disconnect()
+                    #exit(1)
+                    return None
 
     def connect(self):
 

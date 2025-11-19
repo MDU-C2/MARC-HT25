@@ -8,7 +8,22 @@ from updated_communication import Communication
 from copy import deepcopy
 import Camera_Setup as cs
 import test_protocol as tp
+import threading
+global busy
+busy = False
 
+def start_thread(coords, orient):
+    global busy
+    if busy == False:
+        busy = True
+        threading.Thread(target=local_move(coords, orient), daemon=True).start()
+
+
+def local_move(coords, orient):
+    global busy
+    #client.Move(coords, orient)
+    time.sleep(5) # Simulate time taken for move
+    busy = False
 
 
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
@@ -90,7 +105,7 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-            cv.imshow("RGB", frame)
+            #cv.imshow("RGB", frame)
             if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                 coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
@@ -108,8 +123,9 @@ with dai.Device(pipeline) as device:
                     try:
                         temp_coords = obj_list.pop(0)
                         start_time = time.time()
-                        client.Move(temp_coords, quaternion)
-                        rob_coords = client.GetPosition()
+                        start_thread(temp_coords, quaternion)
+                        #rob_coords = client.GetPosition()
+                        rob_coords = 0
                         #rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
                         end_time = time.time()
                         process_time = end_time - start_time
