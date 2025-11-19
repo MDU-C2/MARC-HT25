@@ -2,7 +2,7 @@
 """
 Camera Manager for OAK-D Pro
 Handles RGB and Depth stream acquisition
-WITH ZONE-BASED DISTANCE-DEPENDENT DEPTH CORRECTION (FIXED)
+WITH ZONE-BASED DISTANCE-DEPENDENT DEPTH CORRECTION
 """
 
 import depthai as dai

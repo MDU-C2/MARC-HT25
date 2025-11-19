@@ -29,6 +29,11 @@ $ git clone https://github.com/MDU-C2/MARC-HT25.git
 $ cd MARC-HT25
 ```
 
+You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
+
+In the installer check the box to add python to the PATH
+
+
 Next up is to set up a virtual python environment
 
 ```bash
@@ -36,7 +41,7 @@ Next up is to set up a virtual python environment
 > py -3.11 -m venv .venv
 
 # Activate the virtual environment (make sure you are in the correct folder when doing this)
-> .venv\Scripts\Active
+> .venv\Scripts\activate
 ```
 Now it's time to install the correct libraries, this is done by running our **requirements.txt** file
 

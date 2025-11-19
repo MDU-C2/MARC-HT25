@@ -13,7 +13,7 @@ MODULE movementFunctions
     !
     !***********************************************************
 
-    PROC MovementProc(robtarget desired_target, num step_size, num orient_frac, speeddata movement_speed)
+    PROC MovementProc(robtarget desired_target, num step_size, num max_magnitude, speeddata movement_speed)
         
         VAR robtarget current_target;
         VAR robtarget disc_target;
@@ -28,7 +28,7 @@ MODULE movementFunctions
         desired_joint_value := CalcJointT(testtarget,tGripper);
         
         !Check distance between desired and current targets. Discretize pos & orientation if high distance.
-        WHILE VectMagn(desired_target.trans-current_target.trans) > 200 DO
+        WHILE VectMagn(desired_target.trans-current_target.trans) > max_magnitude DO
             disc_target := discretizeTarget(current_target,desired_target,step_size);
             desired_joint_value := CalcJointT(disc_target,tGripper);
             MoveY \J,disc_target,movement_speed,z50,tGripper;
@@ -46,7 +46,7 @@ MODULE movementFunctions
                 TPWrite "Failed to reach target";
                 Stop;
             ENDIF
-            IF VectMagn(desired_target.trans-current_target.trans) > 200 THEN
+            IF VectMagn(desired_target.trans-current_target.trans) > max_magnitude THEN
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
                 MoveY \J,disc_target,movement_speed,z50,tGripper;
                 current_target := CRobT(\Tool:=tGripper);
