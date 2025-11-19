@@ -22,6 +22,7 @@ class Communication():
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
                 "Ack_succesfull", "ACK","Ack_Coordinate", ] # these should be removed except ACK, it is not in the main switch case but inside a case
+        
         self.CLOSE = ["Disconnect", ]
         self.ASKROBOTCOORDINATES = ["Ask_RobotCoordinate", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
         self.ASKROBOTORIENTATION = ["Ask_RobotOrientation", ] # RAPID gives the robots coordinates
@@ -74,6 +75,7 @@ class Communication():
         self.RobTarget = [[200,-200,100],[1,0,0,0],[-1,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]] # RAPID format
         self.Robotcoordinates = [100,100,100] # Robot hand coordinates
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
+        self.MugNormal = [0,0,1]
 
         #self.RobTarget = []
         #self.Pos = []
