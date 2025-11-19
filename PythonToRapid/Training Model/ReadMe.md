@@ -43,21 +43,13 @@ The model detects cups in six different orientations, plus additional objects:
 
 ### Model Performance Metrics
 
-The model achieved exceptional performance across all metrics:
+The model achieved exceptional performance across all metrics. Training visualizations are available in the following files:
 
-![Validation Results](val_batch2_pred.jpg)
-*Sample validation predictions showing accurate cup orientation detection*
+- **`val_batch2_pred.jpg`** - Sample validation predictions showing accurate cup orientation detection
+- **`confusion_matrix.png`** - Confusion matrix demonstrating high classification accuracy across all 8 classes  
+- **`results.png`** - Comprehensive training metrics including mAP, precision, recall, and loss curves
 
-### Confusion Matrix
-
-![Confusion Matrix](confusion_matrix.jpg)
-*Confusion matrix demonstrating high classification accuracy across all 8 classes*
-
-### Training Metrics
-
-![Training Results](results.jpg)
-*Comprehensive training metrics including mAP, precision, recall, and loss curves*
-
+**Key Achievements:**
 **Key Achievements:**
 - **mAP@50**: 99.48%
 - **Precision**: High accuracy in positive predictions
@@ -160,22 +152,7 @@ self.detector = CupDetector(
 
 ## 🛠️ Model Classes Definition
 
-The `Model_classes.py` file contains the orientation vector mappings:
-
-```python
-orientation_map = {
-    'Back': [-1.0, 0.0, 0.0],
-    'Front': [1.0, 0.0, 0.0],
-    'left_side': [0.0, -1.0, 0.0],
-    'right_side': [0.0, 1.0, 0.0],
-    'upright': [0.0, 0.0, 1.0],
-    'upside_down': [0.0, 0.0, -1.0]
-    'handle': [0.0, 0.0, 0.0]
-    'gripper': [0.0, 0.0, 0.0]
-}
-```
-
-These 3D directional vectors are used by the robot to determine the correct grasping approach.
+The `Model_classes.py` file can extract the classes in the model in order to check the names:
 
 ---
 
