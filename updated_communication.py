@@ -256,6 +256,11 @@ class Communication():
         self._handle_response()
         return None
     
+    def ConnectionTest(self):
+        self._send_message("Connection_test")
+        self._handle_response()
+        return None
+    
 
 
 
