@@ -262,39 +262,4 @@ class Communication():
 
 
 
-    
-    def MugProcess(self, PickUpcoordinates, PickUpOrientation, LeaveCoordinates, LeaveOrientation):
-        # Current mug coordinate and orientation, leave coordinates and orientation, Camera detection
-        # This function only handles one mug/cup at a time. Call it multiple times for multiple mugs/cups.
-
-        # update this if it needs to run in a loop
-
-        self.PickUpSequence(PickUpcoordinates, PickUpOrientation)
-        self.LeaveSequence(LeaveCoordinates, LeaveOrientation)
-
-
-    def Calibration(self,MAX):
-        # Move to a calibration point and get the coordinates from it.
-        position = 1
-        CalibrationMatrix = None
-        while position in range(1,MAX): 
-            self.MoveCalibrationPosition(position) # Move to calibration position
-            self.Robotcoordinates = self.GetPosition() # Get current robot coordinates
-
-            Robotcoordinates = self.GetPosition() # In string format
-
-            CameraCoordinates = self.GetCameraData() 
-
-            # add the pair of coordinates to a list and at the end of the function do the matrix calculation
-
-            Robotcoordinates = ast.literal_eval(Robotcoordinates) # Convert string to list
-
-
-        return CalibrationMatrix
-
-
-
-
-
-
 
