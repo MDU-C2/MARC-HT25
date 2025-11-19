@@ -2,4 +2,5 @@
 <Program>
 	<Module>world_zones.mod</Module>
 	<Module>example_main.mod</Module>
+	<Module>Module1.mod</Module>
 </Program>

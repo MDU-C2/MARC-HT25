@@ -16,15 +16,16 @@ MODULE Module1
 
     PROC main()
         CONST robtarget cup_target := [[499.548,-110.253,-46.3938],[0.0565402,0.114235,0.990146,-0.0580089],[-2,-3,-1,4],[-177.807,9E+09,9E+09,9E+09,9E+09,9E+09]];
-        VAR robtarget testing_target;
-        VAR iodev logfile;
-        CONST bool testing := FALSE;
-        CONST bool testing_savingpos := FALSE;
         CONST speeddata movement_speed := v200;
         CONST num max_magnitude := 300;
         CONST num step_size := 200;
+        CONST num x_offset := 0;
+        CONST num y_offset := 0;
+        CONST num z_offset := 0;
+        CONST num pick_z_offset := 200;
 
 !        shared_vars.target := CrobT(\Tool:=tGripper);
+        g_calibrate; ! Calibrate gripper
         TPErase;
         ConfJ\Off;
 
@@ -34,20 +35,20 @@ MODULE Module1
             CASE 1: !Move to pos / orientation stored in shared_vars.target
 
                 moveToHomeTarget;
-                MovementProc Offs(shared_vars.target,0,0,200), step_size, orient_frac, movement_speed;
+                MovementProc Offs(shared_vars.target,x_offset,y_offset,pick_z_offset), step_size,max_magnitude, movement_speed;
                 g_GripOut;
-                MovementProc Offs(shared_vars.target,0,0,0), step_size, orient_frac, movement_speed;
+                MovementProc Offs(shared_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
                 g_GripIn;
-                MovementProc Offs(shared_vars.target,0,0,200), step_size, orient_frac, v100;
+                MovementProc Offs(shared_vars.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, v100;
             
                 ConfJ\On;
-                MoveJ Offs(cup_target,0,0,200),movement_speed,fine,tGripper;
-                MoveJ Offs(cup_target,0,0,30),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,z_offset),movement_speed,fine,tGripper;
                 g_GripOut;
-                MoveJ Offs(cup_target,0,0,200),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
+                ConfJ\Off;
 
-
-            CASE 2: !Move to home position
+            CASE 2: !Move to home position (calibration position)
                 MoveToHome;
             CASE 3: !Close gripper to minimum
                 g_gripIn;
@@ -60,16 +61,16 @@ MODULE Module1
                 ConfJ\Off;
                 ConfL\Off;
             CASE 6: !test movement
-                MovementProc Offs(shared_vars.target,0,0,200), step_size, orient_frac, movement_speed;
+                MovementProc Offs(shared_vars.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
                 g_GripOut;
-                MovementProc Offs(shared_vars.target,0,0,0), step_size, orient_frac, movement_speed;
+                MovementProc Offs(shared_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
             CASE 7: !Leave cup
                 ConfJ\On;
                 g_GripIn;
-                MoveJ Offs(cup_target,0,0,200),movement_speed,fine,tGripper;
-                MoveJ Offs(cup_target,0,0,30),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,z_offset),movement_speed,fine,tGripper;
                 g_GripOut;
-                MoveJ Offs(cup_target,0,0,200),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
                 ConfJ\Off;
 
             ENDTEST
