@@ -44,8 +44,18 @@ def estimate_rigid_transform(camera_points, robot_points):
     translation_vector = robot_centroid - rotation_matrix @ camera_centroid
     return rotation_matrix, translation_vector
 
+def rms_alignment_error(camera_points, robot_points, rotation_matrix, translation_vector):
+    cam = np.asarray(camera_points, dtype=np.float64)
+    rob = np.asarray(robot_points,  dtype=np.float64)
+    t = np.asarray(translation_vector, dtype=np.float64).reshape(1, 3)
+    predicted_robot_points = (rotation_matrix @ cam.T).T + t
+    squared_errors = np.sum((predicted_robot_points - rob) ** 2, axis=1)
+    rms_error = float(np.sqrt(np.mean(squared_errors)))
+    return rms_error
+
 
 def extract_data(file):
+    
     float_list=[]
     with open(file, "r") as f:
         lines = f.readlines()
@@ -55,10 +65,9 @@ def extract_data(file):
     return list(float_list)
 
     #==================================== CAMERA & COMMUNICATION SETUP ====================================
-def camera_setup():
+def camera_setup(cam_coords, robot_file):
 
-    cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
-    robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
+
     camera_points = extract_data(cam_coords) # Get coordinates from the camera 
     robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
     rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
@@ -145,4 +154,4 @@ def camera_setup():
     detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
     detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
 
-    return homogeneous, syncNN, pipeline, labels
+    return homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points

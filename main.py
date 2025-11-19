@@ -7,12 +7,34 @@ import time
 from send_coords import CupPickingClient
 from copy import deepcopy
 import Camera_Setup as cs
+import test_protocol as tp
 
 
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
+cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
+robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
 
 
-homogeneous, syncNN, pipeline, labels = cs.camera_setup()
+
+homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
+#==================================== TEST PROTOCOL SETUP ====================================
+count = 0
+times_sec = []
+
+save_protocol = input("Do you want to save the test protocol? (y/n): ").lower() == 'y'
+if save_protocol:
+    file_path = tp.create_today_textfile()
+    tp.ask_user(file_path, "start")
+    tp.fill_meta_data(file_path)
+
+
+
+rms_error = cs.rms_alignment_error(camera_points, robot_points, rotation_matrix, translation_vector)
+if save_protocol:
+    tp.log_rms_error(file_path, rms_error)
+
+
+
 
 first_run = True
 with dai.Device(pipeline) as device:
@@ -83,7 +105,17 @@ with dai.Device(pipeline) as device:
                 if obj_list:
                     try:
                         temp_coords = obj_list.pop(0)
+                        start_time = time.time()
                         #client.move_cup(temp_coords, quaternion)
+                        #rob_coords = client.get_coords()
+                        rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
+                        end_time = time.time()
+                        process_time = end_time - start_time
+                        if save_protocol:
+                            count += 1
+                            tp.cup_information(file_path, count, temp_coords, rob_coords, process_time , confidence = conf, label= label)
+                            times_sec.append(process_time)
+
                         prev_coord = deepcopy(obj_list)
                     except Exception as e:
                         print(f"Error {e}")
@@ -97,3 +129,7 @@ with dai.Device(pipeline) as device:
             break
 
 cv.destroyAllWindows()
+
+if save_protocol:
+    tp.ask_user(file_path, "end")
+    tp.log_time_summary(file_path, times_sec)
