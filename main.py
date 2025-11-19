@@ -13,7 +13,8 @@ import test_protocol as tp
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
 robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
-
+client = CupPickingClient()
+client.connect()
 
 
 homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
@@ -106,9 +107,9 @@ with dai.Device(pipeline) as device:
                     try:
                         temp_coords = obj_list.pop(0)
                         start_time = time.time()
-                        #client.move_cup(temp_coords, quaternion)
-                        #rob_coords = client.get_coords()
-                        rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
+                        client.move_cup(temp_coords, quaternion)
+                        rob_coords = client.get_coords()
+                        #rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
                         end_time = time.time()
                         process_time = end_time - start_time
                         if save_protocol:
