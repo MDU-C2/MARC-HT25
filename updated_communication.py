@@ -21,15 +21,18 @@ class Communication():
     
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
-                "Ack_succesfull", "ACK","Ack_Coordinate", ] # these should be removed except ACK, not in the switch but handled inside a case
+                "Ack_succesfull", "ACK","Ack_Coordinate", ] # these should be removed except ACK, it is not in the main switch case but inside a case
         self.CLOSE = ["Disconnect", ]
         self.ASKROBOTCOORDINATES = ["Ask_RobotCoordinate", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
         self.ASKROBOTORIENTATION = ["Ask_RobotOrientation", ] # RAPID gives the robots coordinates
 
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
-        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", ] # RAPID is ready for the next command
+        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", ] # RAPID is ready for the next command
         self.ASKCALPOINT = ["AskCalPoint", ] 
+
+        ## Special case
+        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" '''
 
         ## TODO List of what python can send
 
@@ -44,17 +47,20 @@ class Communication():
         "Home"
         "testmove" dont add this one
         "LeaveCup"
+        "Move_Calibration_Position"
 
 
         TO BE ADDED LATER:
 
         "Get_Coordinates"
         "Move_Calibration_Position"
-        "Pick_Up_Mug"
-        "Leave_Mug"
+        "Pick_Up_Sequence"
+        "Leave_Sequence"
 
-        "Ack_AskRobotCoordinate" # these are for getting the robots coordinates
-        "ACK" 
+        # Special cases, inside a switch case
+        "Ack_AskRobotCoordinate"
+        "Ack_AskRobotOrientation"
+        "ACK"
         '''
 
 
@@ -87,7 +93,7 @@ class Communication():
     def _handle_response(self):
         """Handle response from RAPID"""
         
-        while True: # It will loop until the response is "AskNext" or RAPID wants to close the connection.
+        while True: # It will loop until the response is in "ASKNEXT" or RAPID wants to close the connection (CLOSE).
 
             response = self._receive_message()
 
@@ -212,7 +218,7 @@ class Communication():
         return
 
     def PickUpSequence(self, coordinates, orientation):
-        self._send_message("Pick_Up_Mug")
+        self._send_message("Pick_Up_Sequence")
         self.MugCoordinates = coordinates
         self.MugOrientation = orientation
         self._handle_response()
@@ -221,7 +227,7 @@ class Communication():
         return None
 
     def LeaveSequence(self, coordinates, orientation):
-        self._send_message("Leave_Mug")
+        self._send_message("Leave_Sequence")
         self.MugCoordinates = coordinates
         self.MugOrientation = orientation
         self._handle_response()
