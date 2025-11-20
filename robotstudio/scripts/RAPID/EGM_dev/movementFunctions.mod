@@ -39,7 +39,7 @@ MODULE movementFunctions
 !        ProcerrRecovery \SyncOrgMoveInst;
         
         ERROR
-        IF ERRNO = ERR_ROBLIMIT THEN !Joint values outside of working range
+        IF ERRNO = ERR_ROBLIMIT THEN !Joint values calculated to be outside of working range
             ResetRetryCount;
             IF testing > 1 THEN
                 moveToHomeTarget;
