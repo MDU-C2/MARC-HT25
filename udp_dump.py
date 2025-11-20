@@ -17,7 +17,7 @@ def main():
                 data, addr = sock.recvfrom(65535)
                 # text = data.decode(errors="replace")
                 text =egm.EgmRobot()
-                text.ParseFromString(data.cartesian.pos.x)
+                text.ParseFromString(data)
                 
                 print(f"Got UDP message from {addr}: {text}")
             except socket.timeout:
