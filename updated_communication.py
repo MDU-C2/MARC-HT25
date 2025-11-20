@@ -13,6 +13,7 @@ class Communication():
 
     def __init__(self):
         self._mutex_variable = threading.Lock()  #mutex for accessing variables
+        self._mutex_function = threading.Lock()  #mutex for accessing functions
         self.socket = None
         self.port = 1025
         self.host = '192.168.125.1'
@@ -221,14 +222,17 @@ class Communication():
     
     def Move(self, coordinates, orientation):
 
-        """Move robot to specified coordinates and orientation"""
-        self.MugCoordinates = coordinates
-        self.MugOrientation = orientation
-        self._send_message("Move")
-        self._handle_response()  # Wait for "AskNext"
+        with self._mutex_function:  # Lock mutex for function-level thread safety
+
+            """Move robot to specified coordinates and orientation"""
+            with self._mutex_variable:
+                self.MugCoordinates = list(coordinates)
+                self.MugOrientation = list(orientation)
+            self._send_message("Move")
+            self._handle_response()  # Wait for "AskNext"
 
 
-        return
+            return
 
     def PickUpSequence(self, coordinates, orientation):
         self._send_message("Pick_Up_Sequence")
