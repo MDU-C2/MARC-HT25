@@ -93,7 +93,7 @@ def camera_setup(cam_coords, robot_file):
 
     # Camera configuration (RGB camera)
     cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
     cam_rgb.setPreviewSize(640, 640) # Neural network input size. (MUST MATCH THE RUNNING MODELS SIZE)
     cam_rgb.setInterleaved(False)
     cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
