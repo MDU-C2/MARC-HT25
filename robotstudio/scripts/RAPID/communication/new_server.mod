@@ -92,7 +92,7 @@ MODULE server
                 
             CASE "Get_Coordinates": ! this case sends only the x,y,z coordinates of the left hand gripper, Tool Center Point. ! not done but should not crash the program
                 TPWrite "[INFO] client want cordinates";
-                SocketSend client_socket\Str:="Ask_RobotCoordinate";
+                SocketSend client_socket\Str:="Robot_Wants_To_Send_Coordinates";
                 SocketReceive client_socket\Str:=message; ! Just assume it is "ACK" for now
                 
                 hand_frame:=CRobT(\Tool:=tGripper);
@@ -148,6 +148,8 @@ MODULE server
                     !move failed
                 ENDIF
             CASE "Pick_Up_Sequence":
+            
+                SocketSend client_socket\Str:="Ack_Release done";
                 ! Implement function here
                 SocketSend client_socket\Str:="Ack_Release done";
                 !WaitUntil shared_vars.wait_flag=FALSE;
@@ -169,7 +171,7 @@ MODULE server
             ENDTEST
 
             !WaitTime(delay_time);
-            SocketSend client_socket\Str:="Ask_next";
+            !SocketSend client_socket\Str:="Ask_next";
             ! ask for next "order"
 
         ENDWHILE

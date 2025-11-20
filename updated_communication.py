@@ -12,20 +12,21 @@ class Communication():
     """Class to handle communication with RAPID server"""
 
     def __init__(self):
-        self._mutex_orientation = threading.Lock()  #mutex for accessing variables
-        self._mutex_coordinates = threading.Lock() # unused?
+        self._mutex_variable = threading.Lock()  #mutex for accessing variables
         self.socket = None
         self.port = 1025
         self.host = '192.168.125.1'
         self.connected = False
+
+        self._mutex_variable
     
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
-                "Ack_succesfull", "ACK","Ack_Coordinate", ] # these should be removed except ACK, it is not in the main switch case but inside a case
+                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation" ] # these should be removed except ACK, it is not in the main switch case but inside a case
         
         self.CLOSE = ["Disconnect", ]
-        self.ASKROBOTCOORDINATES = ["Ask_RobotCoordinate", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
-        self.ASKROBOTORIENTATION = ["Ask_RobotOrientation", ] # RAPID gives the robots coordinates
+        self.ROBOTWANTSTOSENDCOORDINATES = ["Robot_Wants_To_Send_Coordinates", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
+        self.ROBOTWANTSTOSENDORIENTATION = ["Robot_Wants_To_Send_Orientation", ] # RAPID gives the robots coordinates
 
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
@@ -59,8 +60,6 @@ class Communication():
         "Leave_Sequence"
 
         # Special cases, inside a switch case
-        "Ack_AskRobotCoordinate"
-        "Ack_AskRobotOrientation"
         "ACK"
         '''
 
@@ -111,21 +110,23 @@ class Communication():
                     self.disconnect() # Disconnect, don't send anything to RAPID
                     return None
                 
-                case ask_robot_coordinates if ask_robot_coordinates in self.ASKROBOTCOORDINATES: # RAPID wants to send robot coordinates
-                    self._send_message("Ack_AskRobotCoordinate") # Tell RAPID to send coordinates
+                case robot_wants_to_send_coordinates if robot_wants_to_send_coordinates in self.ROBOTWANTSTOSENDCOORDINATES: # RAPID wants to send robot coordinates
+                    self._send_message("ACK") # Tell RAPID to send coordinates
                     self.Robotcoordinates =  self._receive_message() # Receive coordinates
                     self._send_message("ACK") # Acknowledge so it can send AskNext or other commands
 
-                case ask_robot_orientation if ask_robot_orientation in self.ASKROBOTORIENTATION: # RAPID wants to send robot orientation
-                    self._send_message("Ack_AskRobotOrientation")
+                case robot_wants_to_send_orientation if robot_wants_to_send_orientation in self.ROBOTWANTSTOSENDORIENTATION: # RAPID wants to send robot orientation
+                    self._send_message("ACK")
                     self.Robotorientation = self._receive_message()
                     self._send_message("ACK")
 
                 case askmug_coordinates if askmug_coordinates in self.ASKMUGCOORDINATES: # RAPID wants mug coordinates
-                    self._send_message(str(self.MugCoordinates)) # Send mug coordinates
+                    with self._mutex_variable:  # Lock mutex for thread-safe access
+                        self._send_message(str(self.MugCoordinates)) # Send mug coordinates
 
                 case askmug_orientation if askmug_orientation in self.ASKMUGORIENTATION: # RAPID wants mug orientation
-                    self._send_message(str(self.MugOrientation)) # Send mug orientation
+                    with self._mutex_variable:  # Lock mutex for thread-safe access
+                        self._send_message(str(self.MugOrientation)) # Send mug orientation
 
                 case askcal_point if askcal_point in self.ASKCALPOINT: # RAPID wants calibration point number
                     self._send_message(str(self.CalPoint)) # Send calibration point number
@@ -199,6 +200,15 @@ class Communication():
             print(f"[ERROR] Receive error: {e}")
             self.connected = False
             return None
+        
+    def UpdateVariables(self, MugCoordinates = None, MugOrientation = None):
+        with self._mutex_variable: # Lock mutex for thread-safe access
+            if MugCoordinates is not None:
+                self.MugCoordinates = list(MugCoordinates)  # make defensive copy, unnecessary?
+            if MugOrientation is not None:
+                self.MugOrientation = list(MugOrientation)
+        return
+
       
     
     def GetPosition(self):
@@ -250,7 +260,8 @@ class Communication():
     
     def MoveCalibrationPosition(self, position):
         self._send_message("Move_Calibration_Position")
-        self.CalPoint = position
+        with self._mutex_variable:
+            self.CalPoint = list(position) # make defensive copy
         self._handle_response()
         return None
     
