@@ -9,7 +9,7 @@ from copy import deepcopy
 import Camera_Setup as cs
 import test_protocol as tp
 import threading
-
+#==================================== THREADING SETUP ====================================
 global busy
 busy = False
 
