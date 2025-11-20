@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<Program>
+	<Module>HandOver_SupportFunctions.mod</Module>
+	<Module>GiveCup_SupportFunctions.mod</Module>
+	<Module>GiveCup.mod</Module>
+	<Module>RightArmExample.mod</Module>
+</Program>
