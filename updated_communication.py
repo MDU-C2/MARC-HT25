@@ -32,7 +32,8 @@ class Communication():
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
         self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", ] # RAPID is ready for the next command
-        self.ASKCALPOINT = ["AskCalPoint", ] 
+        self.ASKCALPOINT = ["AskCalPoint", ]
+        self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
         ## Special case
         ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" '''
@@ -118,10 +119,15 @@ class Communication():
                 case askmug_orientation if askmug_orientation in self.ASKMUGORIENTATION: # RAPID wants mug orientation
                     with self._mutex_variable:  # Lock mutex for thread-safe access
                         self._send_message(str(self.MugOrientation)) # Send mug orientation
+                    
 
                 case askcal_point if askcal_point in self.ASKCALPOINT: # RAPID wants calibration point number
                     self._send_message(str(self.CalPoint)) # Send calibration point number
                     self._handle_response()
+                
+                case askmug_normal if askmug_normal in self.ASKMUGNORMAL: # RAPID wants mug normal
+                    with self._mutex_variable:  # Lock mutex for thread-safe access
+                        self._send_message(str(self.MugNormal)) # Send mug normal
 
                 case _: # Error and unexpected response handling
                     #self.ErrorHandling()
