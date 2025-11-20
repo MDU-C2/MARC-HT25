@@ -1,5 +1,20 @@
 MODULE GiveCup
     
+    
+    
+    !flag values:
+    ! 1 = one hand have sent information
+    ! 2 = both hand have sent information
+    RECORD shared_information
+        num flag; ! what task is at hand
+        pose target;
+        num offset_lenght;
+        bool lock; ! to remove race conditions
+        bool start_handover_sequence;
+    ENDRECORD
+    
+    PERS shared_information multi_move;
+    
     ! fetch up mug
     PROC FetchMug(pos mug_position, num offset_lenght, pos mug_normal)
         VAR robtarget target;
@@ -44,6 +59,8 @@ MODULE GiveCup
     
     ! hand over mug to other hand
     PROC HandOverMug()
+        
+        VAR pose buffer;
         
         
     ENDPROC
