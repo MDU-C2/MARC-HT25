@@ -41,24 +41,14 @@ class Communication():
 
         '''
         "Connection_test"
-        "Cups_available"
-        "Coordinates" dont add this one
-        "Pos" 
+        "Get_Coordinates"
         "Move"
         "Grip"
         "Release"
         "Home"
-        "testmove" dont add this one
-        "LeaveCup"
-        "Move_Calibration_Position"
-
-
-        TO BE ADDED LATER:
-
-        "Get_Coordinates"
-        "Move_Calibration_Position"
         "Pick_Up_Sequence"
         "Leave_Sequence"
+        "Move_Calibration_Position"
 
         # Special cases, inside a switch case
         "ACK"
@@ -142,35 +132,39 @@ class Communication():
 
     def connect(self):
 
-        """Connect to RAPID server"""
-        try:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #socket.settimeout(120)  # Increased to 120 seconds for robot movement, Dont use time out
-            self.socket.connect((self.host, self.port))
-            self.connected = True
-            print(f"[INFO] Connected to RAPID server at {self.host}:{self.port}")
+        with self._mutex_function:  # Lock mutex for function-level thread safety
 
-        except Exception as e:
-            print(f"[ERROR] Connection failed: {e}")
+            """Connect to RAPID server"""
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                #socket.settimeout(120)  # Increased to 120 seconds for robot movement, Dont use time out
+                self.socket.connect((self.host, self.port))
+                self.connected = True
+                print(f"[INFO] Connected to RAPID server at {self.host}:{self.port}")
+
+            except Exception as e:
+                print(f"[ERROR] Connection failed: {e}")
 
 
 
     def disconnect(self):
-        if not self.socket:
-            return
-        try:
-            self._send_message("disconnect")
+
+        with self._mutex_function:  # Lock mutex for function-level thread safety
+            if not self.socket:
+                return
             try:
-                self.socket.shutdown(socket.SHUT_RDWR)
-            except OSError:
-                pass  # socket may already be closed or not connected
-            self.socket.close()
-            print("[INFO] Socket closed")
-        except Exception as e:
-            print(f"[ERROR] Close error: {e}")
-        finally:
-            self.connected = False
-            self.socket = None
+                self._send_message("disconnect")
+                try:
+                    self.socket.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass  # socket may already be closed or not connected
+                self.socket.close()
+                print("[INFO] Socket closed")
+            except Exception as e:
+                print(f"[ERROR] Close error: {e}")
+            finally:
+                self.connected = False
+                self.socket = None
 
         
     def _send_message(self, message):
@@ -213,12 +207,14 @@ class Communication():
       
     
     def GetPosition(self):
-        #"""Get current position from RAPID"""
-        self._send_message("Get_Coordinates")
-        self._handle_response() # stores respone in self.Robotcoordinates
-        self.Robotcoordinates = ast.literal_eval(self.Robotcoordinates) # Convert string to variable
 
-        return self.Robotcoordinates # RobotCoordinates can be both string and a variable depending on when you check it.
+        with self._mutex_function:  # Lock mutex for function-level thread safety
+            #"""Get current position from RAPID"""
+            self._send_message("Get_Coordinates")
+            self._handle_response() # stores respone in self.Robotcoordinates
+            self.Robotcoordinates = ast.literal_eval(self.Robotcoordinates) # Convert string to variable
+
+            return self.Robotcoordinates # RobotCoordinates can be both string and a variable depending on when you check it.
     
     def Move(self, coordinates, orientation):
 
@@ -235,49 +231,56 @@ class Communication():
             return
 
     def PickUpSequence(self, coordinates, orientation):
-        self._send_message("Pick_Up_Sequence")
-        self.MugCoordinates = coordinates
-        self.MugOrientation = orientation
-        self._handle_response()
+        with self._mutex_function:
+            self._send_message("Pick_Up_Sequence")
+            self.MugCoordinates = coordinates
+            self.MugOrientation = orientation
+            self._handle_response()
 
-        #"""Perform pick-up sequence"""
-        return None
+            #"""Perform pick-up sequence"""
+            return None
 
     def LeaveSequence(self, coordinates, orientation):
-        self._send_message("Leave_Sequence")
-        self.MugCoordinates = coordinates
-        self.MugOrientation = orientation
-        self._handle_response()
+        with self._mutex_function:
+            self._send_message("Leave_Sequence")
+            self.MugCoordinates = coordinates
+            self.MugOrientation = orientation
+            self._handle_response()
 
-        #"""Perform leave sequence"""
-        return None
+            #"""Perform leave sequence"""
+            return None
     
     def OpenGripper(self):
-        self._send_message("Release")
-        self._handle_response()
-        return None
+        with self._mutex_function:
+            self._send_message("Release")
+            self._handle_response()
+            return None
     
     def CloseGripper(self):
-        self._send_message("Grip")
-        self._handle_response()
-        return None
+        with self._mutex_function:
+            self._send_message("Grip")
+            self._handle_response()
+            return None
     
     def MoveCalibrationPosition(self, position):
-        self._send_message("Move_Calibration_Position")
-        with self._mutex_variable:
-            self.CalPoint = list(position) # make defensive copy
-        self._handle_response()
-        return None
+        with self._mutex_function:
+            self._send_message("Move_Calibration_Position")
+            with self._mutex_variable:
+                self.CalPoint = list(position) # make defensive copy
+            self._handle_response()
+            return None
     
     def MoveHome(self):
-        self._send_message("Home")
-        self._handle_response()
-        return None
+        with self._mutex_function:
+            self._send_message("Home")
+            self._handle_response()
+            return None
     
     def ConnectionTest(self):
-        self._send_message("Connection_test")
-        self._handle_response()
-        return None
+        with self._mutex_function:
+            self._send_message("Connection_test")
+            self._handle_response()
+            return None
     
 
 
