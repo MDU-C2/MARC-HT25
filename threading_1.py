@@ -14,12 +14,12 @@ global busy
 busy = False
 
 lock = threading.Lock()
-def local_move(coords, orient, client, obj_list):
+def local_move(coords, orient, client, obj_list, normalized_vector):
     global busy
     with lock:
         if busy != True:
             busy = True
-            client.Move(coords, orient)
+            client.Move(coords, orient, normalized_vector)
             obj_list.pop(0)
             print(obj_list, "POPPED")
             busy = False
@@ -72,7 +72,7 @@ def run():
         q_depth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
         q_det   = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
-        prev_coord = [[1,1,1]] # Temporary starting x,y,z coordinates to compare with
+
         obj_list = []
         
         while True:
@@ -97,6 +97,8 @@ def run():
                 label = str(det.label)
                 if det.label < len(labels):
                     label = labels[det.label]
+
+
 
                 conf  = int(det.confidence * 100) # Confidence percentage
                 
@@ -131,7 +133,7 @@ def run():
                                 in_list = True
                     
 
-
+                    
                         if not in_list:
                             obj_list.append(coordinates)
                             print(obj_list, "ADDED")
@@ -145,7 +147,9 @@ def run():
                                 temp_coords = obj_list[0]
                                 
                                 start_time = time.time()
-                                threading.Thread(target=local_move, args=(temp_coords, quaternion, client, obj_list), daemon=True).start()
+
+                                normalized_vector = orientation_map.get(label)
+                                threading.Thread(target=local_move, args=(temp_coords, quaternion, client, obj_list, normalized_vector), daemon=True).start()
 
 
 
