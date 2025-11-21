@@ -19,11 +19,11 @@ class Communication():
         self.host = '192.168.125.1'
         self.connected = False
 
-        self._mutex_variable
+
     
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
-                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation" ] # these should be removed except ACK, it is not in the main switch case but inside a case
+                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal"] # these should be removed except ACK, it is not in the main switch case but inside a case
         
         self.CLOSE = ["Disconnect", ]
         self.ROBOTWANTSTOSENDCOORDINATES = ["Robot_Wants_To_Send_Coordinates", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
@@ -222,7 +222,7 @@ class Communication():
 
             return self.Robotcoordinates # RobotCoordinates can be both string and a variable depending on when you check it.
     
-    def Move(self, coordinates, orientation):
+    def Move(self, coordinates, orientation, normalized_vector):
 
         with self._mutex_function:  # Lock mutex for function-level thread safety
 
@@ -230,6 +230,7 @@ class Communication():
             with self._mutex_variable:
                 self.MugCoordinates = list(coordinates)
                 self.MugOrientation = list(orientation)
+                self.MugNormal = list(normalized_vector)
             self._send_message("Move")
             self._handle_response()  # Wait for "AskNext"
 
