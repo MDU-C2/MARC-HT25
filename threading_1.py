@@ -1,19 +1,17 @@
 import cv2 as cv
 import depthai as dai
-import numpy as np
-import json
 import math
 import time
 from updated_communication import Communication
-from copy import deepcopy
 import Camera_Setup as cs
 import test_protocol as tp
 import threading
 #==================================== THREADING SETUP ====================================
 global busy
 busy = False
-
 lock = threading.Lock()
+
+#Thread function to move robot to specified coordinates
 def local_move(coords, orient, client, obj_list, normalized_vector):
     global busy
     with lock:
@@ -25,8 +23,8 @@ def local_move(coords, orient, client, obj_list, normalized_vector):
 
 def run():
     global busy
-    print("Starting main loop")
 
+    #Normalized orientation vectors for different cup orientations
     orientation_map = {
             'Back': [-1.0, 0.0, 0.0],
             'Front': [1.0, 0.0, 0.0],
@@ -45,6 +43,7 @@ def run():
     
 
     homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
+    
     #==================================== TEST PROTOCOL SETUP ====================================
     count = 0
     times_sec = []
@@ -62,7 +61,7 @@ def run():
         tp.log_rms_error(file_path, rms_error)
 
 
-
+    #==================================== MAIN  ====================================
 
     first_run = True
     with dai.Device(pipeline) as device:
@@ -146,12 +145,8 @@ def run():
 
                                 normalized_vector = orientation_map.get(label)
                                 threading.Thread(target=local_move, args=(temp_coords, quaternion, client, obj_list, normalized_vector), daemon=True).start()
-
-
-
                                 #rob_coords = client.GetPosition()
                                 rob_coords = 0
-                                #rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
                                 end_time = time.time()
                                 process_time = end_time - start_time
                                 if save_protocol:
@@ -159,7 +154,6 @@ def run():
                                     tp.cup_information(file_path, count, temp_coords, rob_coords, process_time , confidence = conf, label= label)
                                     times_sec.append(process_time)
 
-                                #prev_coord = deepcopy(obj_list)
                             except Exception as e:
                                 print(f"Error {e}")
 
