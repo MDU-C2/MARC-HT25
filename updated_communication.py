@@ -133,7 +133,7 @@ class Communication():
                 case _: # Error and unexpected response handling
                     #self.ErrorHandling()
                     print(f"[ERROR] Unexpected response: {response}")
-                    #self.disconnect()
+                    self.disconnect()
                     #exit(1)
                     return None
             
