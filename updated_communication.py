@@ -32,6 +32,7 @@ class Communication():
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
         self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", ] # RAPID is ready for the next command
+
         self.ASKCALPOINT = ["AskCalPoint", ]
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
@@ -85,7 +86,7 @@ class Communication():
 
     def _handle_response(self):
         """Handle response from RAPID"""
-        
+
         while True: # It will loop until the response is in "ASKNEXT" or RAPID wants to close the connection (CLOSE).
 
             response = self._receive_message()
@@ -135,6 +136,7 @@ class Communication():
                     #self.disconnect()
                     #exit(1)
                     return None
+            
 
     def connect(self):
 
@@ -289,10 +291,6 @@ class Communication():
             self._handle_response()
             return None
     
-
-
-
-
 
 
 

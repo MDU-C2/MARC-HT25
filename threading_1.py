@@ -21,7 +21,6 @@ def local_move(coords, orient, client, obj_list, normalized_vector):
             busy = True
             client.Move(coords, orient, normalized_vector)
             obj_list.pop(0)
-            print(obj_list, "POPPED")
             busy = False
 
 def run():
@@ -43,7 +42,7 @@ def run():
     robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
     client = Communication()
     client.connect()
-
+    
 
     homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
     #==================================== TEST PROTOCOL SETUP ====================================
@@ -136,9 +135,6 @@ def run():
                     
                         if not in_list:
                             obj_list.append(coordinates)
-                            print(obj_list, "ADDED")
-                            #prev_coord = deepcopy(obj_list)
-                            #Se över här om man faktiskt behöver prev_coords listan och att man inte anvöänder obj list
 
                         if obj_list:
                             try:
@@ -169,7 +165,8 @@ def run():
 
                 # Show the frames in windows
             cv.imshow("RGB", frame)
-
+            if cv.waitKey(1) & 0xFF == ord('r'):
+                client.connect()
             # Exit on 'q' key
             if cv.waitKey(1) & 0xFF == ord('q'):
 
