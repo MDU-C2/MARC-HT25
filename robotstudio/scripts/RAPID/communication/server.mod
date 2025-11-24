@@ -395,63 +395,6 @@ MODULE server
         ENDIF
     ENDFUNC
     
-    FUNC string TalkWithPython(string data) ! data is a string and is the data that RAPID wants from python. It returns the data in the form of a string
-        
-        VAR string tempdata;
-        
-        TEST data
-        
-        CASE "GetMugCoordinates":
-            SocketSend client_socket\Str:="Ask_MugCoordinate";
-            SocketReceive client_socket\Str:=tempdata;
-        
-        CASE "GetMugOrientation":
-            SocketSend client_socket\Str:="Ask_MugOrientation";
-            SocketReceive client_socket\Str:=tempdata;
-        
-        CASE "GetMugNormal":
-            SocketSend client_socket\Str:="Ask_MugNormal";
-            SocketReceive client_socket\Str:=tempdata;
-        
-        CASE "SendRobotCoordinates":    ! This sends the robots coordinates to python/camera
-            SocketSend client_socket\Str:="Robot_Wants_To_Send_Coordinates";
-            SocketReceive client_socket\Str:=tempdata; ! ACK
-            
-            hand_frame:=CRobT(\Tool:=tGripper);
-            SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
-            SocketReceive client_socket\Str:=tempdata; ! ACK
-            
-            tempdata := "Coordinates sent to Python";     
-            
-        CASE "SendRobotOrientation":    ! This may not work as I dont think RobPosToString() works with orientation. Dont use this.
-        
-            SocketSend client_socket\Str:="Robot_Wants_To_Send_Orientation";
-            SocketReceive client_socket\Str:=tempdata; ! ACK
-            
-            hand_frame:=CRobT(\Tool:=tGripper);
-            SocketSend client_socket\Str:=RobPosToString(hand_frame.rot);
-            SocketReceive client_socket\Str:=tempdata; ! ACK
-            
-            tempdata := "Orientation sent to Python";
-            
-            
-        CASE "AskCalPoint": ! ask for calibration point
-            SocketSend client_socket\Str:="Robot_Wants_To_Send_Orientation";
-            SocketReceive client_socket\Str:=tempdata;
-        
-        CASE "Disconnect":
-            SocketSend client_socket\Str:="Disconnect";
-            
-        
-        
-        DEFAULT:
-            TPWrite("[INFO] unkown message from client: "+data);
-            tempdata := "Unknown instruction in getdatafromrobot()";
-        
-        ENDTEST
-        
-        RETURN tempdata;
-        
-    ENDFUNC
+    
 
 ENDMODULE
