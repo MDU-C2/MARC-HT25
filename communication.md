@@ -28,7 +28,7 @@
 - ConnectionTest
     - Sends **Connection_test** to RAPID
 
-## PYTHON MESSAGES THAT ARE ACCEPTED
+## PYTHON MESSAGES THAT ARE HANDLED
 
 - ACKS
     - **Ack_succesful**
@@ -123,12 +123,10 @@
     - **Ack_wait**
     - **Ack_Grip_Done**
     - **Ack_release done**
-    - **Ack_succesfull** <--- felstavat
-    - **[Hand frame]_ack**
 
 - SEND
     - **Robot_Wants_To_Send_Coordinates**
-    - **[x,y,z]**
+    - **[x,y,z]** (handframe)
 
 - ERROR
     - **[ERROR]can't reach that possition,try again**
