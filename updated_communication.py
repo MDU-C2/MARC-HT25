@@ -37,9 +37,9 @@ class Communication():
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
         ## Special case
-        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" '''
+        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" ''' # not used?, replaced with ACK
 
-        ## TODO List of what python can send
+        ## List of what python can send
 
         '''
         "Connection_test"
