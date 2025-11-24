@@ -64,9 +64,9 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        #self._watchdog_interval = 60  # seconds
-        #self._watchdog_thread = None
-        #self._watchdog_stop = threading.Event()
+        self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
+        self._connection_test_thread.start()
+
 
     
 
@@ -127,6 +127,14 @@ class Communication():
                     #exit(1)
                     return None
             
+
+
+    def _keep_connection_alive(self):
+        """Sleep 60s then send a test message to RAPID. Windows does not like open sockets without activity."""
+        while True:
+            time.sleep(60)
+            if self.connected:
+                self.ConnectionTest()
 
     def connect(self):
 
@@ -281,35 +289,5 @@ class Communication():
             self._handle_response()
             return None
         
-    '''
-    def _start_watchdog(self):
-        if self._watchdog_thread and self._watchdog_thread.is_alive():
-            return
-        self._watchdog_stop.clear()
-        self._watchdog_thread = threading.Thread(target=self._watchdog_loop, daemon=True)
-        self._watchdog_thread.start()
-    
-    def _stop_watchdog(self):
-        self._watchdog_stop.set()
-        if self._watchdog_thread:
-            self._watchdog_thread.join(timeout=1)
 
-    def _watchdog_loop(self):
-        while not self._watchdog_stop.is_set():
-            for _ in range(self._watchdog_interval):
-                if self._watchdog_stop.is_set():
-                    return
-                time.sleep(1)
-            if not self.connected:
-                continue
-            # Acquire function mutex to avoid overlap with active commands
-            if self._mutex_function.acquire(blocking=False):
-                try:
-                    self._send_message("Connection_test")
-                    # Optional: read and discard expected response
-                    # self._handle_response()  # Uncomment if protocol expects AskNext
-                finally:
-                    self._mutex_function.release()
-
-    '''
 
