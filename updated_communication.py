@@ -55,11 +55,6 @@ class Communication():
         # Special cases, inside a switch case
         "ACK"
         '''
-
-
-
-
-
         
         self.MugCoordinates = [200,-200,100] # x,y,z coordinates of the mug
         self.MugOrientation = [1,0,0,0] # quaternion, mug orientation
@@ -69,13 +64,9 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        #self.RobTarget = []
-        #self.Pos = []
-        #self.Orient = []
-
-        #self.RobTarget.append([[200,-200,100],[1,0,0,0],[-1,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]])
-        #self.Pos.append([200,-200,100])
-        #self.Orient.append([1,0,0,0])
+        self._watchdog_interval = 60  # seconds
+        self._watchdog_thread = None
+        self._watchdog_stop = threading.Event()
 
     
 
@@ -290,7 +281,36 @@ class Communication():
             self._send_message("Connection_test")
             self._handle_response()
             return None
-    
+        
 
+    def _start_watchdog(self):
+        if self._watchdog_thread and self._watchdog_thread.is_alive():
+            return
+        self._watchdog_stop.clear()
+        self._watchdog_thread = threading.Thread(target=self._watchdog_loop, daemon=True)
+        self._watchdog_thread.start()
+    
+    def _stop_watchdog(self):
+        self._watchdog_stop.set()
+        if self._watchdog_thread:
+            self._watchdog_thread.join(timeout=1)
+
+    def _watchdog_loop(self):
+        while not self._watchdog_stop.is_set():
+            for _ in range(self._watchdog_interval):
+                if self._watchdog_stop.is_set():
+                    return
+                time.sleep(1)
+            if not self.connected:
+                continue
+            # Acquire function mutex to avoid overlap with active commands
+            if self._mutex_function.acquire(blocking=False):
+                try:
+                    self._send_message("Connection_test")
+                    # Optional: read and discard expected response
+                    # self._handle_response()  # Uncomment if protocol expects AskNext
+                finally:
+                    self._mutex_function.release()
+# ...existing code...
 
 
