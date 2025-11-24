@@ -81,6 +81,11 @@ def CreateSensorMessage(egmSensor, pos, euler):
 #     # print(msg)
 #     robot_socket.sendto(msg, addr) 
 #     time.sleep(0.004)
+def get_pos(pos):
+    position = pos
+    return position  
+
+
 
 def send_pos_egm(egm_ip, egm_port, positions):
     print("Running EGM python client")
@@ -95,7 +100,7 @@ def send_pos_egm(egm_ip, egm_port, positions):
         except TimeoutError:
             print("NO MSG RECIEVED")
             continue
-
+        
         m = egm.EgmRobot()
         #print("message:", m)
         m.ParseFromString(data)
@@ -103,6 +108,7 @@ def send_pos_egm(egm_ip, egm_port, positions):
         #positions[0] = m.feedBack.cartesian.pos.x
         #positions[1] = m.feedBack.cartesian.pos.y + 5
         #positions[2] = m.feedBack.cartesian.pos.z
+
 
         CurX = m.feedBack.cartesian.euler.x
         CurY = m.feedBack.cartesian.euler.y
@@ -114,6 +120,41 @@ def send_pos_egm(egm_ip, egm_port, positions):
         robot_socket.sendto(msg, addr)
         time.sleep(0.004)
 
-        
-pos = [404,200,190]
+
+pos = [600,13,136]
 send_pos_egm(egm_ip, egm_port, pos)
+global global_pos
+global_pos = [200,200,200]
+
+def send_pos_egm_thread(egm_ip, egm_port):
+    print("Running EGM python client")
+    robot_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    print(f"Listening on {egm_ip}:{egm_port}")
+    robot_socket.bind((egm_ip, egm_port))
+    robot_socket.settimeout(30)
+    
+    while robot_socket.fileno() != -1:
+        try:
+            data, addr = robot_socket.recvfrom(1024)
+        except TimeoutError:
+            print("NO MSG RECIEVED")
+            continue
+        
+        m = egm.EgmRobot()
+        #print("message:", m)
+        m.ParseFromString(data)
+        # print("parsed message:", m)
+        #positions[0] = m.feedBack.cartesian.pos.x
+        #positions[1] = m.feedBack.cartesian.pos.y + 5
+        #positions[2] = m.feedBack.cartesian.pos.z
+
+
+        CurX = m.feedBack.cartesian.euler.x
+        CurY = m.feedBack.cartesian.euler.y
+        CurZ = m.feedBack.cartesian.euler.z
+        euler = [CurX,CurY,CurZ]
+        egmSensor=egm.EgmSensor()
+        egmSensor=CreateSensorMessage(egmSensor,global_pos,euler)
+        msg=egmSensor.SerializeToString()
+        robot_socket.sendto(msg, addr)
+        time.sleep(0.01)
