@@ -64,9 +64,9 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        self._watchdog_interval = 60  # seconds
-        self._watchdog_thread = None
-        self._watchdog_stop = threading.Event()
+        #self._watchdog_interval = 60  # seconds
+        #self._watchdog_thread = None
+        #self._watchdog_stop = threading.Event()
 
     
 
@@ -282,7 +282,7 @@ class Communication():
             self._handle_response()
             return None
         
-
+    '''
     def _start_watchdog(self):
         if self._watchdog_thread and self._watchdog_thread.is_alive():
             return
@@ -311,6 +311,6 @@ class Communication():
                     # self._handle_response()  # Uncomment if protocol expects AskNext
                 finally:
                     self._mutex_function.release()
-# ...existing code...
 
+    '''
 
