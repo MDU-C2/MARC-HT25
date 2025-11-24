@@ -1,31 +1,31 @@
 ## PYTHON FUNCTIONS
 
-- GetPosition
+- GetPosition():
     - Sends **Get_Coordinates** to RAPID
     - Returns (x,y,z) of the robots position
 
-- Move (coordinates, orientation, normalized_vector)
+- Move (coordinates, orientation, normalized_vector):
     - Sends **Move** to the RAPID, the function is able to utilize coordinates, quaternion (orientation) and normalized vector.
 
-- PickUpSequence (coordinates, orientation)
-    - Sends **"Pick_Up_Sequence"** to RAPID and utilizes coordinates and orientation.
+- PickUpSequence (coordinates, orientation):
+    - Sends **Pick_Up_Sequence** to RAPID and utilizes coordinates and orientation.
 
-- LeaveSequence(coordinates, orientation)
-    - Sends **"Leave_Sequence"** to RAPID
+- LeaveSequence(coordinates, orientation):
+    - Sends **Leave_Sequence** to RAPID
 
-- OpenGripper
+- OpenGripper():
     - Sends **Release** to RAPID
 
-- CloseGripper
+- CloseGripper():
     - Sends **Grip** to RAPID
 
 - MoveCalibrationPosition (position)
     - Sends **Move_Calibration_Position** to RAPID
 
-- MoveHome
+- MoveHome():
     - Sends **Home** to RAPID
 
-- ConnectionTest
+- ConnectionTest():
     - Sends **Connection_test** to RAPID
 
 ## PYTHON MESSAGES THAT ARE HANDLED
