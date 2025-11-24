@@ -72,23 +72,6 @@ MODULE server
                 TPWrite("[INFO] client is sending test message");
                 SocketSend client_socket\Str:="Connection_Confirmed";
 
-            CASE "Cups_available": ! Not used
-                TPWrite("[INFO] client have found cups");
-
-                MovingCups;
-
-                WaitTime(delay_time);
-                !SocketSend client_socket\Str:="AskNext";
-                ! no more cups
-                SocketClose client_socket;
-                RETURN ;
-                !break process
-
-            CASE "Coordinates": ! Not used
-                TPWrite "[INFO] client want cordinates";
-                hand_frame:=CRobT(\Tool:=tGripper);
-                SocketSend client_socket\Str:=RobtargetToString(hand_frame)+"_ack";
-                ! add real cordinates here
                 
             CASE "Get_Coordinates": ! this case sends only the x,y,z coordinates of the left hand gripper, Tool Center Point. ! not done but should not crash the program
                 TPWrite "[INFO] client want cordinates";
@@ -99,9 +82,6 @@ MODULE server
                 SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
                 SocketReceive client_socket\Str:=message; ! Just assume it is "ACK" for now
                 SocketSend client_socket\Str:="AskNext";
-                
-                
-                ! add real cordinates here
 
             CASE "Move":
                 TPWrite("[INFO] client want to move arm");
@@ -137,16 +117,7 @@ MODULE server
                 shared_vars.flag:=5; !temporary
                 shared_vars.wait_flag:=TRUE;
                 SocketSend client_socket\Str:="Ack_Release done";
-            CASE "testmove": ! not used
-                TPWrite("[INFO] client want to move arm");
-                IF (MoveRob_test(GetRobTarget())) THEN
-                    !Successfull move sequence
-                    !SocketSend client_socket\Str:="Ack_succesfull";
-                    ! add real cordinates here
-                ELSE
-                    SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
-                    !move failed
-                ENDIF
+
             CASE "Pick_Up_Sequence":
             
                 SocketSend client_socket\Str:="Ack_Release done";
