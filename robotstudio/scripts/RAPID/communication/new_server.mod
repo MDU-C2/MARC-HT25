@@ -65,41 +65,27 @@ MODULE server
             
             SocketReceive client_socket\Str:=message;
             !you have 30 sec to send message or conneciton closes
-            ! swich case
+            ! switch case
             TEST message
 
-            CASE "Connection_test":
+            CASE "Connection_test": ! not done but should not crash the program
                 TPWrite("[INFO] client is sending test message");
                 SocketSend client_socket\Str:="Connection_Confirmed";
 
-            CASE "Cups_available":
-                TPWrite("[INFO] client have found cups");
-
-                MovingCups;
-
-                WaitTime(delay_time);
-                SocketSend client_socket\Str:="Ack_stop";
-                ! no more cups
-                SocketClose client_socket;
-                RETURN ;
-                !break process
-
-            CASE "Coordinates":
+                
+            CASE "Get_Coordinates": ! this case sends only the x,y,z coordinates of the left hand gripper, Tool Center Point. ! not done but should not crash the program
                 TPWrite "[INFO] client want cordinates";
-                hand_frame:=CRobT(\Tool:=tGripper);
-                SocketSend client_socket\Str:=RobtargetToString(hand_frame)+"_ack";
-                ! add real cordinates here
-            CASE "Pos":
-                TPWrite "[INFO] client want cordinates";
-                hand_frame:=CRobT(\Tool:=tGripper);
-                SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
-                ! add real cordinates here
+      
+                message := TalkWithPython("SendRobotCoordinates");
+                
+                
+                SocketSend client_socket\Str:="AskNext";
 
             CASE "Move":
                 TPWrite("[INFO] client want to move arm");
                 IF (MoveRob(GetRobTarget())) THEN
                     !Successfull move sequence
-                    SocketSend client_socket\Str:="Ack_succesfull";
+                    !SocketSend client_socket\Str:="AskNext";
                     ! add real cordinates here
                 ELSE
                     SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
@@ -108,49 +94,53 @@ MODULE server
             
             CASE "Grip":
                 TPWrite("[INFO] client want to grip with gripper");
-                SocketSend client_socket\Str:="Ack_wait";
+                SocketSend client_socket\Str:="Ack_wait";   ! Redo this, I dont think we can take 2 consecutive acks, Nicklas, Or maybe we can. We just assume the first message gets read before the second is sent
                 WaitUntil shared_vars.wait_flag=FALSE;
                 shared_vars.flag:=3; !temporary
                 shared_vars.wait_flag:=TRUE;
-                SocketSend client_socket\Str:="Ack_Grip done";
+                SocketSend client_socket\Str:="Ack_Grip_Done";
 
             CASE "Release":
                 TPWrite("[INFO] client want to open with gripper");
-                SocketSend client_socket\Str:="Ack_wait";
+
                 WaitUntil shared_vars.wait_flag=FALSE;
+                SocketSend client_socket\Str:="AskNext";
 
                 shared_vars.flag:=4; !temporary
                 shared_vars.wait_flag:=TRUE;
-                SocketSend client_socket\Str:="Ack_Release done";
+                !SocketSend client_socket\Str:="Ack_Release done";
             CASE "Home":
-                SocketSend client_socket\Str:="Ack_wait";
                 WaitUntil shared_vars.wait_flag=FALSE;
 
                 shared_vars.flag:=5; !temporary
                 shared_vars.wait_flag:=TRUE;
                 SocketSend client_socket\Str:="Ack_Release done";
-            CASE "testmove":
-                TPWrite("[INFO] client want to move arm");
-                IF (MoveRob_test(GetRobTarget())) THEN
-                    !Successfull move sequence
-                    SocketSend client_socket\Str:="Ack_succesfull";
-                    ! add real cordinates here
-                ELSE
-                    SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
-                    !move failed
-                ENDIF
-            CASE "LeaveCup":
-                WaitUntil shared_vars.wait_flag=FALSE;
-                shared_vars.flag:=7; !temporary
-                shared_vars.wait_flag:=TRUE;
+
+            CASE "Pick_Up_Sequence":
+            
+                SocketSend client_socket\Str:="Ack_Release done";
+                ! Implement function here
+                SocketSend client_socket\Str:="Ack_Release done";
+                !WaitUntil shared_vars.wait_flag=FALSE;
+                !shared_vars.flag:=7; !temporary
+                !shared_vars.wait_flag:=TRUE;
+            CASE "Leave_Sequence":
+                ! Implement function here
+                
+            CASE "Move_Calibration_Position": ! not done but should not crash the program
+                SocketSend client_socket\Str:="AskCalPoint";
+                SocketReceive client_socket\Str:=message; ! position number
+                ! Move to position, TODO
+                SocketSend client_socket\Str:="AskNext";
+                
             DEFAULT:
                 TPWrite("[INFO] message from client: "+message);
                 SocketSend client_socket\Str:="default_"+message;
                 ! add real cordinates here
             ENDTEST
 
-            WaitTime(delay_time);
-            SocketSend client_socket\Str:="Ask_next";
+            !WaitTime(delay_time);
+            !SocketSend client_socket\Str:="Ask_next";
             ! ask for next "order"
 
         ENDWHILE
@@ -403,6 +393,65 @@ MODULE server
         ELSEIF ERRNO=ERR_OUTSIDE_REACH THEN
             RETURN FALSE;
         ENDIF
+    ENDFUNC
+    
+    FUNC string TalkWithPython(string data) ! data is a string and is the data that RAPID wants from python. It returns the data in the form of a string
+        
+        VAR string tempdata;
+        
+        TEST data
+        
+        CASE "GetMugCoordinates":
+            SocketSend client_socket\Str:="Ask_MugCoordinate";
+            SocketReceive client_socket\Str:=tempdata;
+        
+        CASE "GetMugOrientation":
+            SocketSend client_socket\Str:="Ask_MugOrientation";
+            SocketReceive client_socket\Str:=tempdata;
+        
+        CASE "GetMugNormal":
+            SocketSend client_socket\Str:="Ask_MugNormal";
+            SocketReceive client_socket\Str:=tempdata;
+        
+        CASE "SendRobotCoordinates":    ! This sends the robots coordinates to python/camera
+            SocketSend client_socket\Str:="Robot_Wants_To_Send_Coordinates";
+            SocketReceive client_socket\Str:=tempdata; ! ACK
+            
+            hand_frame:=CRobT(\Tool:=tGripper);
+            SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
+            SocketReceive client_socket\Str:=tempdata; ! ACK
+            
+            tempdata := "Coordinates sent to Python";     
+            
+        CASE "SendRobotOrientation":    ! This may not work as I dont think RobPosToString() works with orientation. Dont use this.
+        
+            SocketSend client_socket\Str:="Robot_Wants_To_Send_Orientation";
+            SocketReceive client_socket\Str:=tempdata; ! ACK
+            
+            hand_frame:=CRobT(\Tool:=tGripper);
+            SocketSend client_socket\Str:=RobPosToString(hand_frame.rot);
+            SocketReceive client_socket\Str:=tempdata; ! ACK
+            
+            tempdata := "Orientation sent to Python";
+            
+            
+        CASE "AskCalPoint": ! ask for calibration point
+            SocketSend client_socket\Str:="Robot_Wants_To_Send_Orientation";
+            SocketReceive client_socket\Str:=tempdata;
+        
+        CASE "Disconnect":
+            SocketSend client_socket\Str:="Disconnect";
+            
+        
+        
+        DEFAULT:
+            TPWrite("[INFO] unkown message from client: "+data);
+            tempdata := "Unknown instruction in getdatafromrobot()";
+        
+        ENDTEST
+        
+        RETURN tempdata;
+        
     ENDFUNC
 
 ENDMODULE

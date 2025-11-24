@@ -4,16 +4,17 @@ import numpy as np
 import json
 import math
 import time
-from send_coords import CupPickingClient
+from updated_communication import Communication
 from copy import deepcopy
 import Camera_Setup as cs
 import test_protocol as tp
 
 
+
 quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
 cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
 robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
-client = CupPickingClient()
+client = Communication()
 client.connect()
 
 
@@ -71,7 +72,7 @@ with dai.Device(pipeline) as device:
                 label = labels[det.label]
 
             conf  = int(det.confidence * 100) # Confidence percentage
-
+            
             # Get bounding box coordinates
             x1 = int(det.xmin * frame.shape[1])
             y1 = int(det.ymin * frame.shape[0])
@@ -90,7 +91,7 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.imshow("RGB", frame)
-            if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046)): # Fix to not use invalid coordinates while the camera is auto focusing
+            if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                 coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
                 in_list = False
@@ -107,8 +108,8 @@ with dai.Device(pipeline) as device:
                     try:
                         temp_coords = obj_list.pop(0)
                         start_time = time.time()
-                        client.move_cup(temp_coords, quaternion)
-                        rob_coords = client.get_coords()
+                        client.Move(temp_coords, quaternion)
+                        rob_coords = client.GetPosition()
                         #rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
                         end_time = time.time()
                         process_time = end_time - start_time
@@ -122,7 +123,7 @@ with dai.Device(pipeline) as device:
                         print(f"Error {e}")
 
             # Show the frames in windows
-            cv.imshow("RGB", frame)
+        cv.imshow("RGB", frame)
 
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
