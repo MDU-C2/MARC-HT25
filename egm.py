@@ -115,5 +115,5 @@ def send_pos_egm(egm_ip, egm_port, positions):
         time.sleep(0.004)
 
         
-pos = [600,13,136]
+pos = [404,200,190]
 send_pos_egm(egm_ip, egm_port, pos)
