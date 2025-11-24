@@ -13,9 +13,9 @@ MODULE processes
     CONST egm_minmax egm_minmax_joint:=[-0.5,0.5];
 
 
-    PROC dynamicPoseOnetarget()
+    PROC EGMPoseExample()
         
-        setupEGMPose;
+        setupEGMPose(40);
 
         EGMRunPose  egmID1, 
                     EGM_STOP_HOLD 
@@ -42,12 +42,12 @@ MODULE processes
         EGMReset egmID1;
         ERROR
         IF ERRNO = ERR_UDPUC_COMM THEN
-            setupEGMPose;
+            setupEGMPose(40);
             RETRY;
         ENDIF
     ENDPROC
 
-    PROC dynamicJointOnetarget()
+    PROC EGMJointExample()
 
         setupEGMJoint;
 
@@ -82,6 +82,22 @@ MODULE processes
         ENDIF
     ENDPROC
     
+    PROC EGMfollowCup()
+        
+        VAR robtarget starting_target := [[40,200,190],[0.0848672,-0.454517,-0.883453,0.0756562],[-1,-3,0,4],[158.907,9E+9,9E+9,9E+9,9E+9,9E+9]];
+
+        MoveL starting_target,v1000,fine,tool0\WObj:=wobj0;
+        
+        setupEGMPose(40);
+        EGMRunPose  egmID1, 
+                    EGM_STOP_HOLD 
+                    \x \y \z \rx \ry \rz 
+                    \CondTime:=10
+                    \RampInTime:=0.05;
+
+        egmSt1 := EGMGetState(egmID1);
+
+    ENDPROC
     PROC setupEGMJoint()
         EGMReset egmID1;
         EGMGetId egmID1;
@@ -112,8 +128,7 @@ MODULE processes
 
     ENDPROC
     
-    
-    PROC setupEGMPose()
+    PROC setupEGMPose(num max_speed_div)
         EGMReset egmID1;
         EGMGetId egmID1;
     
@@ -142,7 +157,7 @@ MODULE processes
                     \z:=egm_minmax_lin1 
                     \rx:=egm_minmax_rot1 
                     \ry:=egm_minmax_rot1 
-                    \rz:=egm_minmax_rot1\MaxSpeeddeviation:=100;
+                    \rz:=egm_minmax_rot1\MaxSpeeddeviation:=max_speed_div;
     ENDPROC
     
 ENDMODULE
