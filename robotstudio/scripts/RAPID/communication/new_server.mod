@@ -80,7 +80,11 @@ MODULE server
                 
                 hand_frame:=CRobT(\Tool:=tGripper);
                 SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
-                SocketReceive client_socket\Str:=message; ! Just assume it is "ACK" for now
+                SocketReceive client_socket\Str:=message; ! Just assume it is "ACK" for 
+                
+                
+                
+                
                 SocketSend client_socket\Str:="AskNext";
 
             CASE "Move":
@@ -395,6 +399,14 @@ MODULE server
         ELSEIF ERRNO=ERR_OUTSIDE_REACH THEN
             RETURN FALSE;
         ENDIF
+    ENDFUNC
+    
+    FUNC string getdatafromrobot(string data)
+        
+        
+        
+        
+        
     ENDFUNC
 
 ENDMODULE

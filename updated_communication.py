@@ -115,7 +115,6 @@ class Communication():
 
                 case askcal_point if askcal_point in self.ASKCALPOINT: # RAPID wants calibration point number
                     self._send_message(str(self.CalPoint)) # Send calibration point number
-                    self._handle_response()
                 
                 case askmug_normal if askmug_normal in self.ASKMUGNORMAL: # RAPID wants mug normal
                     with self._mutex_variable:  # Lock mutex for thread-safe access
