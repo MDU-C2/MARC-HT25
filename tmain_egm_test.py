@@ -15,10 +15,10 @@ egm_port=6510
 num=0
 
 global busy
-global gpos
+global global_pos
 busy = False
 lock = threading.Lock()
-egm = True
+#egm = True
 #Thread function to move robot to specified coordinates
 def local_move(coords, orient, obj_list, normalized_vector):
     global busy
@@ -49,12 +49,15 @@ def CreateSensorMessage(egmSensor, pos, euler):
 
 def send_pos_egm_thread(egm_ip, egm_port):
     print("Running EGM python client")
+    #lock.acquire()
     robot_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     print(f"Listening on {egm_ip}:{egm_port}")
     robot_socket.bind((egm_ip, egm_port))
     robot_socket.settimeout(30)
+    #lock.release()
+
     
-    while gpos:
+    while global_pos:
         try:
             data, addr = robot_socket.recvfrom(1024)
         except TimeoutError:
@@ -62,7 +65,7 @@ def send_pos_egm_thread(egm_ip, egm_port):
             continue
         
         m = egm.EgmRobot()
-        #print("message:", m)
+        print("message:", m)
         m.ParseFromString(data)
         # print("parsed message:", m)
         #positions[0] = m.feedBack.cartesian.pos.x
@@ -74,10 +77,10 @@ def send_pos_egm_thread(egm_ip, egm_port):
         CurZ = m.feedBack.cartesian.euler.z
         euler = [CurX,CurY,CurZ]
         egmSensor=egm.EgmSensor()
-        egmSensor=CreateSensorMessage(egmSensor,gpos,euler)
+        egmSensor=CreateSensorMessage(egmSensor,global_pos,euler)
         msg=egmSensor.SerializeToString()
         robot_socket.sendto(msg, addr)
-        time.sleep(0.01)
+        time.sleep(0.1)
 
 
 # def run():
@@ -112,9 +115,11 @@ with dai.Device(pipeline) as device:
     q_depth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
     q_det   = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
-
+    global_pos = [40,200,190]
     obj_list = []
-    
+    t1 = threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True)
+    if not t1.is_alive():
+        t1.start()
     while True:
         in_rgb   = q_rgb.get() # latest RGB frame
         in_depth = q_depth.get() # latest depth frame (aligned to RGB)
@@ -159,9 +164,9 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
 
-            if busy == False and label != "gripper":
-
-                if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
+            if label != "Gripper":
+            # if busy == False and label != "gripper":
+                if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                     coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
                     in_list = False
@@ -176,12 +181,12 @@ with dai.Device(pipeline) as device:
                     if obj_list:
                         try:
                             time.sleep(0.5) # Small delay to ensure busy is set before thread starts
-                            lock.acquire()
+                            #lock.acquire()
                             temp_coords = obj_list[0]
-                            gpos = temp_coords
-                            lock.release()
-                            #if egm:
-                            threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True).start()
+                            global_pos = temp_coords
+                            #lock.release()
+                            #if
+                            
                             
                             normalized_vector = orientation_map.get(label)
                             threading.Thread(target=local_move, args=(temp_coords, quaternion, obj_list, normalized_vector), daemon=True).start()
@@ -198,7 +203,7 @@ with dai.Device(pipeline) as device:
             continue
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
-            gpos = False
+            global_pos = False
             break
 
 cv.destroyAllWindows()
