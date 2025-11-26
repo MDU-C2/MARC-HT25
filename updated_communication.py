@@ -38,9 +38,9 @@ class Communication():
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
         ## Special case
-        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" '''
+        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" ''' # not used?, replaced with ACK
 
-        ## TODO List of what python can send
+        ## List of what python can send
 
         '''
         "Connection_test"
@@ -56,11 +56,6 @@ class Communication():
         # Special cases, inside a switch case
         "ACK"
         '''
-
-
-
-
-
         
         self.MugCoordinates = [200,-200,100] # x,y,z coordinates of the mug
         self.MugOrientation = [1,0,0,0] # quaternion, mug orientation
@@ -70,13 +65,9 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        #self.RobTarget = []
-        #self.Pos = []
-        #self.Orient = []
+        self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
+        self._connection_test_thread.start()
 
-        #self.RobTarget.append([[200,-200,100],[1,0,0,0],[-1,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]])
-        #self.Pos.append([200,-200,100])
-        #self.Orient.append([1,0,0,0])
 
     
 
@@ -125,7 +116,6 @@ class Communication():
 
                 case askcal_point if askcal_point in self.ASKCALPOINT: # RAPID wants calibration point number
                     self._send_message(str(self.CalPoint)) # Send calibration point number
-                    self._handle_response()
                 
                 case askmug_normal if askmug_normal in self.ASKMUGNORMAL: # RAPID wants mug normal
                     with self._mutex_variable:  # Lock mutex for thread-safe access
@@ -139,6 +129,14 @@ class Communication():
                     # sys.exit(0)
                     return None
             
+
+
+    def _keep_connection_alive(self):
+        """Sleep 60s then send a test message to RAPID. Windows does not like open sockets without activity."""
+        while True:
+            time.sleep(60)
+            if self.connected:
+                self.ConnectionTest()
 
     def connect(self):
 
@@ -293,7 +291,6 @@ class Communication():
             self._send_message("Connection_test")
             self._handle_response()
             return None
-    
-
+        
 
 
