@@ -2,7 +2,7 @@ import socket
 import json
 import time
 import os
-
+import ast
 
 class CupPickingClient:
     def __init__(self, host='192.168.125.1', port=1025):
@@ -362,6 +362,83 @@ class CupPickingClient:
         if response != "Ask_next":
             print(f"[ERROR] Expected Ask_next, got: {response}")
             return False
+
+    def move_cup_test(self, coordinates, orientation):
+        move = "testmove"
+        print("Alive")
+        coord_str = f"[{coordinates[0]},{coordinates[1]},{coordinates[2]}]"
+        orientation_str = f"[{orientation[0]},{orientation[1]},{orientation[2]},{orientation[3]}]"
+
+        self.send_message(move)
+        response = self.receive_message()
+        if response != "Ask_Coordinate":
+            print(f"[ERROR] Expected Ask_Coordinate, got: {response}")
+            return False
+        else:
+            self.send_message(coord_str)
+        
+        response = self.receive_message()
+        if response != "Ack_Coordinate":
+            print(f"[ERROR] Expected Ack_Coordinate, got: {response}")
+            return False
+
+        response = self.receive_message()
+        if response != "Ask_Orientation":
+            print(f"[ERROR] Expected Ask_Orientation, got: {response}")
+            return False
+        
+        else:
+            self.send_message(orientation_str)
+        
+        response = self.receive_message()
+        if response != "Ack_Orientation":
+            print(f"[ERROR] Expected Ack_Orientation, got: {response}")
+            return False
+
+        response = self.receive_message()
+        if response != "Ack_succesfull":
+            print(f"[ERROR] Expected Ack_succesfull, got: {response}")
+            return False
+        
+        print("[INFO] Cup pickup position sent successfully")
+
+        response = self.receive_message()
+        if response != "Ask_next":
+            print(f"[ERROR] Expected Ask_next, got: {response}")
+            return False
+
+        
+    def grip(self):
+        self.send_message("Grip")
+
+        response = self.receive_message()
+        if response != "Ack_wait":
+            print(f"[ERROR] Expected Ack_wait, got: {response}")
+            return False
+        
+        response = self.receive_message()
+        if response != "Ack_Grip done":
+            print(f"[ERROR] Expected Ack_Grip done, got: {response}")
+            return False
+        
+
+    def get_coords(self):
+        message = "Pos" #"Pos" is the command to get coordinates from robot
+        print("alive")
+        self.send_message(message)
+         
+        response = self.receive_message()
+        time.sleep(0.1) # To not cause issue with the followup "ask_next" message
+        _ = self.receive_message() # throw away ask message
+        data_float = ast.literal_eval(response) #Covert the string that looks like a list into a actual list
+
+        return data_float
+
+    def leave_cup(self):
+        print("ALIVE")
+        self.send_message("LeaveCup")
+
+
 
 def main():
     print("=== Cup Picking Communication Protocol ===")

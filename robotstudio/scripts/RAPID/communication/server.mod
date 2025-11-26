@@ -66,8 +66,10 @@ MODULE server
             SocketReceive client_socket\Str:=message;
             !you have 30 sec to send message or conneciton closes
             ! switch case
+            ! switch case
             TEST message
 
+            CASE "Connection_test": ! not done but should not crash the program
             CASE "Connection_test": ! not done but should not crash the program
                 TPWrite("[INFO] client is sending test message");
                 SocketSend client_socket\Str:="Connection_Confirmed";
@@ -80,6 +82,7 @@ MODULE server
                 TPWrite("[INFO] client want to move arm");
                 IF (MoveRob(GetRobTarget())) THEN
                     !Successfull move sequence
+                    !SocketSend client_socket\Str:="AskNext";
                     !SocketSend client_socket\Str:="AskNext";
                     ! add real cordinates here
                 ELSE
