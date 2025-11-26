@@ -1,17 +1,16 @@
 MODULE movementFunctions
-    !***********************************************************
-    !
-    ! Module:  movementFunctions
-    !
-    ! Description:
-    !   These functions can be used for movement between two points and
-    !   handle problems such as points far away from eachother and high joint values
-    !
-    ! Author: fjn20007
-    !
-    ! Version: 1.0
-    !
-    !***********************************************************
+!***********************************************************
+!
+! Module:  movementFunctions
+!
+! Description:  These functions can be used for movement between two points and handle problems
+!               such as points far away from eachother and high joint values
+!
+!               Meant to be used with configuration mode off (ConfL & ConfJ \off)
+!
+! Author: fjn20007
+!
+!***********************************************************
 
     PROC MovementProc(robtarget desired_target, num step_size, num max_magnitude, speeddata movement_speed)
         
@@ -31,11 +30,11 @@ MODULE movementFunctions
         WHILE VectMagn(desired_target.trans-current_target.trans) > max_magnitude DO
             disc_target := discretizeTarget(current_target,desired_target,step_size);
             desired_joint_value := CalcJointT(disc_target,tGripper);
-            MoveY \J,disc_target,movement_speed,z50,tGripper;
+            MoveY disc_target,movement_speed,z50,tGripper;
             current_target := CRobT(\Tool:=tGripper);
         ENDWHILE
 
-        MoveY \J,desired_target,movement_speed,fine,tGripper;
+        MoveY desired_target,movement_speed,fine,tGripper;
 !        ProcerrRecovery \SyncOrgMoveInst;
         
         ERROR
@@ -48,7 +47,7 @@ MODULE movementFunctions
             ENDIF
             IF VectMagn(desired_target.trans-current_target.trans) > max_magnitude THEN
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
-                MoveY \J,disc_target,movement_speed,z50,tGripper;
+                MoveY disc_target,movement_speed,z50,tGripper;
                 current_target := CRobT(\Tool:=tGripper);
 
                 IF disc_target = home_target THEN
@@ -77,9 +76,13 @@ MODULE movementFunctions
         ENDIF
     ENDPROC
     
+!    ***********************************************************
+!     Function: discretizeTarget
+
+!     Description:  Returns a pos/orient between current and desired target, checking valid pos/orient iterating between the targets by step_size.
+!                   Moves to predefined HomeTarget if no valid pos/orient.
     
-    !Returns a pos/orient between current and desired target, checking valid pos/orient iterating between the targets by step_size
-    !Moves to predefined HomeTarget if no valid pos/orient.
+!    ***********************************************************
     FUNC robtarget discretizeTarget(robtarget current_target, robtarget desired_target,num step_size)
         
         VAR robtarget disc_target;
@@ -115,7 +118,12 @@ MODULE movementFunctions
         
     ENDFUNC
     
-    !Returns the point located the given step_size away from current target towards desired target.
+!    ***********************************************************
+!     Function: discretizePosition
+
+!     Description:  Returns the point located the given step_size away from current position towards desired position.
+    
+!    ***********************************************************
     FUNC pos discretizePosition(pos current_target,pos desired_target,num step_size)
     
     VAR pos dir_vector;
@@ -129,7 +137,12 @@ MODULE movementFunctions
     RETURN return_pos;
     ENDFUNC
     
-    !Returns the orientation between current and desired orientation dependant on step_size.
+!    ***********************************************************
+!     Function: discretizePosition
+
+!     Description:  Returns the orientation between current and desired orientation dependant on step_size.
+    
+!    ***********************************************************
     FUNC orient discretizeOrient(orient current_orient,orient desired_orient,num step_size)
     
     VAR orient dir_vector;
@@ -165,13 +178,24 @@ MODULE movementFunctions
     ENDIF
     ENDFUNC
     
+!    ***********************************************************
+!     Function: QuaternionDotProd
+
+!     Description:  Returns the dot product two quaternions
+    
+!    ***********************************************************
     FUNC num QuaternionDotProd(orient q1,orient q2)
         VAR num dot_product;
         dot_product := q1.q1*q2.q1+q1.q2*q2.q2+q1.q3*q2.q3+q1.q4*q2.q4;
         RETURN dot_product;
     ENDFUNC
 
-    !Checks if calculated joint values are valid.
+!    ***********************************************************
+!     Function: checkJointValues
+
+!     Description:  Check wether calculated joint values from a target are valid
+    
+!    ***********************************************************
     FUNC BOOL checkJointValues(robtarget desired_target)
         
         VAR jointtarget desired_joint_target;
@@ -186,10 +210,15 @@ MODULE movementFunctions
     ENDIF
     ENDFUNC
     
-    !Move to pre-defined home target.
+!    ***********************************************************
+!     Process: moveToHomeTarget
+
+!     Description:  simply move to pre defined home_target
+    
+!    ***********************************************************
     PROC moveToHomeTarget()
         ConfJ\On;
-        MoveY \J,home_target,v300,fine,tGripper;
+        MoveY home_target,v300,fine,tGripper;
         ConfJ\Off;
     ENDPROC
 ENDMODULE

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <Program>
-	<Module>movementFunctions.mod</Module>
-	<Module>Module1.mod</Module>
+	<Module>EGMprocesses.mod</Module>
+	<Module>movement_shared_vars.mod</Module>
 	<Module>SharedAreaFunctions.mod</Module>
+	<Module>Module1.mod</Module>
+	<Module>movementFunctions.mod</Module>
 </Program>

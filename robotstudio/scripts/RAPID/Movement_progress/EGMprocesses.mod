@@ -1,4 +1,14 @@
 MODULE EGMprocesses
+!    ***********************************************************
+    
+!     Module:  EGMprocesses
+    
+!     Description: Main module for EGM processes. Includes setup, activation adn starting of EGM
+!                  in both pose and joint mode.
+    
+!     Author: fjn20007
+    
+!    ***********************************************************
 
     VAR egmident egmID1;
     VAR egmstate egmSt1;
@@ -11,11 +21,19 @@ MODULE EGMprocesses
     CONST egm_minmax egm_minmax_rot1 := [-2,2];
     !    ! limits for joint convergence:        +-0.5 degrees
     CONST egm_minmax egm_minmax_joint:=[-0.5,0.5];
+    
+    CONST num m_speed_div := 40;
+    
+    
+!    ***********************************************************
+!     Process: EGMPoseExample
 
-
+!     Description: Starts EGM communication in pose mode.
+    
+!    ***********************************************************
     PROC EGMPoseExample()
         
-        setupEGMPose(40);
+        setupEGMPose(m_speed_div);
 
         EGMRunPose  egmID1, 
                     EGM_STOP_HOLD 
@@ -42,11 +60,18 @@ MODULE EGMprocesses
         EGMReset egmID1;
         ERROR
         IF ERRNO = ERR_UDPUC_COMM THEN
-            setupEGMPose(40);
+            setupEGMPose(m_speed_div);
             RETRY;
         ENDIF
     ENDPROC
+    
+    
+!    ***********************************************************
+!     Process: EGMJointExample
 
+!     Description: Starts EGM communication in joint mode.
+    
+!    ***********************************************************
     PROC EGMJointExample()
 
         setupEGMJoint;
@@ -82,13 +107,16 @@ MODULE EGMprocesses
         ENDIF
     ENDPROC
     
+    
+!    ***********************************************************
+!     Process: EGMfollowCup
+
+!     Description: Starts EGM communication in pose mode.
+    
+!    ***********************************************************
     PROC EGMfollowCup()
         
-        VAR robtarget starting_target := [[40,200,190],[0.0848672,-0.454517,-0.883453,0.0756562],[-1,-3,0,4],[158.907,9E+9,9E+9,9E+9,9E+9,9E+9]];
-
-        MoveL starting_target,v1000,fine,tool0\WObj:=wobj0;
-        
-        setupEGMPose(40);
+        setupEGMPose(m_speed_div);
         EGMRunPose  egmID1, 
                     EGM_STOP_HOLD 
                     \x \y \z \rx \ry \rz 
@@ -96,9 +124,28 @@ MODULE EGMprocesses
                     \RampInTime:=0.05;
 
         egmSt1 := EGMGetState(egmID1);
-
+        ! Reset EGM communication.
+        IF egmSt1 <= EGM_STATE_CONNECTED THEN
+            EGMReset egmID1;
+        ENDIF
+        
+        ERROR
+        IF ERRNO = ERR_UDPUC_COMM THEN
+            setupEGMPose(m_speed_div);
+            RETRY;
+        ENDIF
     ENDPROC
-    PROC setupEGMJoint()
+    
+    
+!    ***********************************************************
+!     Process: setupEGMJoint
+
+!     Description: Setup and activation for EGM in joint mode
+
+!     Arguments: num:max_speed_div - maximum speed diviation
+    
+!    ***********************************************************
+    PROC setupEGMJoint(num max_speed_div)
         EGMReset egmID1;
         EGMGetId egmID1;
 
@@ -126,8 +173,17 @@ MODULE EGMprocesses
                     \J7:=egm_minmax_joint
                     \MaxSpeedDeviation:=20;
 
-    ENDPROC
+    ENDPROC  
     
+    
+!    ***********************************************************
+!     Process: setupEGMPose
+
+!     Description: Setup and activation for EGM in pose mode
+
+!     Arguments: num:max_speed_div - maximum speed diviation
+    
+!    ***********************************************************
     PROC setupEGMPose(num max_speed_div)
         EGMReset egmID1;
         EGMGetId egmID1;
