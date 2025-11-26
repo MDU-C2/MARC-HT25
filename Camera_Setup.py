@@ -18,7 +18,7 @@ def convert_coordinates(x ,y ,z, homogeneous_matrix): # X Y Z coordinates that s
     obj_camera_coordinates_homo = np.append(obj_camera_coordinates, [1])  # Convert object coordinates to homogeneous coordinates
     obj_base_effector_coordinates_homo = homogeneous_matrix.dot(obj_camera_coordinates_homo)
     obj_base_coordinates = obj_base_effector_coordinates_homo[:3]  
-
+    
     #return list(map(int, obj_base_coordinates)) # Uncomment this line if you want to send integers instead of floats
     return np.around(obj_base_coordinates,2).tolist() # Use this to get a list of new coordinates, chane the number to get the number of decimal numbers
 
@@ -63,6 +63,91 @@ def extract_data(file):
             x = json.loads(i)
             float_list.append(x)
     return list(float_list)
+
+def cam_calibration():
+     # Create DepthAI pipeline
+    pipeline = dai.Pipeline()
+
+    # Define the camera nodes
+    cam_rgb   = pipeline.create(dai.node.ColorCamera)
+    mono_left  = pipeline.create(dai.node.MonoCamera)
+    mono_right = pipeline.create(dai.node.MonoCamera)
+    stereo     = pipeline.create(dai.node.StereoDepth)
+    detection_nn = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
+
+    # Define XLink outputs for streaming frames and detections to host
+    xout_rgb   = pipeline.create(dai.node.XLinkOut)
+    xout_depth = pipeline.create(dai.node.XLinkOut)
+    xout_nn    = pipeline.create(dai.node.XLinkOut)
+    xout_rgb.setStreamName("rgb")
+    xout_depth.setStreamName("depth")
+    xout_nn.setStreamName("detections")
+
+    # Camera configuration (RGB camera)
+    cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
+    cam_rgb.setPreviewSize(640, 640) # Neural network input size. (MUST MATCH THE RUNNING MODELS SIZE)
+    cam_rgb.setInterleaved(False)
+    cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+
+    # Mono cameras (for depth)
+    mono_left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    mono_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    mono_left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+    mono_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+
+    # Stereo depth configuration
+    stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+    stereo.setDepthAlign(dai.CameraBoardSocket.RGB)       
+    stereo.setOutputSize(mono_left.getResolutionWidth(), mono_left.getResolutionHeight())
+    stereo.setSubpixel(True) 
+
+    configPath = "new_blob_v8/best_Nano.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+    with open(configPath, "r") as f:
+        config = json.load(f)
+    nnConfig = config.get("nn_config", {})
+
+    # Extract the metadata from the JSON file
+    metadata = nnConfig.get("NN_specific_metadata", {})
+    classes = metadata.get("classes", {})
+    coordinates = metadata.get("coordinates", {})
+    anchors = metadata.get("anchors", {})
+    anchorMasks = metadata.get("anchor_masks", {})
+    iouThreshold = metadata.get("iou_threshold", {})
+    confidenceThreshold = metadata.get("confidence_threshold", {})
+
+    print(metadata)
+
+    nnMappings = config.get("mappings", {})
+    labels = nnMappings.get("labels", {})
+
+    nnPath = "new_blob_v8/best_Nano_openvino_2022.1_6shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+
+    # Specific settings for the network
+    detection_nn.setConfidenceThreshold(confidenceThreshold)
+    detection_nn.setNumClasses(classes)
+    detection_nn.setCoordinateSize(coordinates)
+    detection_nn.setAnchors(anchors)
+    detection_nn.setAnchorMasks(anchorMasks)
+    detection_nn.setIouThreshold(iouThreshold)
+    detection_nn.setBlobPath(nnPath)
+    detection_nn.setNumInferenceThreads(2)
+    detection_nn.input.setBlocking(False)
+
+    syncNN = True
+
+    # Linking
+    cam_rgb.preview.link(detection_nn.input)
+    mono_left.out.link(stereo.left)
+    mono_right.out.link(stereo.right)
+    stereo.depth.link(detection_nn.inputDepth)
+
+    detection_nn.passthrough.link(xout_rgb.input) # Passthrough RGB frames (frames that went into NN)
+    detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
+    detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
+
+    return  syncNN, pipeline, labels
+
 
     #==================================== CAMERA & COMMUNICATION SETUP ====================================
 def camera_setup(cam_coords, robot_file):

@@ -147,6 +147,19 @@ MODULE GiveCup_SupportFunctions
       
    ENDPROC 
    
+   ! if mug is to close to robot, we want to change the "sholder" directin, making the robot fetch the mug in a different direction
+   FUNC pos dynamicSholderPos(pos mug_position,num max_lenght)
+       
+       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
+       TPWrite "magnitude:", \Num:=max_lenght;
+       IF sqrt(DotProd(mug_position,mug_position)) < max_lenght THEN
+           RETURN sholder_pos_far;
+       ELSE
+           RETURN sholder_pos_close;
+       ENDIF
+       
+   ENDFUNC
+   
    ! support function to span plane to find the specifit directional vector
    FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
        
@@ -158,9 +171,9 @@ MODULE GiveCup_SupportFunctions
        VAR pos u;
        VAR pos v;
        VAR num scaler;
-       scaler := .8;
+       scaler := .8; ! weight the normal vector minial value
        
-       position := position - sholder_pos; ! this to gain the vector from the sholder and not the base.
+       position := position - dynamicSholderPos(position,300); ! this to gain the vector from the sholder and not the base.
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
             ! generate "easy" vector to span plane

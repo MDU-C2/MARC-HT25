@@ -6,28 +6,32 @@ import json
 import time
 import ast
 import Camera_Setup as cs
+from updated_communication import Communication
 
-host='192.168.125.1' #Input server (robot) ip
-port=1025 #Input used port
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #initialize client socket object, (IPv4, TCP)
-
-try:
-    client_socket.connect((host, port)) #simply connect the client (this code) to the robot
-    print(f"Connected to {host}:{port}") #if successfull
-except ConnectionRefusedError:
-    print(f"Connection refused.") # If failure, (server probably not started or wrong values)
-
-def get_coords():
-    message = "Pos" # "Pos" is the command to get coordinates from robot
-    client_socket.sendall(message.encode())  # Send message 
-    data = client_socket.recv(1024).decode('utf-8')  # Receive response
-    time.sleep(0.1) # To not cause issue with the followup "ask_next" message
-    _ = client_socket.recv(1024).decode('utf-8') # throw away ask message
-    data_float = ast.literal_eval(data) #Covert the string that looks like a list into a actual list
-    return data_float
+# host='192.168.125.1' #Input server (robot) ip
+# port=1025 #Input used port
+#client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #initialize client socket object, (IPv4, TCP)
+client = Communication()
+client.connect()
 
 
-_, _, pipeline, label_map = cs.camera_setup()
+# try:
+#     client_socket.connect((host, port)) #simply connect the client (this code) to the robot
+#     print(f"Connected to {host}:{port}") #if successfull
+# except ConnectionRefusedError:
+#     print(f"Connection refused.") # If failure, (server probably not started or wrong values)
+
+# def get_coords():
+#     message = "Get_Coordinates" # "Pos" is the command to get coordinates from robot
+#     client_socket.sendall(message.encode())  # Send message 
+#     data = client_socket.recv(1024).decode('utf-8')  # Receive response
+#     time.sleep(0.1) # To not cause issue with the followup "ask_next" message
+#     _ = client_socket.recv(1024).decode('utf-8') # throw away ask message
+#     data_float = ast.literal_eval(data) #Covert the string that looks like a list into a actual list
+#     return data_float
+
+
+_, pipeline, label_map = cs.cam_calibration()
 
 # Initialize the device and pipeline
 with dai.Device(pipeline) as device:
@@ -59,7 +63,7 @@ with dai.Device(pipeline) as device:
                 label = label_map[det.label]
             conf  = int(det.confidence * 100)  # confidence percentage
 
-            if label != "gripper": # Only process non-gripper detections (cups)
+            if label == "Gripper": # Only process non-gripper detections (cups)
                 # Get bounding box coordinates (normalized 0..1 from NN, convert to pixel coords)
                 x1 = int(det.xmin * frame.shape[1])
                 y1 = int(det.ymin * frame.shape[0])
@@ -85,7 +89,7 @@ with dai.Device(pipeline) as device:
                 if cv.waitKey(1) & 0xFF == ord(' '):
                     Saved_Coordinates.append([coords.x,coords.y,coords.z]) # save camera coordinates
                     try:
-                        robot_position = get_coords() # get coordinates from robot
+                        robot_position = client.GetPosition()# get coordinates from robot
                     except:
                         print("error getting coordinates from robot")
                     saved_robo_coordinates.append(robot_position) # save robot coordinates
@@ -98,8 +102,8 @@ with dai.Device(pipeline) as device:
 
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
-            client_socket.close() #close connection to server
-            print("Connection closed.")
+            # client_socket.close() #close connection to server
+            # print("Connection closed.")
             break # kill pipeline
 
 # both these files are needed to run the main file, as they are used when converting camera fram into robot frame 

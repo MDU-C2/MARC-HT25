@@ -26,43 +26,57 @@ MODULE GiveCup
     PROC FetchMug(pos mug_position, num offset_lenght, pos mug_normal)
         VAR robtarget target;
         VAR orient hand_rotation;
-        VAR pos offset;
+        VAR pos offset_dir;
         !go to postion
         hand_rotation := NormalToOrientationSemiOptimal(mug_position,mug_normal);
 !        hand_rotation := NormalToOrientation(mug_normal);
         
-        offset := RotatePointUsingQuaternion([0,0,1],hand_rotation)*offset_lenght;
-        offset.x := Round(offset.x \Dec:=4);
-        offset.y := Round(offset.y \Dec:=4);
-        offset.z := Round(offset.z \Dec:=4);
+        offset_dir := RotatePointUsingQuaternion([0,0,1],hand_rotation);
+        offset_dir.x := Round(offset_dir.x \Dec:=4);
+        offset_dir.y := Round(offset_dir.y \Dec:=4);
+        offset_dir.z := Round(offset_dir.z \Dec:=4);
         
         target := CRobT(\Tool := tGripper);
         ConfJ \Off;
 
+        mug_position := mug_position - [0,0,1]*zOffset(mug_normal);
+        
         target.rot := hand_rotation;
-        target.trans := mug_position - offset;
-        moveJ target,movespeed,z50,tGripper;
-!        MovementProc target,50,300,movespeed;
+        target.trans := mug_position - offset_dir*offset_lenght;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movespeed;
         ! grippers out
         WaitTime(1);
-!         g_GripOut;
+        g_GripOut;
                 
         !ask for confermation
         TPWrite("At mug picking frame");
         
         !pick up mug
-        target.trans := mug_position;
-        moveJ target,movespeed,z50,tGripper;
-!        MovementProc target,50,300,movespeed;
+        target.trans := mug_position + offset_dir*gripper_offset;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movespeed;
         ! grippers in
         WaitTime(1);
-!         g_GripIn;
+        g_GripIn;
         
-        target.trans := mug_position - offset;
-        moveJ target,movespeed,z50,tGripper;
-!        MovementProc target,50,300,movespeed;
+        target.trans := mug_position - offset_dir*offset_lenght;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movespeed;
         
     ENDPROC
+    
+    ! the mug is longer if it standing up rather then laying down
+    FUNC num ZOffset(pos normal)
+        
+        ! mug standing upright
+        IF normal.z >= normal.x AND normal.z >= normal.y THEN
+            RETURN 30;
+        ELSE
+            RETURN 20;
+        ENDIF
+            
+    ENDFUNC
     
     ! hand over mug to other hand
     PROC HandOverMug()
@@ -72,12 +86,10 @@ MODULE GiveCup
     ENDPROC
     
     ! leave mug
-   PROC LeaveMug(pos mug_end_position, pos mug_end_normal)
+   PROC LeaveMug(pos mug_end_position, pos mug_end_normal, num offset_lenght)
         VAR robtarget target;
         VAR orient hand_rotation;
         VAR pos offset;
-        VAR num offset_lenght;
-        offset_lenght := 50;
         
         hand_rotation := NormalToOrientationSemiOptimal(mug_end_position,mug_end_normal);
         offset := [0,0,1]*offset_lenght; ! we always want to move straight up after leaving mug

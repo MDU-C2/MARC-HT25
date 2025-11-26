@@ -6,6 +6,7 @@ import ast
 import threading
 import numpy as np
 import math
+import sys
 
 
 class Communication():
@@ -134,7 +135,8 @@ class Communication():
                     #self.ErrorHandling()
                     print(f"[ERROR] Unexpected response: {response}")
                     self.disconnect()
-                    #exit(1)
+                    # exit(1)
+                    # sys.exit(0)
                     return None
             
 
@@ -239,11 +241,12 @@ class Communication():
 
             return
 
-    def PickUpSequence(self, coordinates, orientation):
+    def PickUpSequence(self, coordinates, orientation,normalized_vector):
         with self._mutex_function:
             self._send_message("Pick_Up_Sequence")
             self.MugCoordinates = coordinates
             self.MugOrientation = orientation
+            self.MugNormal = list(normalized_vector)
             self._handle_response()
 
             #"""Perform pick-up sequence"""

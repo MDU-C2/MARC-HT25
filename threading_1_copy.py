@@ -6,18 +6,19 @@ from updated_communication import Communication
 import Camera_Setup as cs
 import test_protocol as tp
 import threading
+import numpy as np
 #==================================== THREADING SETUP ====================================
 global busy
 busy = False
 lock = threading.Lock()
-
 #Thread function to move robot to specified coordinates
 def local_move(coords, orient, client, obj_list, normalized_vector):
     global busy
     with lock:
         if busy != True:
             busy = True
-            client.Move(coords, orient, normalized_vector)
+            # client.Move(coords, orient, normalized_vector)
+            client.PickUpSequence(coords, orient, normalized_vector)
             obj_list.pop(0)
             busy = False
 
@@ -26,14 +27,24 @@ def run():
 
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
-            'Back': [-1.0, 0.0, 0.0],
-            'Front': [1.0, 0.0, 0.0],
-            'left_side': [0.0, -1.0, 0.0],
-            'right_side': [0.0, 1.0, 0.0],
-            'upright': [0.0, 0.0, 1.0],
-            'upside_down': [0.0, 0.0, -1.0],
+        
+            'Back': [ 0.0, 0.0,-1.0],
+            'Front': [0.0, 0.0,1.0],
+            'left_side': [-1.0, 0.0, 0.0],
+            'right_side': [1.0, 0.0, 0.0],
+            'upright': [0.0, 1.0 ,0.0],
+            'upside_down': [0.0, -1.0, 0.0],
+
             'handle': [0.0, 0.0, -1.0],
             'gripper': [0.0, 0.0, -1.0],
+            # 'Back': [-1.0, 0.0, 0.0],
+            # 'Front': [1.0, 0.0, 0.0],
+            # 'left_side': [0.0, -1.0, 0.0],
+            # 'right_side': [0.0, 1.0, 0.0],
+            # 'upright': [0.0, 0.0, 1.0],
+            # 'upside_down': [0.0, 0.0, -1.0],
+            # 'handle': [0.0, 0.0, -1.0],
+            # 'gripper': [0.0, 0.0, -1.0],
         }
     quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
     cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
@@ -122,9 +133,9 @@ def run():
 
                 if busy == False and label != "gripper":
 
-                    if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
+                    if cv.waitKey(1) & 0xFF == ord(' '):#True :#not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                         coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-
+                        
                         in_list = False
                         for i in obj_list:
 
@@ -144,9 +155,27 @@ def run():
                                 
                                 start_time = time.time()
 
+
                                 normalized_vector = orientation_map.get(label)
-                                threading.Thread(target=local_move, args=(temp_coords, quaternion, client, obj_list, normalized_vector), daemon=True).start()
+                                # debugg
+                                # print("normal vector before: " + str(normalized_vector))
+                                # print(abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0]))
+                                
+                                temp = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
+                                if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # z not the biggest value -> mug is not up nor down
+                                    temp -= [0,0,np.dot(temp,[0,0,1])]
+                                    temp =  temp/np.sqrt(np.dot(temp,temp))
+                                    np.set_printoptions(precision=3)
+                                else:
+                                    # stading upright
+                                    temp[2] = normalized_vector[1]/abs(normalized_vector[1])
+                                    temp[1] = 0
+                                    temp[0] = 0
+
+                                temp = list(temp)
+                                threading.Thread(target=local_move, args=(temp_coords, quaternion, client, obj_list, [float(temp[0]),float(temp[1]),float(temp[2])] ), daemon=True).start()
                                 #rob_coords = client.GetPosition()
+                                
                                 rob_coords = 0
                                 end_time = time.time()
                                 process_time = end_time - start_time
