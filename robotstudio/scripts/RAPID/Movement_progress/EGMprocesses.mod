@@ -74,7 +74,7 @@ MODULE EGMprocesses
 !    ***********************************************************
     PROC EGMJointExample()
 
-        setupEGMJoint;
+        setupEGMJoint(m_speed_div);
 
         EGMRunJoint egmID1, 
                     EGM_STOP_HOLD
@@ -102,7 +102,7 @@ MODULE EGMprocesses
         EGMReset egmID1;
         ERROR
         IF ERRNO = ERR_UDPUC_COMM THEN
-            setupEGMJoint;
+            setupEGMJoint(m_speed_div);
             RETRY;
         ENDIF
     ENDPROC
