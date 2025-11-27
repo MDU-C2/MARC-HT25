@@ -31,7 +31,7 @@
 
 * Components used
   - YUMI IRB14000
-  - OAK D PRO Camera
+  - OAK-D PRO Camera
 * Languages used
   - Python
   - RAPID
