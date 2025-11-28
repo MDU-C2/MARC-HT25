@@ -57,10 +57,10 @@ MODULE Server_functions
         VAR string roborient_string;
         
        roborient_string := "[" +
-            ValToStr(Round(input_orient.rot.q1)) + "," +
-            ValToStr(Round(input_orient.rot.q2)) + "," +
-            ValToStr(Round(input_orient.rot.q3)) + "," +
-            ValToStr(Round(input_orient.rot.q4)) + "]";
+            ValToStr(Round(input_orient.q1)) + "," +
+            ValToStr(Round(input_orient.q2)) + "," +
+            ValToStr(Round(input_orient.q3)) + "," +
+            ValToStr(Round(input_orient.q4)) + "]";
     
         RETURN roborient_string;
         

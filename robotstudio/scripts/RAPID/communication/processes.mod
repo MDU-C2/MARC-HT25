@@ -8,14 +8,14 @@ MODULE processes
     PROC EGMMovement()
         VAR robtarget starting_point;
         
-        starting_point:=[[0,0,0],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];
-        starting_point.trans := getMugCoordinates();
+!        starting_point:=[[0,0,0],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];
+!        starting_point.trans := getMugCoordinates();
         
         WaitUntil shared_movement_vars.wait_flag=FALSE;
         
         shared_movement_vars.flag:=8;
-        shared_movement_vars.target:=starting_point;
-        SocketSend client_socket\Str:="enable_EGM";
+!        shared_movement_vars.target:=starting_point;
+!        SocketSend client_socket\Str:="enable_EGM";
         
         shared_movement_vars.wait_flag:=TRUE;
         
@@ -29,7 +29,7 @@ MODULE processes
     
 !    ***********************************************************
     PROC Grip()
-        TPWrite("[INFO] client wants to close gripper");
+        TPWrite("[INFO] client wants to close the gripper");
         WaitUntil shared_movement_vars.wait_flag=FALSE;
         shared_movement_vars.flag:=3; 
         shared_movement_vars.wait_flag:=TRUE;
@@ -224,7 +224,7 @@ MODULE processes
             SocketSend client_socket\Str:="Ask_MugOrientation";
 
             SocketReceive client_socket\Str:=message;
-            sucess:=rob_orientation(message,return_Orientation;
+            sucess:=rob_orientation(message,return_Orientation);
         ENDWHILE
 
         return_Orientation:=NormilizeRotation(return_Orientation);
@@ -235,4 +235,82 @@ MODULE processes
         
     ENDFUNC
     
+    FUNC bool MoveRob(robtarget target)
+
+        WaitUntil shared_movement_vars.wait_flag=FALSE;
+        shared_movement_vars.flag:=1;
+
+        !EXCLAIMER TEMPORARY CONSTANT ORIENTATION
+        target.rot:=[0.00274,0.75169,0.65950,-0.00414];
+        target.trans.z := -28;
+        IF VectMagn(target.trans) > 560 THEN
+            shared_movement_vars.flag:=0;
+            RETURN FALSE;
+        ENDIF
+
+        shared_movement_vars.target:=target;
+!        shared_vars.joint_values := CalcJointT(target,tGripper); ! get target joint values
+
+        shared_movement_vars.wait_flag:=TRUE;
+        
+        WaitUntil shared_movement_vars.wait_flag =FALSE;
+        RETURN TRUE;
+    ERROR
+        IF ERRNO=ERR_ROBLIMIT THEN
+            ! exead limit, send error to client and expect new coordinates
+            RETURN FALSE;
+        ELSEIF ERRNO=ERR_OUTSIDE_REACH THEN
+            RETURN FALSE;
+        ENDIF
+    ENDFUNC
+
+    FUNC robtarget GetRobTarget()
+        VAR bool sucess:=FALSE;
+        VAR robtarget return_target;
+        return_target:=[[611.44,-10,224.449],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        !CRobT(\Tool:= tGripper); !init values
+
+        WaitTime(delay_time);
+        SocketSend client_socket\Str:="Ask_Coordinate";
+        SocketReceive client_socket\Str:=message;
+        sucess:=rob_coordinates(message,return_target.trans);
+        WHILE NOT sucess DO
+            SocketSend client_socket\Str:="[ERROR]_wrong_format,try_again(exampel[x,y,z])";
+            WaitTime(delay_time);
+            SocketSend client_socket\Str:="Ask_Coordinate";
+
+            SocketReceive client_socket\Str:=message;
+            sucess:=rob_coordinates(message,return_target.trans);
+        ENDWHILE
+        TPWrite "Recieved pos(GetRobTarget):"\Pos:=return_target.trans;
+        SocketSend client_socket\Str:="Ack_Coordinate";
+        WaitTime(delay_time);
+        SocketSend client_socket\Str:="Ask_Orientation";
+
+        ! expect message [q1,q2,q3,q4] commands next
+        SocketReceive client_socket\Str:=message;
+        sucess:=rob_orientation(message,return_target.rot);
+
+        WHILE NOT sucess DO
+            SocketSend client_socket\Str:="[ERROR]_wrong_format,try_again(exampel[q1,q2,q3,q4])";
+            WaitTime(delay_time);
+            SocketSend client_socket\Str:="Ask_Orientation";
+
+            SocketReceive client_socket\Str:=message;
+            sucess:=rob_orientation(message,return_target.rot);
+        ENDWHILE
+
+        return_target.rot:=NormilizeRotation(return_target.rot);
+
+
+        SocketSend client_socket\Str:="Ack_Orientation";
+        WaitTime(delay_time);
+
+        RETURN return_target;
+    ERROR
+        IF ERRNO = ERR_SOCK_CLOSED THEN
+            SocketClose client_socket;
+        ENDIF
+    ENDFUNC
+
 ENDMODULE
