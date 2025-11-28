@@ -71,9 +71,17 @@ MODULE Module1
                 ConfJ\Off;
             CASE 8: !EGM movement
                 ConfJ\On;
+                ConfL\On;
                 MoveY shared_movement_vars.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
+                ConfL\Off;
                 EGMfollowCup;
+            CASE 9:
+                ConfJ\On;
+                ConfL\On;
+                MoveY shared_movement_vars.target,movement_speed,fine,tGripper;
+                ConfJ\Off;
+                ConfL\Off;
             ENDTEST
             shared_movement_vars.wait_flag := FALSE;
         ENDWHILE
