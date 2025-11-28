@@ -72,13 +72,16 @@ $ cd MARC-HT25
 
 There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot. [Python guide](/media/Guide/Python/README.md) for setting up Python and the camera to communicate with the robot.
 
-**If this is your first time with this scrit, it is sugessted to follow the [step by step guide](/media/Guide/step_by_step_guide.md).**
+**If this is your first time working in this project, it is sugessted to follow the [step by step guide](/media/Guide/step_by_step_guide.md).**
 ## Rapid
 Rapid is the language to program the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md). It is used to do the following parts of the project.
+- [Get started](/media/Guide/Yumi%20IRB%2014000/RAPIDstart.md)
 - [Communication](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md)
 - [Move arm](/media/Guide/Yumi%20IRB%2014000/move_arm.md)
 
 ## Python
+- [Python](/media/Guide/Python/README.md)
+- [Run Python code](/media/Guide/Python/running_code.md)
 
 ## YuMi IRB 14000
 [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) is the robot used. It currently boot with system failure, to solve this and to get started follow the links down below. 
