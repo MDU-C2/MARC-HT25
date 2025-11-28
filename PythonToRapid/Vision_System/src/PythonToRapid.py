@@ -15,7 +15,7 @@ from typing import List, Dict, Optional, Callable
 
 
 class RobotCommunication:
-    def __init__(self, host='127.0.0.1', port=1025):
+    def __init__(self, host='192.168.125.1', port=1025):
         """
         Initialize robot communication with full cup management
         
@@ -41,7 +41,7 @@ class RobotCommunication:
         self.total_cups_sent = 0
         
         # Default release position
-        self.release_position = [421, -186, 200]  # [x, y, z] in mm
+        self.release_position = [421, -186, -55]  # [x, y, z] in mm
         
         # Message handlers (dynamic dispatch)
         self.message_handlers = {

@@ -19,31 +19,21 @@ To run the codes provided in this repository multiple Python libraries needs to 
 
 ## Installation
 
-Start by cloning this repository to your computer by using the following commands
-
-```bash
-# Clone this repository
-$ git clone https://github.com/MDU-C2/MARC-HT25.git
-
-# Go into the repository
-$ cd MARC-HT25
-```
-
 You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
 
-In the installer check the box to add python to the PATH
+In the installer check the box to add Python to the PATH
 
 
-Next up is to set up a virtual python environment
+Next step is to set up a virtual Python environment
 
 ```bash
-# Create a virtual environment with python 3.11 (Python 3.11 is needed for some libraries used)
+# Create a virtual environment with Python 3.11 (Python 3.11 is needed for some libraries used)
 > py -3.11 -m venv .venv
 
 # Activate the virtual environment (make sure you are in the correct folder when doing this)
 > .venv\Scripts\activate
 ```
-Now it's time to install the correct libraries, this is done by running our **requirements.txt** file
+Now it's time to install the correct libraries, this is done by running the **requirements.txt** file included in the Git repository
 
 ```bash
 #Run the requirements.txt file

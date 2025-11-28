@@ -1,9 +1,7 @@
 MODULE GiveCup_SupportFunctions
-    
-   
    !!! ================== SUPPORT FUNCTIONS =========================== !!!
    
-   !this function will align the y axes to the normal axes
+   !Align the y axes to the normal axes
    FUNC orient NormalToOrientation(pos normal)
        
        VAR pos e{3}; ! base frame vectors
@@ -29,19 +27,6 @@ MODULE GiveCup_SupportFunctions
        PosToNumArr e{1},x;
        PosToNumArr e{2},y;
        PosToNumArr e{3},z;
-  
-       
-    ! ===== Not working correctly version 
-        !NOTE: Here we declare that the Yaxes will align with the orientation
-        ! rotate pi/2 around z axes to get y to align with normal
-!!        R := [[0,-1,0],[1,0,0],[0,0,1]];
-!        R := [[1,0,0],[0,1,0],[0,0,1]];
-!        MatrixMult3x3 Matrix,[x,y,z],R;
-        
-!   ! to make equations more consistant with documentation
-!    x := [Matrix{1,1},Matrix{1,2},Matrix{1,3}];
-!    y := [Matrix{2,1},Matrix{2,2},Matrix{2,3}];
-!    z := [Matrix{3,1},Matrix{3,2},Matrix{3,3}];
 
     ! ===== uggly and hard coded version of what is above
     buffer := x;
@@ -55,12 +40,53 @@ MODULE GiveCup_SupportFunctions
       RETURN q;
    ENDFUNC
    
+   !Align y axes with normal and align zaxes to a semi optimal vector from robot to mug
+   FUNC orient NormalToOrientationSemiOptimal(pos mug_position,pos normal)
+       
+       VAR pos e{3}; ! base frame vectors
+       ! to make it consistant with documentation
+       VAR num x{3};
+       VAR num y{3};
+       VAR num z{3};
+       VAR num buffer{3};
+       VAR num Matrix{3,3};
+       VAR num R{3,3};
+       VAR orient q;
+       
+       Normilize normal;
+       
+       ! span the R3 Space
+       SpanPlaneFromNormalSemiOptimal mug_position,normal,e;
+      
+       ! make the Span ortogonal to get proporties of Rotation matrix
+       OrtogonalMatrix3x3 e;
+       
+       
+       ! to make equations more consistant with documentation
+!       PosToNumArr e{1},x;
+!       PosToNumArr e{2},y;
+!       PosToNumArr e{3},z;
+        
+        ! To make the frame "right" compared to the wated outcome
+       PosToNumArr e{1},y;
+       PosToNumArr e{2},z;
+       PosToNumArr e{3},x;
+
+    
+    !%Chiaverini-Siciliano method
+    q := ChiaveriniSiciliano(x,y,z);!now we have a queternium from a normal vector!
+ 
+      RETURN q;
+   ENDFUNC
+  
+   ! Convert position to num array
    PROC PosToNumArr(pos p, INOUT num e{*})
        e{1} := p.x;
        e{2} := p.y;
        e{3} := p.z;
    ENDPROC
    
+   ! matrix multiplication
    PROC  MatrixMult3x3(INOUT num M{*,*},num M1{*,*}, num M2{*,*})
        
      FOR i FROM 1 TO 3 DO
@@ -72,6 +98,7 @@ MODULE GiveCup_SupportFunctions
        
    ENDPROC
    
+   ! get 2 vector non parallel to normal
    PROC SpanPlaneFromNormal(pos normal, INOUT pos e{*})
        VAR pos e1;
        VAR pos e2;
@@ -90,7 +117,8 @@ MODULE GiveCup_SupportFunctions
       ELSE !z is smallest numeric 
         e2 := [0,0,-1]; 
       ENDIF
-    
+
+
       e3 := CrossProd(e1,e2);
       
       e{1} := e1;
@@ -98,7 +126,77 @@ MODULE GiveCup_SupportFunctions
       e{3} := e3;
       
    ENDPROC 
+     
+   ! get 2 vector non parallel to normal, but one of them is in specific direction
+   PROC SpanPlaneFromNormalSemiOptimal(pos mug_position, pos normal, INOUT pos e{*})
+       VAR pos e1;
+       VAR pos e2;
+       VAR pos e3;
+       
+       !normilze normal and add it to e1
+       e1 := normal;
+       Normilize e1;
+
+       e2 := SemiOptimalPickUpOrientation(mug_position,e1);
+
+       e3 := CrossProd(e1,e2);
+      
+      e{1} := e1;
+      e{2} := e2;
+      e{3} := e3;
+      
+   ENDPROC 
    
+   ! if mug is to close to robot, we want to change the "sholder" directin, making the robot fetch the mug in a different direction
+   FUNC pos dynamicSholderPos(pos mug_position,num max_lenght)
+       
+       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
+       TPWrite "magnitude:", \Num:=max_lenght;
+       IF sqrt(DotProd(mug_position,mug_position)) < max_lenght THEN
+           RETURN sholder_pos_far;
+       ELSE
+           RETURN sholder_pos_close;
+       ENDIF
+       
+   ENDFUNC
+   
+   ! support function to span plane to find the specifit directional vector
+   FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
+       
+       ! We want to make the magnitude of cross product of n and v1 to be as big as possible,
+       ! This to make the area between them as big as possible, aka include more information and less distortion
+       
+       ! We also want to make sure that if the mug is laying down (n = [?,?,0]) the vector should be close to [small,small,sgn(mug.pos.z - robtarget.pos.z)] 
+       
+       VAR pos u;
+       VAR pos v;
+       VAR num scaler;
+       scaler := .8; ! weight the normal vector minial value
+       
+       position := position - dynamicSholderPos(position,300); ! this to gain the vector from the sholder and not the base.
+       u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
+       
+            ! generate "easy" vector to span plane
+        !NOTE: we want to grip y and z from negativ to positive  
+           IF Abs(normal.z) <= Abs(normal.y) AND Abs(normal.z) <= Abs(normal.x) THEN ! z is smallest numeric 
+             v := [0,0,sign(u.z)*scaler];
+          ELSEIF Abs(normal.y) <= Abs(normal.x) AND Abs(normal.y) <= Abs(normal.z) THEN ! y is smallest numeric 
+             v := [0,sign(u.y)*scaler,0];
+          ELSE !x is smallest numeric 
+            v := [sign(u.x)*scaler,0,0];
+          ENDIF
+       
+       v := v + u;
+       
+       v := v/sqrt(DotProd(v,v));
+       
+       v := v - Project(v,normal);
+       
+       RETURN v;
+       
+   ENDFUNC
+   
+   ! normilize position variable
    PROC Normilize(INOUT pos v)
        VAR num size;
        size := sqrt(DotProd(v,v));
@@ -109,6 +207,7 @@ MODULE GiveCup_SupportFunctions
        
    ENDPROC
    
+   ! make a 3x3 matrix ortogonal
    PROC OrtogonalMatrix3x3(INOUT pos e{*})
        
        !e1 is ortogonal to nothing
@@ -127,6 +226,7 @@ MODULE GiveCup_SupportFunctions
        RETURN v2*(DotProd(v1,v2)/(sqrt(DotProd(v2,v2))));
    ENDFUNC
    
+   ! convert 3x3 matrix to queternion
    FUNC orient ChiaveriniSiciliano(num x{*},num y{*},num z{*}) 
    
        VAR orient q;
@@ -152,12 +252,14 @@ MODULE GiveCup_SupportFunctions
        
    ENDFUNC
        
+   ! return i +1, -1 or 0 depending of sign of number
     FUNC num sign(num eq)
         IF(eq >= 0) THEN RETURN 1;
         ELSE RETURN -1;
         ENDIF
     ENDFUNC
 
+    ! rotate a point using a queterion
     FUNC pos RotatePointUsingQuaternion(pos p, orient q)
         
         VAR orient q_inv;
@@ -191,6 +293,7 @@ MODULE GiveCup_SupportFunctions
         return result;
     ENDFUNC
     
+    ! get inverse or queternion
     FUNC orient QuaternionInverse(orient q)
         VAR orient q_inv;
         q_inv.q1 := q.q1;
@@ -200,6 +303,7 @@ MODULE GiveCup_SupportFunctions
         RETURN q_inv;
     ENDFUNC
     
+    ! make a point into orinet (w = 0)
     FUNC orient PointToOrinet(pos p)
         VAR orient q;
         q.q1 := 0;
