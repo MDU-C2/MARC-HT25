@@ -12,10 +12,13 @@ MODULE Module1
     !
     !***********************************************************
 !-177.987
+    
+
 
     CONST robtarget home_target := [[609,13,136],[0.56458,0.45107,0.48932,0.48820],[-1,-1,0,4],[-177.987,9E+09,9E+09,9E+09,9E+09,9E+09]];
 !    CONST robtarget home_target := [[693.916,137.177,38.7584],[0.467517,-0.537106,0.454215,-0.535381],[-2,0,1,4],[83.8102,9E+09,9E+09,9E+09,9E+09,9E+09]];
-
+    CONST num calib_array_size := 3;
+    PERS robtarget calib_targets{calib_array_size};
     PROC main()
         CONST robtarget cup_target := [[499.548,-110.253,-46.3938],[0.0565402,0.114235,0.990146,-0.0580089],[-2,-3,-1,4],[-177.807,9E+09,9E+09,9E+09,9E+09,9E+09]];
         VAR robtarget testing_target;
@@ -23,22 +26,30 @@ MODULE Module1
         VAR iodev logfile;
 !        CONST robtarget home_target:=[[609,13,136],[0.56458,0.45107,0.48932,0.48820],[-1,-1,0,4],[-177.987,9E+09,9E+09,9E+09,9E+09,9E+09]];
         CONST bool testing := FALSE;
-        CONST bool testing_savingpos := FALSE;
+        CONST bool testing_savingpos := TRUE;
+        CONST bool savepos := FALSE;
         CONST speeddata movement_speed := vMedium;
         CONST num max_magnitude := 300;
         CONST num step_size := 50;
         CONST num orient_frac := 0.3;
         CONST num joint_threshold := 0.7;
+        VAR num j := 1;
         shared_vars.target := CrobT(\Tool:=tGripper);
         TPErase;
         ConfJ\On;
 !        RemoveFile "Home:/Positions.txt";
+        IF savepos THEN
+            saveCalibTargets;
+        ENDIF
+            
         IF testing_savingpos THEN
             Close logfile;
-            Open "HOME:" \File:= "Positions.txt", logfile \Write;
+!            Open "HOME:" \File:= "Positions.txt", logfile \Write;
             WHILE TRUE DO
                 testing_target := CrobT(\Tool:=tGripper);
-                Write logfile, "",\Pos:= testing_target.trans;
+                calib_targets{j} := testing_target;
+                Incr j;
+!                Write logfile, "",\Pos:= testing_target.trans;   
             ENDWHILE
         ENDIF
 !        WaitTime 1;
@@ -117,5 +128,19 @@ MODULE Module1
             ENDTEST
             shared_vars.wait_flag := FALSE;
         ENDWHILE
+    ENDPROC
+    
+    PROC saveCalibTargets()
+
+        VAR iodev logfile;
+        VAR num i:=1;
+
+        Open "Home:" \File:= "LOGFILE1.txt", logfile \Write;
+        FOR i FROM 1 TO calib_array_size DO
+            Write logfile, "",\Pos:= calib_targets{i}.trans;
+            Write logfile, "",\Orient:= calib_targets{i}.rot;
+            Write logfile, "[",\num:=calib_targets{i}.confdata.cf1;
+        ENDFOR
+        Close logfile;
     ENDPROC
 ENDMODULE
