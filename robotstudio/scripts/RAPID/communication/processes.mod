@@ -107,9 +107,15 @@ MODULE processes
     
     
     PROC calibrationMovement()
+        VAR bool ok;
+        VAR num index;
         SocketSend client_socket\Str:="AskCalPoint";
         SocketReceive client_socket\Str:=message; ! position number
-        ! Move to position, TODO
+        ok := StrToVal(message,index);
+        WaitUntil shared_movement_vars.wait_flag=FALSE;
+        shared_movement_vars.flag:=9;
+        shared_movement_vars.target := calib_robtargets{index};
+        shared_movement_vars.wait_flag:=TRUE;
                 
     ENDPROC
     
