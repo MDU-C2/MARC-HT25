@@ -6,6 +6,7 @@ import ast
 import threading
 import numpy as np
 import math
+import sys
 
 
 class Communication():
@@ -23,7 +24,7 @@ class Communication():
     
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
-                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal"] # these should be removed except ACK, it is not in the main switch case but inside a case
+                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal", "Ack_EGM"] # these should be removed except ACK, it is not in the main switch case but inside a case
         
         self.CLOSE = ["Disconnect", ]
         self.ROBOTWANTSTOSENDCOORDINATES = ["Robot_Wants_To_Send_Coordinates", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
@@ -37,9 +38,9 @@ class Communication():
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
         ## Special case
-        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" '''
+        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" ''' # not used?, replaced with ACK
 
-        ## TODO List of what python can send
+        ## List of what python can send
 
         '''
         "Connection_test"
@@ -124,7 +125,8 @@ class Communication():
                     #self.ErrorHandling()
                     print(f"[ERROR] Unexpected response: {response}")
                     self.disconnect()
-                    #exit(1)
+                    # exit(1)
+                    # sys.exit(0)
                     return None
             
 
@@ -237,11 +239,12 @@ class Communication():
 
             return
 
-    def PickUpSequence(self, coordinates, orientation):
+    def PickUpSequence(self, coordinates, orientation,normalized_vector):
         with self._mutex_function:
             self._send_message("Pick_Up_Sequence")
             self.MugCoordinates = coordinates
             self.MugOrientation = orientation
+            self.MugNormal = list(normalized_vector)
             self._handle_response()
 
             #"""Perform pick-up sequence"""
@@ -289,5 +292,8 @@ class Communication():
             self._handle_response()
             return None
         
-
-
+    def EGM_movement(self):
+        with self._mutex_function:
+            self._send_message("EGM_movement")
+            self._handle_response()
+            return None
