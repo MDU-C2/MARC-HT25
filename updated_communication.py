@@ -32,7 +32,7 @@ class Communication():
 
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
-        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", ] # RAPID is ready for the next command
+        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", "Ask_next"] # RAPID is ready for the next command
 
         self.ASKCALPOINT = ["AskCalPoint", ]
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
@@ -276,7 +276,7 @@ class Communication():
         with self._mutex_function:
             self._send_message("Move_Calibration_Position")
             with self._mutex_variable:
-                self.CalPoint = list(position) # make defensive copy
+                self.CalPoint = position # make defensive copy
             self._handle_response()
             return None
     
