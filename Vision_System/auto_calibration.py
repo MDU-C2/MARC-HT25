@@ -1,13 +1,8 @@
-import socket
 import cv2 as cv
 import depthai as dai
-import numpy as np
-import json
 import time
-import ast
 import camera_setup as cs
 from updated_communication import Communication
-import random
 import threading
 
 client = Communication()

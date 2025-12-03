@@ -1,12 +1,8 @@
 import socket
-import json
 import time
-import os
 import ast
 import threading
-import numpy as np
-import math
-import sys
+
 
 
 class Communication():

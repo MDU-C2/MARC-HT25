@@ -1,4 +1,3 @@
-import cv2 as cv
 import depthai as dai
 import numpy as np
 import json
