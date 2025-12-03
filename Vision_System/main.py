@@ -114,63 +114,63 @@ def run():
                 label = str(det.label)
                 if det.label < len(labels):
                     label = labels[det.label]
+                if label != "handle":
 
 
-
-                conf  = int(det.confidence * 100) # Confidence percentage
-                
-                # Get bounding box coordinates
-                x1 = int(det.xmin * frame.shape[1])
-                y1 = int(det.ymin * frame.shape[0])
-                x2 = int(det.xmax * frame.shape[1])
-                y2 = int(det.ymax * frame.shape[0])
-
-                # Draw rectangle on RGB frame
-                cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
-
-                # Draw label and confidence
-                cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-
-                # Draw spatial coordinates (X, Y, Z in mm)
-                coords = det.spatialCoordinates  # Spatial coordinates relative to camera
-                cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-
-
-                if busy == False and label != "Gripper":
-
-                    if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
-                        coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
-
-                        in_list = False
-                        for i in obj_list:
-
-                            if (math.isclose(coordinates[0],i[0], abs_tol= 10) or math.isclose(coordinates[1],i[1], abs_tol= 10)):
-                                in_list = True
+                    conf  = int(det.confidence * 100) # Confidence percentage
                     
+                    # Get bounding box coordinates
+                    x1 = int(det.xmin * frame.shape[1])
+                    y1 = int(det.ymin * frame.shape[0])
+                    x2 = int(det.xmax * frame.shape[1])
+                    y2 = int(det.ymax * frame.shape[0])
 
-                        with lock:
-                            if not in_list:
-                                obj_list.append(coordinates)
+                    # Draw rectangle on RGB frame
+                    cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
-                        if obj_list:    
-                            try:    
-                                norm = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
-                                if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # z not the biggest value -> mug is not up nor down
-                                    norm -= [0,0,np.dot(norm,[0,0,1])]
-                                    norm =  norm/np.sqrt(np.dot(norm,norm))
-                                    np.set_printoptions(precision=3)
-                                else:
-                                    # standing upright
-                                    norm[2] = normalized_vector[1]/abs(normalized_vector[1])
-                                    norm[1] = 0
-                                    norm[0] = 0
+                    # Draw label and confidence
+                    cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
-                                normalized_vector = orientation_map.get(label)
-                                threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
-                            except Exception as e:
-                                print(f"Error {e}")
+                    # Draw spatial coordinates (X, Y, Z in mm)
+                    coords = det.spatialCoordinates  # Spatial coordinates relative to camera
+                    cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+
+
+                    if busy == False and label != "Gripper":
+
+                        if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
+                            coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+
+                            in_list = False
+                            for i in obj_list:
+
+                                if (math.isclose(coordinates[0],i[0], abs_tol= 10) or math.isclose(coordinates[1],i[1], abs_tol= 10)):
+                                    in_list = True
+                        
+
+                            with lock:
+                                if not in_list:
+                                    obj_list.append(coordinates)
+
+                            if obj_list:    
+                                try:    
+                                    norm = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
+                                    if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # z not the biggest value -> mug is not up nor down
+                                        norm -= [0,0,np.dot(norm,[0,0,1])]
+                                        norm =  norm/np.sqrt(np.dot(norm,norm))
+                                        np.set_printoptions(precision=3)
+                                    else:
+                                        # standing upright
+                                        norm[2] = normalized_vector[1]/abs(normalized_vector[1])
+                                        norm[1] = 0
+                                        norm[0] = 0
+
+                                    normalized_vector = orientation_map.get(label)
+                                    threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
+                                except Exception as e:
+                                    print(f"Error {e}")
 
                 # Show the frames in windows
             cv.imshow("RGB", frame)
