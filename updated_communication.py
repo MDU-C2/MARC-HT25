@@ -24,7 +24,7 @@ class Communication():
     
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
-                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal"] # these should be removed except ACK, it is not in the main switch case but inside a case
+                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal", "Ack_EGM"] # these should be removed except ACK, it is not in the main switch case but inside a case
         
         self.CLOSE = ["Disconnect", ]
         self.ROBOTWANTSTOSENDCOORDINATES = ["Robot_Wants_To_Send_Coordinates", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
@@ -292,5 +292,8 @@ class Communication():
             self._handle_response()
             return None
         
-
-
+    def EGM_movement(self):
+        with self._mutex_function:
+            self._send_message("EGM_movement")
+            self._handle_response()
+            return None

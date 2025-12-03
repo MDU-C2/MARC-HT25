@@ -22,7 +22,7 @@ MODULE Module1
         CONST num pick_z_offset := 200;         
 
 !        shared_vars.target := CrobT(\Tool:=tGripper);
-        g_calibrate; ! Calibrate gripper
+!        g_calibrate; ! Calibrate gripper
         TPErase;     ! Erase all text on FlexPendant
         ConfJ\Off;   ! Turn off configuration mode
 
@@ -46,11 +46,11 @@ MODULE Module1
 !                ConfJ\Off;
 
             CASE 2: !Move to home position (revelotion counter calibration position)
-                MoveToHome;
+!                MoveToHome;
             CASE 3: !Close gripper to minimum
-                g_gripIn;
+!                g_gripIn;
             CASE 4: !Open gripper to maximum
-                g_gripOut;
+!                g_gripOut;
             CASE 5: !Move to home_target
                 ConfJ\On;
                 ConfL\On;
@@ -59,29 +59,21 @@ MODULE Module1
                 ConfL\Off;
             CASE 6: !test movement
                 MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
-                g_GripOut;
+!                g_GripOut;
                 MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
             CASE 7: !Leave cup
                 ConfJ\On;
-                g_GripIn;
+!                g_GripIn;
                 MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
                 MoveJ Offs(cup_target,x_offset,y_offset,z_offset),movement_speed,fine,tGripper;
-                g_GripOut;
+!                g_GripOut;
                 MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
                 ConfJ\Off;
             CASE 8: !EGM movement
                 ConfJ\On;
-                ConfL\On;
-                MoveY shared_movement_vars.target,movement_speed,fine,tGripper;
+                MoveJ shared_movement_vars.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
-                ConfL\Off;
                 EGMfollowCup;
-            CASE 9:
-                ConfJ\On;
-                ConfL\On;
-                MoveY shared_movement_vars.target,movement_speed,fine,tGripper;
-                ConfJ\Off;
-                ConfL\Off;
             ENDTEST
             shared_movement_vars.wait_flag := FALSE;
         ENDWHILE

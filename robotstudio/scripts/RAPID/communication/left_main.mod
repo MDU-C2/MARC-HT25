@@ -5,7 +5,7 @@ MODULE left_main
 
 !        TPErase;
 
-        shared_vars.wait_flag := FALSE;
+        shared_movement_vars.wait_flag := FALSE;
         WHILE TRUE DO !main loop
             !server
             single_client_communication; ! get and connect client communication

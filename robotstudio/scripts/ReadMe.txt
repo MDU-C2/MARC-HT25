@@ -13,11 +13,17 @@ NOTE! It uses winsock2.h and not sock.h meaning linux and mac might have problem
 
 
 ================ RAPID ================
-Rapid have 2 main files.
+The main tasks used in cup movement and python communication are:
+
+-Movement_progress
+-communication
+
+-------------- SERVER.MOD --------------
+communication has 2 main files:
 - server.mod
 - Server_functions.mod
 
-To execute the functionallit from these files, in main (or where you want the server to exsist) just add "single_client_communication;"
+To execute the functionality from these files, in main (or where you want the server to exist) just add "single_client_communication;"
 This will call the function "single_client_communication;" and execute all server functionality.
 
 -------------- SERVER.MOD --------------
