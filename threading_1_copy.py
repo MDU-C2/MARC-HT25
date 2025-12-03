@@ -60,7 +60,7 @@ def run():
     times_sec = []
 
     # save_protocol = input("Do you want to save the test protocol? (y/n): ").lower() == 'y'
-    save_protocol = False;
+    save_protocol = False
     if save_protocol:
         file_path = tp.create_today_textfile()
         tp.ask_user(file_path, "start")

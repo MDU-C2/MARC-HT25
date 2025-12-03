@@ -1,4 +1,5 @@
 import cv2 as cv
+import numpy as np
 import depthai as dai
 import math
 import time
@@ -15,7 +16,7 @@ times_sec = []
 lock = threading.Lock()
 
 #Thread function to move robot to specified coordinates
-def local_move(orient, client, obj_list, normalized_vector, file_path, save_protocol, conf=None, label=None):
+def local_move(orient, client, obj_list, normalized_vector, save_protocol ,file_path, conf=None, label=None):
     global busy, times_sec, count
     with lock:
         if busy != True:
@@ -28,22 +29,31 @@ def local_move(orient, client, obj_list, normalized_vector, file_path, save_prot
             if save_protocol:
                 count += 1
                 tp.cup_information(file_path, count, obj_list[0], process_time , confidence = conf, label= label)
+
                 times_sec.append(process_time)
             obj_list.pop(0)
             busy = False
 
 def run():
     global busy, times_sec
-
+    file_path = None
+    normalized_vector = [0,0,1] # Initial orientation vector for the gripper
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
-            'Back': [-1.0, 0.0, 0.0],
-            'Front': [1.0, 0.0, 0.0],
-            'left_side': [0.0, -1.0, 0.0],
-            'right_side': [0.0, 1.0, 0.0],
-            'upright': [0.0, 0.0, 1.0],
-            'upside_down': [0.0, 0.0, -1.0],
+            'Back': [ 0.0, 0.0,-1.0],
+            'Front': [0.0, 0.0,1.0],
+            'left_side': [-1.0, 0.0, 0.0],
+            'right_side': [1.0, 0.0, 0.0],
+            'upright': [0.0, 1.0 ,0.0],
+            'upside_down': [0.0, -1.0, 0.0],
             'Gripper': [0.0, 0.0, -1.0],
+            # 'Back': [-1.0, 0.0, 0.0],
+            # 'Front': [1.0, 0.0, 0.0],
+            # 'left_side': [0.0, -1.0, 0.0],
+            # 'right_side': [0.0, 1.0, 0.0],
+            # 'upright': [0.0, 0.0, 1.0],
+            # 'upside_down': [0.0, 0.0, -1.0],
+            # 'Gripper': [0.0, 0.0, -1.0],
         }
     quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
     cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
@@ -145,9 +155,20 @@ def run():
                                 obj_list.append(coordinates)
 
                         if obj_list:    
-                            try:                                
+                            try:    
+                                norm = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
+                                if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # z not the biggest value -> mug is not up nor down
+                                    norm -= [0,0,np.dot(norm,[0,0,1])]
+                                    norm =  norm/np.sqrt(np.dot(norm,norm))
+                                    np.set_printoptions(precision=3)
+                                else:
+                                    # standing upright
+                                    norm[2] = normalized_vector[1]/abs(normalized_vector[1])
+                                    norm[1] = 0
+                                    norm[0] = 0
+
                                 normalized_vector = orientation_map.get(label)
-                                threading.Thread(target=local_move, args=(quaternion, client, obj_list, normalized_vector, file_path, save_protocol, conf, label), daemon=True).start()
+                                threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                             except Exception as e:
                                 print(f"Error {e}")
 
