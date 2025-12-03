@@ -4,7 +4,7 @@ import depthai as dai
 import math
 import time
 from updated_communication import Communication
-import Camera_Setup as cs
+import camera_setup as cs
 import test_protocol as tp
 import threading
 #==================================== THREADING SETUP ====================================

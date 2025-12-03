@@ -5,7 +5,7 @@ import numpy as np
 import json
 import time
 import ast
-import Camera_Setup as cs
+import camera_setup as cs
 from updated_communication import Communication
 import random
 
