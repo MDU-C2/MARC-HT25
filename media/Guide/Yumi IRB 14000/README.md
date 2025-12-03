@@ -20,7 +20,9 @@ Start the YuMI by turning the power knob at the base of the robot.
 
 
 
->***Note:*** If you are using the same YuMI IRB14000 as we did you should read how to fix the [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error.
+>[!Note]
+ >If you are using the same YuMI IRB14000 as we did you should read how to fix the [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error. This should not be a problem though as it seems it was fixed by a person at ABB near the end of the project period.
+
 
 ## RobotStudio
 

@@ -1,0 +1,149 @@
+clear,clc,close all;
+
+%% load vars
+
+%base frame
+x = [1,0,0]';
+y = [0,1,0]';
+z = [0,0,1]';
+
+% input normal
+n = [1;1;1];
+
+% plot base frame
+w = .5;
+h = .8;
+
+offset = .2;
+figure(1);
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [(1-w)/2 (1-h)/2 w h]);
+PlotFrame(x',y',z',0);
+%% script
+
+% create vectors that Span R3
+[e1,e2,e3] = CreateFrameFromNormal(n);
+PlotFrame(e1',e2',e3',1);
+
+M = [e1,e2,e3];
+
+% make vector ortogonal to each other
+M_ortogonal = OrtogonalMatrix(M);
+
+e1 = M_ortogonal(:,1);
+e2 = M_ortogonal(:,2);
+e3 = M_ortogonal(:,3);
+
+PlotFrame(e1',e2',e3',2);
+
+%Chiaverini-Siciliano method
+R = M_ortogonal; % from base frame this is rotation matrix
+
+q0 =.5*sqrt(1 + R(1,1) + R(2,2) + R(3,3));
+q1 =.5*sqrt(1 + R(1,1) - R(2,2) - R(3,3))*sgn(R(3,2)-R(2,3));
+q2 =.5*sqrt(1 - R(1,1) + R(2,2) - R(3,3))*sgn(R(1,3)-R(3,1));
+q3 =.5*sqrt(1 - R(1,1) - R(2,2) + R(3,3))*sgn(R(2,1)-R(1,2));
+
+q = {q0,q1,q2,q3};
+
+PlotQueternium(q);
+
+plot3([0 n(1)], [0 n(2)], [0 n(3)], 'Color', [.5,.5,.5], 'LineWidth',3);
+text( n(1)+offset, n(2)+offset, n(3)+offset, 'Normal', 'Color', [.5,.5,.5], 'FontWeight', 'bold');
+
+
+%% animate
+
+f = figure(2);
+frames = 100;
+film(frames) = struct('cdata',[],'colormap',[]);
+fe1 = lerp(x,e1,frames);
+fe2 = lerp(y,e2,frames);
+fe3 = lerp(z,e3,frames);
+
+set(f,"Visible","off");
+    figure(2);
+for i = 1:frames-1
+
+    clf(2);
+    PlotFrame(fe1(:,i)',fe2(:,i)',fe3(:,i)',0);
+    
+    PlotQueternium(q);
+
+    xlim([-1.5 1.5]);
+    ylim([-1.5 1.5]);
+    zlim([-1.5 1.5]);
+    view(45, 45);
+    drawnow
+    film(i) = getframe;
+
+end
+
+plot3([0 n(1)], [0 n(2)], [0 n(3)], 'Color', [.5,.5,.5], 'LineWidth',3);
+text( n(1)+offset, n(2)+offset, n(3)+offset, 'Normal', 'Color', [.5,.5,.5], 'FontWeight', 'bold');
+
+drawnow
+film(i) = getframe;
+
+%% play movie
+
+f.Visible = 'on';
+movie(film,1,10);
+
+
+%% make y axes follow normal
+
+
+% create vectors that Span R3
+[e2,e1,e3] = CreateFrameFromNormal(n);
+PlotFrame(e1',e2',e3',1);
+
+M = [e1,e2,e3];
+
+% make vector ortogonal to each other
+M_ortogonal = OrtogonalMatrix(M);
+
+e1 = M_ortogonal(:,1);
+e2 = M_ortogonal(:,2);
+e3 = M_ortogonal(:,3);
+
+PlotFrame(e1',e2',e3',2);
+
+%Chiaverini-Siciliano method
+R = M_ortogonal; % from base frame this is rotation matrix
+
+q0 =.5*sqrt(1 + R(1,1) + R(2,2) + R(3,3));
+q1 =.5*sqrt(1 + R(1,1) - R(2,2) - R(3,3))*sgn(R(3,2)-R(2,3));
+q2 =.5*sqrt(1 - R(1,1) + R(2,2) - R(3,3))*sgn(R(1,3)-R(3,1));
+q3 =.5*sqrt(1 - R(1,1) - R(2,2) + R(3,3))*sgn(R(2,1)-R(1,2));
+
+q = {q0,q1,q2,q3};
+
+PlotQueternium(q);
+
+plot3([0 n(1)], [0 n(2)], [0 n(3)], 'Color', [.5,.5,.5], 'LineWidth',3);
+text( n(1)+offset, n(2)+offset, n(3)+offset, 'Normal', 'Color', [.5,.5,.5], 'FontWeight', 'bold');
+
+
+
+
+%% support functions
+
+function t = lerp(startp,endp,amount_of_steps)
+
+stepsize = 1/amount_of_steps;
+steps = stepsize:stepsize:1;
+
+t =  startp.*(1-steps) + steps.*endp;
+
+end
+
+function sign = sgn(num)
+
+    if(num > 0)
+        sign = 1;
+    elseif(num < 0)
+        sign = -1;
+    else
+        sign = 0;
+    end
+end
