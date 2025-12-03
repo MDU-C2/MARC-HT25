@@ -45,7 +45,7 @@ MODULE server
         ELSEIF ERRNO = ERR_SOCK_CLOSED THEN
             RETURN;
         ELSEIF ERRNO = ERR_SOCK_ADDR_INVALID THEN
-            ipAddress := "192.168.125.1";
+            ipAddress := "127.0.0.1";
             RETRY;
         ENDIF
     ENDPROC

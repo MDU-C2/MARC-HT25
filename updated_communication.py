@@ -37,8 +37,6 @@ class Communication():
         self.ASKCALPOINT = ["AskCalPoint", ]
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
-        ## Special case
-        ''' "Ack_AskRobotCoordinate", "Ack_AskRobotOrientation" ''' # not used?, replaced with ACK
 
         ## List of what python can send
 
