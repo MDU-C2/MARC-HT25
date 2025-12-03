@@ -7,22 +7,33 @@ import Camera_Setup as cs
 import test_protocol as tp
 import threading
 #==================================== THREADING SETUP ====================================
-global busy
+global busy, times_sec, count
 busy = False
+count = 0
+times_sec = []
+
 lock = threading.Lock()
 
 #Thread function to move robot to specified coordinates
-def local_move(coords, orient, client, obj_list, normalized_vector):
-    global busy
+def local_move(orient, client, obj_list, normalized_vector, file_path, save_protocol, conf=None, label=None):
+    global busy, times_sec, count
     with lock:
         if busy != True:
+            start_time = time.time()
             busy = True
-            client.Move(coords, orient, normalized_vector)
+            client.Move(obj_list[0], orient, normalized_vector)
+            
+            end_time = time.time()
+            process_time = end_time - start_time
+            if save_protocol:
+                count += 1
+                tp.cup_information(file_path, count, obj_list[0], process_time , confidence = conf, label= label)
+                times_sec.append(process_time)
             obj_list.pop(0)
             busy = False
 
 def run():
-    global busy
+    global busy, times_sec
 
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
@@ -32,8 +43,7 @@ def run():
             'right_side': [0.0, 1.0, 0.0],
             'upright': [0.0, 0.0, 1.0],
             'upside_down': [0.0, 0.0, -1.0],
-            'handle': [0.0, 0.0, -1.0],
-            'gripper': [0.0, 0.0, -1.0],
+            'Gripper': [0.0, 0.0, -1.0],
         }
     quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
     cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
@@ -45,11 +55,9 @@ def run():
     homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
     
     #==================================== TEST PROTOCOL SETUP ====================================
-    count = 0
-    times_sec = []
 
-    # save_protocol = input("Do you want to save the test protocol? (y/n): ").lower() == 'y'
-    save_protocol = False;
+
+    save_protocol = input("Do you want to save the test protocol? (y/n): ").lower() == 'y'
     if save_protocol:
         file_path = tp.create_today_textfile()
         tp.ask_user(file_path, "start")
@@ -120,9 +128,9 @@ def run():
                 cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
 
-                if busy == False and label != "gripper":
+                if busy == False and label != "Gripper":
 
-                    if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
+                    if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                         coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
                         in_list = False
@@ -132,29 +140,14 @@ def run():
                                 in_list = True
                     
 
-                    
-                        if not in_list:
-                            obj_list.append(coordinates)
+                        with lock:
+                            if not in_list:
+                                obj_list.append(coordinates)
 
-                        if obj_list:
-                            try:
-
-                                time.sleep(0.5) # Small delay to ensure busy is set before thread starts
-                                temp_coords = obj_list[0]
-                                
-                                start_time = time.time()
-
+                        if obj_list:    
+                            try:                                
                                 normalized_vector = orientation_map.get(label)
-                                threading.Thread(target=local_move, args=(temp_coords, quaternion, client, obj_list, normalized_vector), daemon=True).start()
-                                #rob_coords = client.GetPosition()
-                                rob_coords = 0
-                                end_time = time.time()
-                                process_time = end_time - start_time
-                                if save_protocol:
-                                    count += 1
-                                    tp.cup_information(file_path, count, temp_coords, rob_coords, process_time , confidence = conf, label= label)
-                                    times_sec.append(process_time)
-
+                                threading.Thread(target=local_move, args=(quaternion, client, obj_list, normalized_vector, file_path, save_protocol, conf, label), daemon=True).start()
                             except Exception as e:
                                 print(f"Error {e}")
 

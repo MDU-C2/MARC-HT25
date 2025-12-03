@@ -108,7 +108,7 @@ with dai.Device(pipeline) as device:
                     try:
                         temp_coords = obj_list.pop(0)
                         start_time = time.time()
-                        client.Move(temp_coords, quaternion)
+                        client.Move(temp_coords, quaternion, [1,0,0])
                         rob_coords = client.GetPosition()
                         #rob_coords = [temp_coords[0]+10, temp_coords[1]+10, temp_coords[2]] # Dummy robot coordinates for testing without robot
                         end_time = time.time()

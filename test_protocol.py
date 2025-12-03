@@ -38,15 +38,14 @@ def ask_user(file_path, start_end):
             f.write(f"Test Conclusion: {response}\n")
 
 
-def cup_information(file_path, count, temp_coords, rob_coords, process_time, confidence=None, label=None):
+def cup_information(file_path, count, cam_coords, process_time, confidence=None, label=None):
     with open(file_path, "a") as f:
         f.write(f"------- Cup {count} Coordinates -------\n")
         if label is not None:
             f.write(f"Detection Label: {label}\n")
         if confidence is not None:
             f.write(f"Detection Confidence: {confidence:.1f}%\n")
-        f.write(f"Camera Coordinates: {temp_coords}\n")
-        f.write(f"Robot Coordinates: {rob_coords}\n\n")
+        f.write(f"Camera Coordinates: {cam_coords}\n")
         f.write(f"Time taken for pick and place: {process_time:.3f} seconds\n\n")
 
 

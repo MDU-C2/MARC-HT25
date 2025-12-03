@@ -21,12 +21,17 @@ if num_positions.isdigit() == False:
     print("invalid input, setting to 10 positions")
     num_positions = 10
 num_positions = int(num_positions)
+num_positions_copy = num_positions
 
 random_pos = input("do you want to have random positions for the calibration? (y/n): ").lower()
 if random_pos == 'y':
 
     for i in range(num_positions):
-        positions.append(random.randint(1,40))
+        rand_num = random.randint(1,40)
+        if rand_num not in positions:
+            positions.append(rand_num)
+        else:
+            num_positions += 1
 else:
     for i in range(num_positions):
         positions.append(i+1)
@@ -95,16 +100,19 @@ with dai.Device(pipeline) as device:
                     print("Robot:", robot_position)
                     print("Camera", [coords.x,coords.y,coords.z])
                     count += 1
-                    if count < num_positions:
+                    if count < num_positions_copy:
                         client.MoveCalibrationPosition(positions[count])
                     else:
                         print("all positions saved")
                         break
+                    
 
 
         # Show the frames in windows
         cv.imshow("RGB", frame)
 
+        if count >= num_positions_copy:
+            break
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
             # client_socket.close() #close connection to server
