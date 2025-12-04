@@ -6,15 +6,12 @@ MODULE processes
     
 !    ***********************************************************
     PROC EGMMovement()
-        VAR robtarget starting_point;
-        
-!        starting_point:=[[0,0,0],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];
-!        starting_point.trans := getMugCoordinates();
+        VAR robtarget starting_point := [[442.004,-92.0926,171.604],[0.0189937,-0.0236138,0.999427,-0.0150419],[-1,1,-1,4],[-152.666,9E+09,9E+09,9E+09,9E+09,9E+09]];
         
         WaitUntil shared_movement_vars.wait_flag=FALSE;
         
-        shared_movement_vars.flag:=8;
-!        shared_movement_vars.target:=starting_point;
+        shared_movement_vars.flag:=flag_move_EGM;
+        shared_movement_vars.target:=starting_point;
 !        SocketSend client_socket\Str:="enable_EGM";
         
         shared_movement_vars.wait_flag:=TRUE;
@@ -31,7 +28,7 @@ MODULE processes
     PROC Grip()
         TPWrite("[INFO] client wants to close the gripper");
         WaitUntil shared_movement_vars.wait_flag=FALSE;
-        shared_movement_vars.flag:=3; 
+        shared_movement_vars.flag:=flag_gripper_grip; 
         shared_movement_vars.wait_flag:=TRUE;
         
     ENDPROC
@@ -49,7 +46,7 @@ MODULE processes
         WaitUntil shared_movement_vars.wait_flag=FALSE;
         SocketSend client_socket\Str:="AskNext";
 
-        shared_movement_vars.flag:=4; 
+        shared_movement_vars.flag:=flag_gripper_release; 
         shared_movement_vars.wait_flag:=TRUE;
     ENDPROC 
     
@@ -62,7 +59,7 @@ MODULE processes
 !    *********************************************************** 
     PROC moveToHomeTarget()
         WaitUntil shared_movement_vars.wait_flag=FALSE;
-        shared_movement_vars.flag:=5; 
+        shared_movement_vars.flag:=flag_move_home_target;
         shared_movement_vars.wait_flag:=TRUE;
     ENDPROC
     
@@ -105,21 +102,43 @@ MODULE processes
     ENDPROC
     
     
+!    ***********************************************************
+!     Process: calibrationMovement
+
+!     Description: Asks for calibration position index over TCP and set shared target to corresponding posision, set flag to 9 (Calib movement).
     
-    PROC calibrationMovement()
+!    *********************************************************** 
+PROC calibrationMovement()
         VAR bool ok;
         VAR num index;
         SocketSend client_socket\Str:="AskCalPoint";
         SocketReceive client_socket\Str:=message; ! position number
-        ok := StrToVal(message,index);
-        WaitUntil shared_movement_vars.wait_flag=FALSE;
-        shared_movement_vars.flag:=9;
-        shared_movement_vars.target := calib_robtargets{index};
+        ok := StrToVal(message,index); ! saves value in index
+        
+        WaitUntil shared_movement_vars.wait_flag=FALSE; !Wait for movement to be ready
+        shared_movement_vars.flag:=flag_move_calibration; !Set flag to 9 (calibration movement)
+        shared_movement_vars.target := calib_robtargets{index}; !set shared robtarget to corresponding calibration position
         shared_movement_vars.wait_flag:=TRUE;
+        WaitUntil shared_movement_vars.wait_flag=FALSE; !Wait for movement to be done
                 
+    ENDPROC 
+    
+    PROC pickupSequence()
+        ! -----------------------------------------------------------------------------------Elliot function ------------------------------------------------------------------------------
+        !flag for pick up sequence is: flag_move_gripsequence
+        !
+        !
+        !
+        !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     ENDPROC
-    
-    
+    PROC leaveSequence()
+        ! -----------------------------------------------------------------------------------Elliot function ------------------------------------------------------------------------------
+        !flag for pick up sequence is: flag_move_leavesequence
+        !
+        !
+        !
+        !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    ENDPROC
 !    ***********************************************************
 !     Function: GetRobTarget_two
 
@@ -211,7 +230,7 @@ MODULE processes
 
 !     Description: Recieve and check orientation from TCP socket (from python vision system)
 
-!     Returns: Returns a orient
+!     Returns: Returns an orient
     
 !    *********************************************************** 
     FUNC orient getMugOrient()
@@ -240,22 +259,23 @@ MODULE processes
         RETURN return_Orientation;
         
     ENDFUNC
-    
+
     FUNC bool MoveRob(robtarget target)
 
         WaitUntil shared_movement_vars.wait_flag=FALSE;
         shared_movement_vars.flag:=1;
 
-        !EXCLAIMER TEMPORARY CONSTANT ORIENTATION
+        !EXCLAIMER TEMPORARY CONSTANT ORIENTATION & Z-value
         target.rot:=[0.00274,0.75169,0.65950,-0.00414];
-        target.trans.z := -28;
+        target.trans.z := 40;
+        
+        !EXCLAIMER TEMPORARY MAXIMUM REACH DISTANCE
         IF VectMagn(target.trans) > 560 THEN
             shared_movement_vars.flag:=0;
             RETURN FALSE;
         ENDIF
 
         shared_movement_vars.target:=target;
-!        shared_vars.joint_values := CalcJointT(target,tGripper); ! get target joint values
 
         shared_movement_vars.wait_flag:=TRUE;
         

@@ -16,7 +16,7 @@ MODULE server
     ! Open socket connection
     PROC server_init()
         ! port values
-        VAR string ipAddress:="192.168.125.1";
+        VAR string ipAddress:="192.168.125.5";
         ! YuMi ip "192.168.0.1"
         VAR num port:=1025;
 
@@ -29,7 +29,9 @@ MODULE server
         
         !create sockets
         SocketCreate server_socket;
-
+    
+        TPWrite ipAddress;
+        TPWrite ""\Num:=port;
         !connect client and server
         socketBind server_socket,ipAddress,port;
         SocketListen server_socket;
@@ -68,10 +70,10 @@ MODULE server
             ! switch case
             TEST message
 
-            CASE "Connection_test": ! not done but should not crash the program
+            CASE "Connection_test": 
                 TPWrite("[INFO] client is sending test message");
                 SocketSend client_socket\Str:="Connection_Confirmed";
-            CASE "Get_Coordinates": ! this case sends only the x,y,z coordinates of the left hand gripper, Tool Center Point. ! not done but should not crash the program
+            CASE "Get_Coordinates": 
                 sendHandCoordinates;
             CASE "Get_Orientation":
                 sendHandOrientation;
@@ -92,25 +94,27 @@ MODULE server
             CASE "Home":
                 moveToHomeTarget;
             CASE "Pick_Up_Sequence":
-                SocketSend client_socket\Str:="Ack_Release done";
-                ! Implement function here
-                SocketSend client_socket\Str:="Ack_Release done";
-                !WaitUntil shared_vars.wait_flag=FALSE;
-                !shared_vars.flag:=7; !temporary
-                !shared_vars.wait_flag:=TRUE;
+                ! -----------------------------------------------------------------------------------Elliot function ------------------------------------------------------------------------------
+                !flag for pick up sequence is: flag_move_gripsequence
+                !Please add communication functionalities of process in communication\processes\pickupSequence and call for it here
+                !
+                !
+                !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             CASE "Leave_Sequence":
-                ! Implement function here
-                
-            CASE "Move_Calibration_Position": ! not done but should not crash the program
-                calibrationMovement;!NOT DONE
-
+                ! -----------------------------------------------------------------------------------Elliot function ------------------------------------------------------------------------------
+                !flag for leave sequence is: flag_move_leavesequence
+                !Please add communication functionalities of process in communication\processes\leaveSequence and call for it here
+                !
+                !
+                !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            CASE "Move_Calibration_Position": 
+                calibrationMovement;
             CASE "EGM_movement":
                 EGMMovement;
             DEFAULT:
                 TPWrite("[INFO] message from client: "+message);
                 SocketSend client_socket\Str:="default_"+message;
             ENDTEST
-
             WaitTime(delay_time);
             SocketSend client_socket\Str:="Ask_next"; ! ask for next "order"
 
