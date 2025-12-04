@@ -28,4 +28,3 @@ MODULE movement_shared_vars
     CONST num flag_move_EGM:= 8;
     CONST num flag_move_calibration:= 9;
 ENDMODULE
-ENDMODULE

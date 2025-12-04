@@ -41,11 +41,11 @@ MODULE Module1
 !                g_GripIn;
 
             CASE flag_move_home: !Move to home position (revelotion counter calibration position) (Requires YuMi lib)
-                MoveToHome;
+                MoveToHome; 
             CASE flag_gripper_grip: !Close gripper to minimum (Requires YuMi lib)
-                g_gripIn;
+                g_gripIn;   
             CASE flag_gripper_release: !Open gripper to maximum (Requires YuMi lib)
-                g_gripOut;
+                g_gripOut; 
             CASE flag_move_home_target: !Move to home_target
                 ConfJ\On;
                 ConfL\On;
@@ -54,11 +54,11 @@ MODULE Module1
                 ConfL\Off;
             CASE flag_move_gripsequence:
                 MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
-                g_GripOut;
+                g_GripOut; 
                 MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
             CASE flag_move_leavesequence: !Leave cup
                 ConfJ\On;
-                g_GripIn;
+                g_GripIn; 
                 MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
                 MoveJ Offs(cup_target,x_offset,y_offset,z_offset),movement_speed,fine,tGripper;
                 g_GripOut;
@@ -67,14 +67,14 @@ MODULE Module1
             CASE flag_move_EGM: !EGM movement
                 ConfJ\On;
                 ConfL\On;
-                MoveY shared_movement_vars.target,movement_speed,fine,tGripper;
+                MoveJ shared_movement_vars.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
                 EGMfollowCup;
             CASE flag_move_calibration:
                 ConfJ\On;
                 ConfL\On;
-                MoveY shared_movement_vars.target,movement_speed,fine,tGripper;
+                MoveJ shared_movement_vars.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
             ENDTEST

@@ -20,6 +20,8 @@ MODULE movementFunctions
         VAR jointtarget desired_joint_value;
         VAR bool home;
         VAR num testing := 0;
+        ConfJ\Off;
+        ConfL\Off;
         current_target := CRobT(\Tool:=tGripper);
         testtarget := desired_target;
         
@@ -43,7 +45,7 @@ MODULE movementFunctions
             IF testing > 1 THEN
                 moveToHomeTarget;
                 TPWrite "Failed to reach target";
-                Stop;
+                RETURN;
             ENDIF
             IF VectMagn(desired_target.trans-current_target.trans) > max_magnitude THEN
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
@@ -68,11 +70,10 @@ MODULE movementFunctions
             ENDIF
         ELSEIF ERRNO = ERR_OUTSIDE_REACH THEN !Robot cannot reach to desired position
             TPWrite "Outside of reach";
-            Stop;
-        ELSEIF ERRNO = ERR_PATH_STOP THEN
+            RETURN;
+        ELSEIF ERRNO = ERR_PATH_STOP THEN !Only used if ProcerrRecovery \SyncOrgMoveInst; is active
             TPWrite "Movement stopped!";
             TRYNEXT;
-            STOP;
         ENDIF
     ENDPROC
     
@@ -126,15 +127,15 @@ MODULE movementFunctions
 !    ***********************************************************
     FUNC pos discretizePosition(pos current_target,pos desired_target,num step_size)
     
-    VAR pos dir_vector;
-    VAR pos return_pos;
-    
-    dir_vector := desired_target - current_target;
-    dir_vector := dir_vector / VectMagn(dir_vector);
-    return_pos := current_target + dir_vector * step_size;
-!    return_pos := desired_target - dir_vector * step_size;
-    
-    RETURN return_pos;
+        VAR pos dir_vector;
+        VAR pos return_pos;
+        
+        dir_vector := desired_target - current_target;
+        dir_vector := dir_vector / VectMagn(dir_vector);
+        return_pos := current_target + dir_vector * step_size;
+    !    return_pos := desired_target - dir_vector * step_size;
+        
+        RETURN return_pos;
     ENDFUNC
     
 !    ***********************************************************
@@ -145,37 +146,37 @@ MODULE movementFunctions
 !    ***********************************************************
     FUNC orient discretizeOrient(orient current_orient,orient desired_orient,num step_size)
     
-    VAR orient dir_vector;
-    VAR orient return_orient;
-    VAR num angle;
-    VAR num sin_angle;
-    VAR num coeff_1;
-    VAR num coeff_2;
-    VAR num dot_prod;
+        VAR orient dir_vector;
+        VAR orient return_orient;
+        VAR num angle;
+        VAR num sin_angle;
+        VAR num coeff_1;
+        VAR num coeff_2;
+        VAR num dot_prod;
+        
+        dot_prod := QuaternionDotProd(current_orient,desired_orient);
     
-    dot_prod := QuaternionDotProd(current_orient,desired_orient);
-
-    IF (dot_prod > 1) OR (dot_prod < -1) THEN
-        RETURN current_orient;
-    ENDIF
+        IF (dot_prod > 1) OR (dot_prod < -1) THEN
+            RETURN current_orient;
+        ENDIF
+        
+        angle := ACos(dot_prod);
+        sin_angle := sin(angle);
+        coeff_1 := sin((1-step_size)*angle) / sin_angle;
+        coeff_2 := sin(step_size*angle) / sin_angle;
     
-    angle := ACos(dot_prod);
-    sin_angle := sin(angle);
-    coeff_1 := sin((1-step_size)*angle) / sin_angle;
-    coeff_2 := sin(step_size*angle) / sin_angle;
-
-    return_orient.q1 := coeff_1 * current_orient.q1 + coeff_2 * desired_orient.q1;
-    return_orient.q2 := coeff_1 * current_orient.q2 + coeff_2 * desired_orient.q2;
-    return_orient.q3 := coeff_1 * current_orient.q3 + coeff_2 * desired_orient.q3;
-    return_orient.q4 := coeff_1 * current_orient.q4 + coeff_2 * desired_orient.q4;
-
+        return_orient.q1 := coeff_1 * current_orient.q1 + coeff_2 * desired_orient.q1;
+        return_orient.q2 := coeff_1 * current_orient.q2 + coeff_2 * desired_orient.q2;
+        return_orient.q3 := coeff_1 * current_orient.q3 + coeff_2 * desired_orient.q3;
+        return_orient.q4 := coeff_1 * current_orient.q4 + coeff_2 * desired_orient.q4;
     
-    RETURN return_orient;
-    ERROR
-    IF ERRNO = ERR_DIVZERO THEN
-        sin_angle := sin_angle + 0.000001;
-        RETRY;
-    ENDIF
+        
+        RETURN return_orient;
+        ERROR
+        IF ERRNO = ERR_DIVZERO THEN
+            sin_angle := sin_angle + 0.000001;
+            RETRY;
+        ENDIF
     ENDFUNC
     
 !    ***********************************************************
