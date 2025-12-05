@@ -30,11 +30,13 @@ def CreateSensorMessage(egmSensor, pos, euler):
     
     #to change the position and/or orientation of the robot, change values of input vectors
     planned=egmSensor.planned
+    egmSensor.RAPIDtoRobot.digVal = 1
     pose=planned.cartesian
     Position=pose.pos
     Position.x=pos[0]
     Position.y=pos[1]
-    Position.z=pos[2]
+    # Position.z=pos[2]
+    Position.z=100
 
     planned.cartesian.euler.x=euler[0]
     planned.cartesian.euler.y=euler[1]
@@ -74,7 +76,7 @@ def send_pos_egm_thread(egm_ip, egm_port):
         # Testa ta bort euler i båda, se om det fungerar
         egmSensor=egm.EgmSensor()
         egmSensor=CreateSensorMessage(egmSensor,global_pos,euler)
-        egmSensor=CreateSensorMessage(egmSensor,global_pos)
+        # egmSensor=CreateSensorMessage(egmSensor,global_pos)
         msg=egmSensor.SerializeToString()
         robot_socket.sendto(msg, addr)
 
@@ -98,7 +100,7 @@ with dai.Device(pipeline) as device:
 
     # threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True).start()
     client.EGM_movement()
-
+    
     t1 = threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True)
     if not t1.is_alive():
         t1.start()
