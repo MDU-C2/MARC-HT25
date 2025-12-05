@@ -20,7 +20,7 @@ class Communication():
     
         ## What python can recive SEE BELOW
         self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
-                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal"] # these should be removed except ACK, it is not in the main switch case but inside a case
+                "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal"] # Most of these are not used anymore
         
         self.CLOSE = ["Disconnect", ]
         self.ROBOTWANTSTOSENDCOORDINATES = ["Robot_Wants_To_Send_Coordinates", ] # Python will answer with an ACK then receive coordinates then answer with an ACK again
@@ -63,7 +63,7 @@ class Communication():
         self._connection_test_thread.start()
 
 
-    
+
 
 
 
