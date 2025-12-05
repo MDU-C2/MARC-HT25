@@ -2,17 +2,17 @@ import cv2 as cv
 import depthai as dai
 import math
 import time
-import Camera_Setup as cs
 import threading
 import egm_pb2 as egm
 import socket
-import numpy as np
-
+import Vision_System.camera_setup as cs
+from Vision_System.updated_communication import Communication
 # This code required the egm.proto file to be in the same folder. 
 # egm_pb2.py is also a requirement.
 
 #import test_protocol as tp
-from updated_communication import Communication
+
+from Vision_System.updated_communication import Communication
 client = Communication()
 client.connect()
 #IP and port for the UDP that EGM is using 
@@ -23,14 +23,15 @@ num=0
 global global_pos
 lock = threading.Lock()
 
-def CreateSensorMessage(egmSensor, pos, euler):
+def CreateSensorMessage(egmSensor, pos, euler, quitval):
+    
     headerOne=egmSensor.header
     headerOne.seqno=num
     headerOne.mtype=egm.EgmHeader.MessageType.MSGTYPE_CORRECTION
     
     #to change the position and/or orientation of the robot, change values of input vectors
     planned=egmSensor.planned
-    egmSensor.RAPIDtoRobot.digVal = 1
+    egmSensor.RAPIDtoRobot.digVal = quitval
     pose=planned.cartesian
     Position=pose.pos
     Position.x=pos[0]
@@ -44,7 +45,8 @@ def CreateSensorMessage(egmSensor, pos, euler):
     # Note to self, testa ta bort Euler 
     return egmSensor
 
-def send_pos_egm_thread(egm_ip, egm_port):
+def send_pos_egm_thread(egm_ip, egm_port, quitval):
+    
     print("Running EGM python client")
     #lock.acquire()
     robot_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -75,7 +77,7 @@ def send_pos_egm_thread(egm_ip, egm_port):
         euler = [CurX,CurY,CurZ] # Temp values, euler not being used
         # Testa ta bort euler i båda, se om det fungerar
         egmSensor=egm.EgmSensor()
-        egmSensor=CreateSensorMessage(egmSensor,global_pos,euler)
+        egmSensor=CreateSensorMessage(egmSensor,global_pos,euler, quitval)
         # egmSensor=CreateSensorMessage(egmSensor,global_pos)
         msg=egmSensor.SerializeToString()
         robot_socket.sendto(msg, addr)
@@ -87,7 +89,9 @@ cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
 robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
 
 homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
-#==================================== MAIN  ====================================
+
+
+
 first_run = True
 with dai.Device(pipeline) as device:
     # Output queues to retrieve frames and detections
@@ -101,8 +105,8 @@ with dai.Device(pipeline) as device:
     # threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True).start()
     client.EGM_movement()
     
-    t1 = threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True)
-    if not t1.is_alive():
+    t1 = threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port, 0), daemon=True)
+    if not t1.is_alive(): #safety
         t1.start()
 
     while True:
@@ -165,12 +169,18 @@ with dai.Device(pipeline) as device:
                             print(f"Error {e}")
             # Show the frames in windows
         cv.imshow("RGB", frame)
-        if cv.waitKey(1) & 0xFF == ord('r'):
-            client.connect()
-            continue
+        # if cv.waitKey(1) & 0xFF == ord('r'):
+        #     client.connect()
+        #     continue
         # Exit on 'q' key
         if cv.waitKey(1) & 0xFF == ord('q'):
             global_pos = False
             break
 
+        if cv.waitKey(1) & 0xFF == ord(' '):
+            global_pos = False
+            t1.join()
+            send_pos_egm_thread(egm_ip, egm_port, 1)
+            #break #??
+            
 cv.destroyAllWindows()
