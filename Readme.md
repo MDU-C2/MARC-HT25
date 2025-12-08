@@ -1,11 +1,11 @@
 
 <h1 align="center">
+  Dishwasher Loading And Unloading Robot
   <br>
   <br>
   <img src="media/images/marc.png" alt="MARC Logo" width="400">
   <br>
   <br>
-  Dishwasher loading and unloading robot
   <br>
 </h1>
 
