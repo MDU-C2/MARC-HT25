@@ -64,10 +64,10 @@ $ cd MARC-HT25
 
 <!-- There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot. [Python guide](/media/Guide/Python/README.md) for setting up Python and the camera to communicate with the robot. -->
 
-When working with the software there are two main parts, the robot side (RAPID) and the camera side (Python). 
+<!-- When working with the software there are two main parts, the robot side (RAPID) and the camera side (Python).  -->
 
-## Setting Up Python
-To get started you should follow the [Python guide](/media/Guide/Python/README.md) for setting up the Python environment.
+## Setting Up Python & Camera
+To get started you should follow the [Python guide](/media/Guide/Python/README.md) which will go through all steps necessary for setting up the Python environment, calibrating the camera and running the Python side of the software. 
 
 ## Starting The Robot
 If you need help with starting or working with the robot follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide.
