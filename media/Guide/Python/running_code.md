@@ -14,7 +14,7 @@
 
 
 ## Calibration
-The first step is to start the server from **RAPID** as shown in [this guide](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md) 
+The first step is to start the server from **RAPID** as shown in [this guide](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md) 
 
 Now run the code
 

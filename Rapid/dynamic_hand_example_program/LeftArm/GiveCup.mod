@@ -43,26 +43,26 @@ MODULE GiveCup
         
         target.rot := hand_rotation;
         target.trans := mug_position - offset_dir*offset_lenght;
-!        moveJ target,movespeed,z50,tGripper;
-        MovementProc target,50,300,movespeed;
+        moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         ! grippers out
         WaitTime(1);
-        g_GripOut;
+!        g_GripOut;
                 
         !ask for confermation
         TPWrite("At mug picking frame");
         
         !pick up mug
         target.trans := mug_position + offset_dir*gripper_offset;
-!        moveJ target,movespeed,z50,tGripper;
-        MovementProc target,50,300,movespeed;
+        moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         ! grippers in
         WaitTime(1);
-        g_GripIn;
+!        g_GripIn;
         
         target.trans := mug_position - offset_dir*offset_lenght;
-!        moveJ target,movespeed,z50,tGripper;
-        MovementProc target,50,300,movespeed;
+        moveJ target,movespeed,z50,tGripper;
+!        MovementProc target,50,300,movespeed;
         
     ENDPROC
     
@@ -84,14 +84,15 @@ MODULE GiveCup
         
         
     ENDPROC
-    
+
     ! leave mug
    PROC LeaveMug(pos mug_end_position, pos mug_end_normal, num offset_lenght)
         VAR robtarget target;
         VAR orient hand_rotation;
         VAR pos offset;
         
-        hand_rotation := NormalToOrientationSemiOptimal(mug_end_position,mug_end_normal);
+!        hand_rotation := NormalToOrientationSemiOptimal(mug_end_position,mug_end_normal);
+        hand_rotation :=NormalToOrientation(mug_end_normal); !NOrient([.5,-.5,.5,-.5]);! 
         offset := [0,0,1]*offset_lenght; ! we always want to move straight up after leaving mug
         target := CRobT(\Tool := tGripper);
         ConfJ \Off;
@@ -99,21 +100,25 @@ MODULE GiveCup
        
         target.rot := hand_rotation;
         target.trans := mug_end_position + offset;
-        moveJ target,movespeed,z50,tGripper;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movespeed;
         WaitTime(1);
+        
                 
         !ask for confermation
         TPWrite("At mug picking frame");
         
         ! Leave mug
         target.trans := mug_end_position;
-        moveJ target,movespeed,z50,tGripper;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movespeed;
         
         ! grippers out
         WaitTime(1);
         
         target.trans := mug_end_position + offset;
-        moveJ target,movespeed,z50,tGripper;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movespeed;
         
        
    ENDPROC

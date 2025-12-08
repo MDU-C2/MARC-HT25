@@ -8,19 +8,34 @@ MODULE LeftArmMain
 !     Author: fjn20007 
     
 !    ***********************************************************
-    
+
+
+    ! CONST VALUES
+        !home positions
     CONST robtarget home_target := [[609,13,136],[0.56458,0.45107,0.48932,0.48820],[-1,-1,0,4],[-177.987,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget calib_home_target := [[442.004,-92.0926,171.604],[0.0189937,-0.0236138,0.999427,-0.0150419],[-1,1,-1,4],[-152.666,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget home_target_v2:=[[247.91,314.47,202.37],[0.680648,0.280046,0.674068,0.0626469],[0,-2,0,5],[107.401,9E+09,9E+09,9E+09,9E+09,9E+09]];    
+    
+        ! used for mug manipulation
+    CONST pos sholder_pos_close := [110,100,460];
+    CONST pos sholder_pos_far := [500,400,460];
+    CONST robtarget cup_target := [[499.548,-110.253,-46.3938],[0.0565402,0.114235,0.990146,-0.0580089],[-2,-3,-1,4],[-177.807,9E+09,9E+09,9E+09,9E+09,9E+09]]; ! start value
+        
+    CONST speeddata movement_speed := v200; ! Movement speed for robot movement
+    CONST num max_magnitude := 300;         ! Threshold for when to discretize robtarget (used in MovementProc)
+    CONST num step_size := 200;             ! Step size when discretizing robtargets (used in MovementProc)
+        
+        ! used in basic movement
+    CONST num x_offset := 0;                
+    CONST num y_offset := 0;                
+    CONST num z_offset := 0;        
+        ! used when fetching a mug
+    CONST num gripper_offset := 50;    
+    CONST num pick_offset := 200;
+    
     
     PROC main()
-        CONST robtarget cup_target := [[499.548,-110.253,-46.3938],[0.0565402,0.114235,0.990146,-0.0580089],[-2,-3,-1,4],[-177.807,9E+09,9E+09,9E+09,9E+09,9E+09]];
-        CONST speeddata movement_speed := v200; ! Movement speed for robot movement
-        CONST num max_magnitude := 300;         ! Threshold for when to discretize robtarget (used in MovementProc)
-        CONST num step_size := 200;             ! Step size when discretizing robtargets (used in MovementProc)
-        CONST num x_offset := 0;                
-        CONST num y_offset := 0;                
-        CONST num z_offset := 0;                
-        CONST num pick_z_offset := 200;         
+
 
         g_calibrate; ! Calibrate gripper (Requires YuMi lib)
         TPErase;     ! Erase all text on FlexPendant
@@ -30,14 +45,19 @@ MODULE LeftArmMain
             !Flag is set by communication task
             WaitUntil shared_movement_left.wait_flag = TRUE;
             TEST shared_movement_left.flag 
+            CASE flag_ERROR:
+                TPWrite("ERROR OCCURED");
+                StopMove;
+                STOP;
             CASE flag_move: !Move to pos / orientation stored in shared_vars.target
 
-                MoveJ calib_home_target,movement_speed,fine,tGripper;
+!                MoveJ calib_home_target,movement_speed,fine,tGripper;
+                MoveJ home_target_v2,movement_speed,fine,tGripper;
 !                moveToHomeTarget;
-                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,pick_z_offset), step_size,max_magnitude, movement_speed;
-!                g_GripOut;
-                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
-!                g_GripIn;
+                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,z_offset), step_size,max_magnitude, movement_speed;
+!!                g_GripOut;
+!                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
+!!                g_GripIn;
 
             CASE flag_move_home: !Move to home position (revelotion counter calibration position) (Requires YuMi lib)
                 MoveToHome; 
@@ -53,16 +73,16 @@ MODULE LeftArmMain
                 ConfL\Off;
             CASE flag_move_gripsequence:
             
-                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
+                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,pick_offset), step_size, max_magnitude, movement_speed;
                 g_GripOut; 
                 MovementProc Offs(shared_movement_left.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
-            CASE flag_move_leavesequence: !Leave cup
+            CASE flag_move_leavesequence: !Leave mug
                 ConfJ\On;
                 g_GripIn; 
-                MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,pick_offset),movement_speed,fine,tGripper;
                 MoveJ Offs(cup_target,x_offset,y_offset,z_offset),movement_speed,fine,tGripper;
                 g_GripOut;
-                MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
+                MoveJ Offs(cup_target,x_offset,y_offset,pick_offset),movement_speed,fine,tGripper;
                 ConfJ\Off;
             CASE flag_move_EGM: !EGM movement
                 ConfJ\On;
@@ -78,6 +98,19 @@ MODULE LeftArmMain
                 MoveJ shared_movement_left.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
+                
+            CASE flag_pick_up_mug:
+            
+                ! pick up mug sequence
+            
+            CASE flag_leave_mug:
+                
+                ! leave mug sequence
+            
+            CASE flag_hand_over: 
+                
+                ! hand over sequence
+                
             ENDTEST
             shared_movement_left.wait_flag := FALSE;
         ENDWHILE

@@ -23,6 +23,7 @@ MODULE MugManipulation
         target.trans := mug_position - offset_dir*offset_lenght;
 !        moveJ target,movespeed,z50,tGripper;
         MovementProc target,50,300,movement_speed;
+        
         ! grippers out
         WaitTime(1);
         g_GripOut;
@@ -34,6 +35,7 @@ MODULE MugManipulation
         target.trans := mug_position + offset_dir*gripper_offset;
 !        moveJ target,movespeed,z50,tGripper;
         MovementProc target,50,300,movement_speed;
+        
         ! grippers in
         WaitTime(1);
         g_GripIn;
