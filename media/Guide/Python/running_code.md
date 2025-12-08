@@ -20,7 +20,7 @@ It is important to note that the quality of the calibration relies on how many p
 
 ```bash
 # Run the calibration code
-> py calibration_single_file.py
+> py auto_calibration.py
 # Now a program should start
 ```
 
