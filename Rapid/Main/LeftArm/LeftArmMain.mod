@@ -28,15 +28,15 @@ MODULE LeftArmMain
         ConfL\On;
         WHILE TRUE DO
             !Flag is set by communication task
-            WaitUntil shared_movement_vars.wait_flag = TRUE;
-            TEST shared_movement_vars.flag 
+            WaitUntil shared_movement_left.wait_flag = TRUE;
+            TEST shared_movement_left.flag 
             CASE flag_move: !Move to pos / orientation stored in shared_vars.target
 
                 MoveJ calib_home_target,movement_speed,fine,tGripper;
 !                moveToHomeTarget;
-                MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,pick_z_offset), step_size,max_magnitude, movement_speed;
+                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,pick_z_offset), step_size,max_magnitude, movement_speed;
 !                g_GripOut;
-                MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
+                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
 !                g_GripIn;
 
             CASE flag_move_home: !Move to home position (revelotion counter calibration position) (Requires YuMi lib)
@@ -53,9 +53,9 @@ MODULE LeftArmMain
                 ConfL\Off;
             CASE flag_move_gripsequence:
             
-                MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
+                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
                 g_GripOut; 
-                MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
+                MovementProc Offs(shared_movement_left.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
             CASE flag_move_leavesequence: !Leave cup
                 ConfJ\On;
                 g_GripIn; 
@@ -67,7 +67,7 @@ MODULE LeftArmMain
             CASE flag_move_EGM: !EGM movement
                 ConfJ\On;
                 ConfL\On;
-                MoveJ shared_movement_vars.target,movement_speed,fine,tGripper;
+                MoveJ shared_movement_left.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
                 EGMfollowCup;
@@ -75,11 +75,11 @@ MODULE LeftArmMain
                 ConfJ\On;
                 ConfL\On;
                 MoveJ calib_home_target,movement_speed,fine,tGripper;
-                MoveJ shared_movement_vars.target,movement_speed,fine,tGripper;
+                MoveJ shared_movement_left.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
             ENDTEST
-            shared_movement_vars.wait_flag := FALSE;
+            shared_movement_left.wait_flag := FALSE;
         ENDWHILE
     ENDPROC
 ENDMODULE

@@ -9,16 +9,24 @@ MODULE shared_vars
 !                   This specific module is used to share variables between movement and communication tasks.
 !    ***********************************************************
 
-! ========== MOVEMENT ========== 
-    RECORD movement_vars
-        bool wait_flag;
-        num flag;
-        robtarget target;
+    ! ==== dynamic global vars ====
+    RECORD mug_vector
+        pos position;
+        pos normal;
     ENDRECORD
     
-    PERS movement_vars shared_movement_vars;
-        
+    !========== MOVEMENT ========== 
+    RECORD movement_vars
+      bool wait_flag;
+      num flag;
+      robtarget target;
+      mug_vector hand_over_pose;
+      mug_vector mug;
+    ENDRECORD
     
+    PERS movement_vars shared_movement_left;
+    
+    CONST num nothing:=0;
     CONST num flag_move:= 1;
     CONST num flag_move_home:= 2;
     CONST num flag_gripper_grip:= 3;
