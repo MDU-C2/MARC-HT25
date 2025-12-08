@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/MDU-C2/MARC-HT25/developer/media/images/camera_to_rob_frame.png" width="600" alt="walkthrough banner">
   <br>
   <br>
-  This walkthrough showcases how to run the vision system for this project.
+  Walkthrough of the vision system.
   <br>
 </h1>
 <!--
