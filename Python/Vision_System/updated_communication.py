@@ -145,7 +145,22 @@ class Communication():
 
             except Exception as e:
                 print(f"[ERROR] Connection failed: {e}")
+    def connectV2(self):
 
+        with self._mutex_function:  # Lock mutex for function-level thread safety
+
+            """Connect to RAPID server"""
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                #socket.settimeout(120)  # Increased to 120 seconds for robot movement, Dont use time out
+                self.socket.connect((self.host, self.port))
+                self.connected = True
+                print(f"[INFO] Connected to RAPID server at {self.host}:{self.port}")
+                return True
+
+            except Exception as e:
+                print(f"[ERROR] Connection failed: {e}")
+                return False
 
 
     def disconnect(self):
