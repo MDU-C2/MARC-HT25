@@ -8,13 +8,6 @@
   <br>
 </h1>
 
-## Requirements
-To run the codes provided in this repository multiple Python libraries needs to be installed. These are:
-
-* OpenCV
-* DepthAI
-* Numpy
-
 ## Installation
 
 You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
@@ -31,7 +24,15 @@ Next step is to set up a virtual Python environment.
 # Activate the virtual environment (make sure you are in the correct folder when doing this)
 > .venv\Scripts\activate
 ```
-Now it's time to install the correct libraries, this is done by running the **requirements.txt** file included in the Git repository
+
+## Requirements
+To run the codes provided in this repository multiple Python libraries needs to be installed. These are:
+
+* OpenCV
+* DepthAI
+* Numpy
+
+This is done by running the **requirements.txt** file included in the Git repository.
 
 ```bash
 #Run the requirements.txt file
