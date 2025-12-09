@@ -1,0 +1,133 @@
+
+\newcommand\w{5}
+\section{Result}
+
+\begin{Form}
+\noindent Commit ID: \vspace{3mm} 
+
+\TextField[
+  name=commitid,
+  multiline=true,
+  width=10cm,
+  height=1cm
+]{}
+
+\end{Form}\\
+
+\bigskip
+
+\noindent Which calibration points were used. Position 1-10 belongs to zone 1, 11 - 20 to zone 2 etc. Fill in a checkbox even if not all positions in the zone was used.
+\bigskip
+
+\CheckBox[name=Zone 1,charsize=12pt]{Zone 1:}\quad
+\CheckBox[name=Zone 2,charsize=12pt]{Zone 2:}\quad
+\CheckBox[name=Zone 3,charsize=12pt]{Zone 3:}\quad
+\CheckBox[name=Zone 4,charsize=12pt]{Zone 4:}
+
+\bigskip
+
+
+
+
+
+
+\begin{Form}
+\begin{table}[h!]
+\renewcommand{\arraystretch}{1.6}
+\centering
+
+\begin{tabular}{|l|p{4cm}|p{7cm}|}
+\hline
+\textbf{Metric} & \textbf{Value} & \textbf{Description} \\
+\hline
+
+RMSE &
+\TextField[name=RMSE, width=4cm]{} &
+Root Mean Square Error, the difference between the robots coordinates and the cameras coordinates after transformation to the robots frame.(mm) \\
+\hline
+
+STD &
+\TextField[name=STD, width=4cm]{} &
+Standard deviation error between robot coordinates and transformed camera coordinates.(mm) \\
+\hline
+
+Number of calibration positions &
+\TextField[name=CalibrationPositions, width=4cm]{} &
+How many calibration positions were used. \\
+\hline
+
+Camera distance to robot base &
+\TextField[name=CameraDistance, width=4cm]{} &
+Measured distance between camera, x-y plane, and robot base, absolute value.(mm)\\
+\hline
+
+Camera height &
+\TextField[name=CameraHeight, width=4cm]{} &
+Measured height between camera and the robot base, absolute value.(mm)\\
+\hline
+
+Estimated camera position &
+\TextField[name=EstimatedCameraPosition, width=4cm]{} &
+The rough angle of the cameras position to the robot base, e.g. 150 degrees, left of robot. (degrees)\\
+\hline
+
+Estimated camera pose &
+\TextField[name=EstimatedCameraPose, width=4cm]{} &
+The estimated angle of camera to the robot base, e.g. z = -20, y = -10 (degrees)\\
+\hline
+
+
+
+\end{tabular}
+
+\caption{Result table}
+\end{table}
+\end{Form}
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{comment}
+    
+
+
+\begin{Form} % Start interactive form environment
+\begin{table}[h!]
+
+\renewcommand{\arraystretch}{3} % Increase row height
+\centering
+
+\begin{tabular}{|l|l|l|}
+\hline
+
+\textbf{Metric} & \textbf{Description} & \textbf{Value} \\
+\hline
+
+Accuracy & \TextField[name=accuracy_disc,
+  multiline=true, width=\w cm]{} & 
+  \TextField[name=accuracy,
+  multiline=true, width=\w cm]{} \\
+Percentage correct & \TextField[name=percentage_disc,
+  multiline=true, width=\w cm]{} & \TextField[name=percentage,
+  multiline=true, width=\w cm]{} \\
+Amount of tries & \TextField[name=tries_disc,
+  multiline=true, width=\w cm]{} & \TextField[name=tries,
+  multiline=true, width=\w cm]{} \\
+Total score & \TextField[name=score_disc,
+  multiline=true, width=\w cm]{} & \TextField[name=score,
+  multiline=true, width=\w cm]{} \\
+\hline
+\end{tabular}
+\caption{Result table}
+\end{table}
+\end{Form}
+
+\end{comment}
