@@ -32,10 +32,10 @@ To run the codes provided in this repository multiple Python libraries needs to 
 * DepthAI
 * Numpy
 
-This is done by running the **requirements.txt** file included in the Git repository.
+This is done by running the **requirements.txt** file located in the **Vision_System** folder included in the Git repository.
 
 ```bash
 #Run the requirements.txt file
 > pip install -r requirements.txt
 ```
-Now the setup is complete and you should be able to run the code by following this [walkthrough](/media/Guide/Python/running_code.md)
+Now the setup is complete and you should be able to run the code by following this [walkthrough](/media/Guide/Python/running_code.md).
