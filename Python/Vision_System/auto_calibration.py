@@ -10,7 +10,7 @@ client.connect()
 lock = threading.Lock()
 wait = True
 _, pipeline, label_map = cs.cam_calibration()
-
+first_run = True
 
 def local_move(positions, count):
     global wait
@@ -56,6 +56,7 @@ def run():
         Saved_Coordinates = []
         saved_robo_coordinates = []
         while True:
+           
             in_rgb   = q_rgb.get()      # latest RGB frame
             in_depth = q_depth.get() 
 # latest depth frame (aligned to RGB)

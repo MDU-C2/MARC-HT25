@@ -25,7 +25,10 @@ def local_move(orient, client, obj_list, normalized_vector, save_protocol ,file_
 
             # ADD MUG SEQUENCE HERE
 
-            client.Move(obj_list[0], orient, normalized_vector)
+            client.PickUpSequence(obj_list[0], orient, normalized_vector)
+            # client.Move(obj_list[0], orient, normalized_vector)
+            
+            client.MoveHome()
             
             end_time = time.time()
             process_time = end_time - start_time
@@ -71,12 +74,9 @@ def run():
             file_path = tp.create_today_textfile()
             tp.ask_user(file_path, "start")
             tp.fill_meta_data(file_path)
-
-
-
-        rms_error = cs.rms_alignment_error(camera_points, robot_points, rotation_matrix, translation_vector)
-        if save_protocol:
+            rms_error = cs.rms_alignment_error(camera_points, robot_points, rotation_matrix, translation_vector)
             tp.log_rms_error(file_path, rms_error)
+
 
 
         #==================================== MAIN  ====================================
@@ -156,8 +156,10 @@ def run():
 
                                 if obj_list:    
                                     try:    
+                                        normalized_vector = orientation_map.get(label)
                                         norm = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
-                                        if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # z not the biggest value -> mug is not up nor down
+                                        print(f"[DEBUGG] normal vector: {normalized_vector}")
+                                        if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # robot z not the biggest value -> mug is not up nor down
                                             norm -= [0,0,np.dot(norm,[0,0,1])]
                                             norm =  norm/np.sqrt(np.dot(norm,norm))
                                             np.set_printoptions(precision=3)
@@ -167,7 +169,7 @@ def run():
                                             norm[1] = 0
                                             norm[0] = 0
 
-                                        normalized_vector = orientation_map.get(label)
+                                        print(f"[DEBUGG] normal vector after matrix: {norm}")
                                         threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                                     except Exception as e:
                                         print(f"Error {e}")

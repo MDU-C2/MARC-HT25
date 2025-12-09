@@ -6,8 +6,11 @@ import threading
 
 class Communication():
     """Class to handle communication with RAPID server"""
-
+    max_sleep_duration = 60
+    activ = True
     def __init__(self):
+        self.sleep_time = 0
+
         self._mutex_variable = threading.Lock()  #mutex for accessing variables
         self._mutex_function = threading.Lock()  #mutex for accessing functions
         self.socket = None
@@ -126,10 +129,20 @@ class Communication():
 
     def _keep_connection_alive(self):
         """Sleep 60s then send a test message to RAPID. Windows does not like open sockets without activity."""
-        while True:
-            time.sleep(60)
-            if self.connected:
-                self.ConnectionTest()
+        while self.activ:
+
+            start = time.time()
+            time.sleep(1) 
+            if self.sleep_time > self.max_sleep_duration:
+                if self.connected:
+                    self.ConnectionTest()
+                    self.sleep_time = 60
+            else:
+                self.sleep_time += time.time() - start
+
+    def reset_connection_timer(self):
+        self.sleep_time = 0
+        # print(f"Sleep timer reset: {self.sleep_time}")
 
     def connect(self):
 
@@ -145,6 +158,8 @@ class Communication():
 
             except Exception as e:
                 print(f"[ERROR] Connection failed: {e}")
+
+                
     def connectV2(self):
 
         with self._mutex_function:  # Lock mutex for function-level thread safety

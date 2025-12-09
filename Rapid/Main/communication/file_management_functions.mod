@@ -57,9 +57,11 @@ MODULE file_management_functions
             bin_data := 0;
             temp_string := "";
             
+            bin_data := ReadBin(logfile);
+            bin_data := ReadBin(logfile);
             WHILE ByteToStr(bin_data\char) <> "]" DO
-                bin_data := ReadBin(logfile);
                 temp_string := temp_string + ByteToStr(bin_data\Char);
+                bin_data := ReadBin(logfile);
             ENDWHILE
             
             bin_data := ReadBin(logfile);
