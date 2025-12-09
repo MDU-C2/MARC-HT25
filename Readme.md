@@ -22,12 +22,13 @@
 
 ![screenshot](/media/images/banner.gif)
 
+The project aims to create a robotic system capable of dynamically locating different kinds of mugs in different orientations and correctly picking them up using a **Dual Arm YuMi**.
 ## Key Features
 
-* Dynamic robot capable of picking up and placing cups in a dishwasher
+* Dynamic robot capable of picking up and placing mugs in a predefined position.
 
 * Object awareness
-  - Identifies cups, their postion and pose.
+  - Identifies mugs, their postion and pose.
 
 * Components used
   - YUMI IRB14000
