@@ -32,7 +32,7 @@ The
     >note: MoveY is only available with YumiLib
 * EGMprocesses.mod
 
-    Main module for EGM processes. Includes setup, activation and starting of EGM in both pose and joint mode.
+    Main module for EGM processes. Includes setup, activation and starting of EGM position guidance in both pose and joint mode.
 
 * movement_shared_vars.mod
 
