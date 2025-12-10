@@ -173,7 +173,8 @@ MODULE MugManipulation_SupportFunctions
        VAR num scaler;
        scaler := .2; ! weight the normal vector minial value
        
-       position := position - dynamicSholderPos(position,350); ! this to gain the vector from the sholder and not the base.
+       position := position - shoulderPos(position,[300,-200,460],75); ! this to gain the vector from the sholder and not the base.
+       
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
             ! generate "easy" vector to span plane
@@ -191,6 +192,7 @@ MODULE MugManipulation_SupportFunctions
        v := v/sqrt(DotProd(v,v));
        
        v := v - Project(v,normal);
+       v := v/sqrt(DotProd(v,v));
        
        RETURN v;
        
@@ -328,7 +330,7 @@ MODULE MugManipulation_SupportFunctions
 !            PosToNumArr [1,0,0],e1;
 !            PosToNumArr [0,0,1],e2;
 !            PosToNumArr [0,-1,0],e3;
-        RETURN  NOrient([0,0,.707,-.707]); 
+        RETURN  NOrient([.707,-.707,0,0]);
        
         
 !        RETURN ChiaveriniSiciliano(e1,e2,e3);!now we have a queternium from a normal vector!
@@ -358,5 +360,21 @@ MODULE MugManipulation_SupportFunctions
         RETURN middle_target;
     ENDFUNC
     
+     FUNC pos shoulderPos(pos mug_pos, pos origo, num radius)
+        VAR pos v1;
+        VAR pos s_shoulder;
+        VAR pos h_shoulder;
+        VAR num v1_magn;
+        h_shoulder := [origo.x,origo.y+500,origo.z];
+        
+        v1 := [mug_pos.x - origo.x,mug_pos.y-origo.y,origo.z];
+        s_shoulder :=  [origo.x-v1.x,origo.y-v1.y,v1.z];
+        v1_magn := Sqrt(v1.x*v1.x + v1.y*v1.y);
+        IF v1_magn > radius THEN
+            RETURN s_shoulder;
+        ELSE
+            RETURN h_shoulder;
+        ENDIF
+    ENDFUNC
     
 ENDMODULE

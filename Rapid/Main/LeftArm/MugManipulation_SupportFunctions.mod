@@ -150,8 +150,8 @@ MODULE MugManipulation_SupportFunctions
    ! if mug is to close to robot, we want to change the "sholder" directin, making the robot fetch the mug in a different direction
    FUNC pos dynamicSholderPos(pos mug_position,num max_lenght)
        
-       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
-       TPWrite "magnitude:", \Num:=max_lenght;
+!       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
+!       TPWrite "magnitude:", \Num:=max_lenght;
        IF sqrt(DotProd(mug_position,mug_position)) < max_lenght THEN
            RETURN sholder_pos_far;
        ELSE
@@ -173,7 +173,13 @@ MODULE MugManipulation_SupportFunctions
        VAR num scaler;
        scaler := .2; ! weight the normal vector minial value
        
-       position := position - dynamicSholderPos(position,350); ! this to gain the vector from the sholder and not the base.
+!       position := position - dynamicSholderPos(position,350); ! this to gain the vector from the sholder and not the base.
+    
+!        TPWrite "mug:" \Pos:=position;
+       position := position - shoulderPos(position,[300,200,460],75); ! this to gain the vector from the sholder and not the base.
+       
+!!        TPWrite "z vector:" \Pos:=position;
+       
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
             ! generate "easy" vector to span plane
@@ -191,6 +197,10 @@ MODULE MugManipulation_SupportFunctions
        v := v/sqrt(DotProd(v,v));
        
        v := v - Project(v,normal);
+       
+       v := v/sqrt(DotProd(v,v));
+       
+!      TPWrite "z vector:" \Pos:=v;
        
        RETURN v;
        
@@ -346,16 +356,33 @@ MODULE MugManipulation_SupportFunctions
             
     ENDFUNC
     
-  FUNC pose HandOverTarget(pose end_target, pose mug_current_target)
-    VAR pose middle_target;
-    
-    ! half way mark
-    middle_target.trans := end_target.trans  - (end_target.trans - mug_current_target.trans)/2;
-    
-    ! to make it easier for the leaving arm
-    middle_target.rot := end_target.rot;
+    FUNC pose HandOverTarget(pose end_target, pose mug_current_target)
+        VAR pose middle_target;
+        
+        ! half way mark
+        middle_target.trans := end_target.trans  - (end_target.trans - mug_current_target.trans)/2;
+        
+        ! to make it easier for the leaving arm
+        middle_target.rot := end_target.rot;
     
         RETURN middle_target;
+    ENDFUNC
+    
+    FUNC pos shoulderPos(pos mug_pos, pos origo, num radius)
+        VAR pos v1;
+        VAR pos s_shoulder;
+        VAR pos h_shoulder;
+        VAR num v1_magn;
+        h_shoulder := [origo.x,origo.y+500,origo.z];
+        
+        v1 := [mug_pos.x - origo.x,mug_pos.y-origo.y,origo.z];
+        s_shoulder :=  [origo.x-v1.x,origo.y-v1.y,v1.z];
+        v1_magn := Sqrt(v1.x*v1.x + v1.y*v1.y);
+        IF v1_magn > radius THEN
+            RETURN s_shoulder;
+        ELSE
+            RETURN h_shoulder;
+        ENDIF
     ENDFUNC
     
     
