@@ -84,28 +84,28 @@ MODULE MugManipulation
         VAR pos offset;
         
         hand_rotation := NormalToOrientationSemiOptimal(mug_end_position,mug_end_normal);
-        offset := [0,0,1]*offset_lenght; ! we always want to move straight up after leaving mug
+        offset := [0,0,1]*offset_lenght+ ([1,0,0]*x_offset + [0,1,0]*y_offset +[0,0,1]*z_offset); ! we always want to move straight up after leaving mug
         target := CRobT(\Tool := tGripper);
         ConfJ \Off;
 
+       TPWrite "q:" \Orient:=hand_rotation;
        
         target.rot := hand_rotation;
         target.trans := mug_end_position + offset;
+        
         moveJ target,movement_speed,z50,tGripper;
         WaitTime(1);
                 
-        !ask for confermation
-        TPWrite("At mug picking frame");
-        
         ! Leave mug
         target.trans := mug_end_position;
-        moveJ target,movement_speed,z50,tGripper;
+        moveL target,movement_speed,z50,tGripper;
         
         ! grippers out
         WaitTime(1);
+        g_GripOut;
         
         target.trans := mug_end_position + offset;
-        moveJ target,movement_speed,z50,tGripper;
+        moveL target,movement_speed,z50,tGripper;
         
        
    ENDPROC

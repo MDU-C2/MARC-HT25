@@ -4,4 +4,6 @@
 	<Module>EGMprocesses.mod</Module>
 	<Module>movementFunctions.mod</Module>
 	<Module>shared_vars.mod</Module>
+	<Module>MugManipulation.mod</Module>
+	<Module>MugManipulation_SupportFunctions.mod</Module>
 </Program>

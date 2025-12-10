@@ -29,7 +29,8 @@ MODULE shared_vars
     PERS movement_vars shared_movement_left;
     PERS movement_vars shared_movement_right;
     
-    CONST num nothing:=0;
+    CONST num flag_ERROR := -1;
+    CONST num flag_nothing:=0;
     CONST num flag_move:= 1;
     CONST num flag_move_home:= 2;
     CONST num flag_gripper_grip:= 3;
@@ -39,6 +40,9 @@ MODULE shared_vars
     CONST num flag_move_leavesequence:= 7;
     CONST num flag_move_EGM:= 8;
     CONST num flag_move_calibration:= 9;
+    CONST num flag_pick_up_mug := 10;
+    CONST num flag_leave_mug := 11;
+    CONST num flag_hand_over := 12;
     
     ! ========== CALIBRATION ========== 
     CONST num calib_array_size := 40;

@@ -1,4 +1,4 @@
-MODULE MugManipulation_SupportFunctions
+MODULE GiveCup_SupportFunctions
    !!! ================== SUPPORT FUNCTIONS =========================== !!!
    
    !Align the y axes to the normal axes
@@ -171,9 +171,9 @@ MODULE MugManipulation_SupportFunctions
        VAR pos u;
        VAR pos v;
        VAR num scaler;
-       scaler := .2; ! weight the normal vector minial value
+       scaler := .8; ! weight the normal vector minial value
        
-       position := position - dynamicSholderPos(position,350); ! this to gain the vector from the sholder and not the base.
+       position := position - dynamicSholderPos(position,300); ! this to gain the vector from the sholder and not the base.
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
             ! generate "easy" vector to span plane
@@ -313,50 +313,4 @@ MODULE MugManipulation_SupportFunctions
         
         RETURN q;
     ENDFUNC
-    
-    
-    
-    ! get wanted orientation
-    FUNC orient MugHandOverOrient()
-
-        VAR orient target;
-        VAR num e1{3};
-        VAR num e2{3};
-        VAR num e3{3};
-        
-        
-!            PosToNumArr [1,0,0],e1;
-!            PosToNumArr [0,0,1],e2;
-!            PosToNumArr [0,-1,0],e3;
-        RETURN  NOrient([0,0,.707,-.707]); 
-       
-        
-!        RETURN ChiaveriniSiciliano(e1,e2,e3);!now we have a queternium from a normal vector!
-    ENDFUNC       
-    
-      ! the mug is longer if it standing up rather then laying down
-    FUNC num ZOffset(pos normal)
-        
-        ! mug standing upright
-        IF abs(normal.z) >= abs(normal.x) AND abs(normal.z) >= abs(normal.y) THEN
-            RETURN 5;
-        ELSE
-            RETURN -30;
-        ENDIF
-            
-    ENDFUNC
-    
-  FUNC pose HandOverTarget(pose end_target, pose mug_current_target)
-    VAR pose middle_target;
-    
-    ! half way mark
-    middle_target.trans := end_target.trans  - (end_target.trans - mug_current_target.trans)/2;
-    
-    ! to make it easier for the leaving arm
-    middle_target.rot := end_target.rot;
-    
-        RETURN middle_target;
-    ENDFUNC
-    
-    
 ENDMODULE

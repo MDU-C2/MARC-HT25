@@ -61,8 +61,8 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
-        self._connection_test_thread.start()
+        # self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
+        # self._connection_test_thread.start()
 
 
     
@@ -136,7 +136,7 @@ class Communication():
             if self.sleep_time > self.max_sleep_duration:
                 if self.connected:
                     self.ConnectionTest()
-                    self.sleep_time = 60
+                    self.sleep_time = self.reset_connection_timer()
             else:
                 self.sleep_time += time.time() - start
 

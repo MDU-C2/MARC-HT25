@@ -5,5 +5,5 @@
 	<Module>processes.mod</Module>
 	<Module>Server_functions.mod</Module>
 	<Module>server.mod</Module>
-	<Module>left_main.mod</Module>
+	<Module>CommunicationMain.mod</Module>
 </Program>

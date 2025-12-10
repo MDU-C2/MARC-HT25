@@ -37,10 +37,14 @@ MODULE Server_functions
         VAR string robtarget_string;
         
         !extracting all single values
+!       robtarget_string := "[" +
+!            ValToStr(Round(input_pos.x)) + "," +
+!            ValToStr(Round(input_pos.y)) + "," +
+!            ValToStr(Round(input_pos.z)) + "]";
        robtarget_string := "[" +
-            ValToStr(Round(input_pos.x)) + "," +
-            ValToStr(Round(input_pos.y)) + "," +
-            ValToStr(Round(input_pos.z)) + "]";
+            ValToStr(input_pos.x) + "," +
+            ValToStr(input_pos.y) + "," +
+            ValToStr(input_pos.z) + "]";
     
         RETURN robtarget_string;
        
