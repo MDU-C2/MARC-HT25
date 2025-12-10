@@ -331,6 +331,7 @@ MODULE MugManipulation_SupportFunctions
 !            PosToNumArr [0,0,1],e2;
 !            PosToNumArr [0,-1,0],e3;
         RETURN  NOrient([.707,-.707,0,0]);
+!        RETURN  NOrient([.707,-.707,0,0]);
        
         
 !        RETURN ChiaveriniSiciliano(e1,e2,e3);!now we have a queternium from a normal vector!

@@ -30,7 +30,7 @@ MODULE RightArmMain
     CONST num y_offset := -10;                
     CONST num z_offset := -10;           
         ! used when fetching a mug
-    CONST num gripper_offset := 0;    
+    CONST num gripper_offset := 50;    
     CONST num pick_offset := 100;
 !CONST robtarget calib_robtargets10:=[[308.66,-338.67,251.88],[0.47389,-0.816927,0.0698697,-0.321211],[0,0,1,4],[179.081,9E+09,9E+09,9E+09,9E+09,9E+09]];
     
@@ -105,6 +105,7 @@ MODULE RightArmMain
             
             CASE flag_hand_over: 
                 ! hand over sequence
+                handOverSequence;
                 
             ENDTEST
             shared_movement_right.wait_flag := FALSE;

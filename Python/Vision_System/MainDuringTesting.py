@@ -120,8 +120,6 @@ def run():
     
     if client.connectV2(): 
 
-
-
         homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
         
         # get avg of matrices

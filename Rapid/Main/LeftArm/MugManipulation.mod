@@ -17,13 +17,13 @@ MODULE MugManipulation
         target := CRobT(\Tool := tGripper);
         ConfJ \Off;
 
-        TPWrite "mugs pos:" \Pos:=mug_position;
+!        TPWrite "mugs pos:" \Pos:=mug_position;
         mug_position := mug_position + [0,0,1]*zOffset(mug_normal) + ([1,0,0]*x_offset + [0,1,0]*y_offset +[0,0,1]*z_offset);
-        TPWrite "mugs after offsets pos:" \Pos:=mug_position;
+!        TPWrite "mugs after offsets pos:" \Pos:=mug_position;
         
         target.rot := hand_rotation;
         target.trans := mug_position - offset_dir*offset_lenght;
-        TPWrite "mugs offset pos:" \Pos:=mug_position;
+!        TPWrite "mugs offset pos:" \Pos:=mug_position;
 !        moveJ target,movespeed,z50,tGripper;
         MovementProc target,50,300,movement_speed;
         
@@ -32,7 +32,7 @@ MODULE MugManipulation
         g_GripOut;
                 
         !ask for confermation
-        TPWrite("At mug picking frame");
+!        TPWrite("At mug picking frame");
         
         !pick up mug
         target.trans := mug_position + offset_dir*gripper_offset ;
@@ -51,30 +51,41 @@ MODULE MugManipulation
     
   
     PROC handOverSequence()
-!        VAR robtarget target;
+        VAR robtarget target;
+        VAR pos offset_dir;
+       
+        ! get right pose
+        target := CRobT(\Tool := tGripper);
         
-!        ConfJ\Off;
-    
-!        target := CRobT(\Tool:=Gripper);
-!        target.trans := multi_move.hand_over_pose.position;
-!        target.rot := MugHandOverOrient();
+        target.rot := MugHandOverOrient(); ! should add normal
         
-!        moveJ target,movespeed,z50,Gripper;
-!!            MovementProc target,movespeed,z50,tGripper;
-
-!        ! wait untill right arm is in right poss
-!        multi_move.right_in_process := TRUE;
-!        multi_move.left_in_process := FALSE;
-!        WaitUntil multi_move.left_in_process = TRUE;
+        offset_dir := RotatePointUsingQuaternion([0,0,1],target.rot);
+        offset_dir.x := Round(offset_dir.x \Dec:=4);
+        offset_dir.y := Round(offset_dir.y \Dec:=4);
+        offset_dir.z := Round(offset_dir.z \Dec:=4);
         
-!        !open gripper
+        target.trans := shared_movement_left.hand_over_pose.position - offset_dir*gripper_offset;
+        ConfJ \Off;
         
-!        target.trans := multi_move.hand_over_pose.position + [0,1,0]*mug_offset*2;
-!        moveJ target,movespeed,z50,Gripper;
-!!            MovementProc home_target,movespeed,z50,tGripper;
+        ! move to right pose
+!        moveJ target,movement_speed,z50,tGripper;
+        MovementProc target,50,300,movement_speed;
+        shared_movement_left.wait_flag := FALSE;
         
-!        ! tell right arm that we are not in the way
-!        multi_move.right_in_process := TRUE;
+        ! wait for right arm
+        WaitUntil shared_movement_left.wait_flag = TRUE;
+        
+        ! open gripper and move back
+        
+        g_GripOut;
+        
+        WaitTime(1);
+        
+        target.trans := target.trans - offset_dir*(pick_offset+gripper_offset);
+        moveL target,movement_speed,z50,tGripper;
+!        MovementProc target,50,300,movement_speed;
+        
+        
     ENDPROC
         
     ! leave mug
@@ -91,7 +102,8 @@ MODULE MugManipulation
        
         target.rot := hand_rotation;
         target.trans := mug_end_position + offset;
-        moveJ target,movement_speed,z50,tGripper;
+!        moveJ target,movespeed,z50,tGripper;
+        MovementProc target,50,300,movement_speed;
         WaitTime(1);
                 
         !ask for confermation

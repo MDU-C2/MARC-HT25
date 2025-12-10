@@ -32,7 +32,7 @@ MODULE LeftArmMain
     CONST num y_offset := -30;                
     CONST num z_offset := -30;        
         ! used when fetching a mug
-    CONST num gripper_offset := 0;    
+    CONST num gripper_offset := 20;    
     CONST num pick_offset := 100;
     
     
@@ -121,6 +121,7 @@ MODULE LeftArmMain
             
             CASE flag_hand_over: 
                 ! hand over sequence
+                handOverSequence;
                 
             ENDTEST
             shared_movement_left.wait_flag := FALSE;
