@@ -24,6 +24,7 @@ At the top of the screen, click **File** and select the following:
 4. Tick **Include a Robot and Virtual Controller**
 4. Choose robot model: **IRB 14000 YuMi** Variant **IRB 14000 0.5kg 0.5m**
 5. Tick **Customize options** and Press **create**
+
 ![NewProject](/media/images/NewProject.png)
 >If you want the controller to be able to run EGM, in the Change Options window, navigate to the **Engineering Tools** catagory and tick the **Externally Guided Motion (EGM)** option.
 
@@ -43,10 +44,13 @@ To add a task, first open the **Controller Configuration** in the active station
 1. Double click the **Controller** section
 2. Press **Task**
 3. Right click within the window and add a **New task**
+
 ![AddingTask](/media/images/AddingTask.png)
+
 4. Enter a name, for example "Communication"
 5. Change the type to **Normal**
 6. Press **OK**
+
 ![TaskSettings](/media/images/TaskSettings.png)
 
 >Make sure Motion Task is set to **No**, since you can only have one motion task for each mechanical unit (each arm) and there should already be two tasks available.
@@ -67,7 +71,9 @@ The following instructions show how to load the RAPID code from this repository:
 
 1. Right click the **Communication** task
 2. Press **Load Program**
-![jisajd](/media/images/LoadProgram.png)
+
+![LoadProgram](/media/images/LoadProgram.png)
+
 3. Navigate to where the repository is saved **(C:\ ...\MARC-HT25\RAPID\communication)**
 4. Choose **communication.pgf**
 5. Press **Open**
