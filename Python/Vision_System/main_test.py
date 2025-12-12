@@ -102,8 +102,11 @@ def run():
     quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
     cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
     robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
-    client = Communication()
-    client.connect()
+    try:
+        client = Communication()
+        client.connect()
+    except e as exception:
+        print(1)
     
 
     homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
