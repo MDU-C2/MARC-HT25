@@ -214,7 +214,8 @@ def run():
                                         norm[0] = 0
 
                                     normalized_vector = orientation_map.get(label)
-                                    threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
+                                    if cv.waitKey(1) & 0xFF == ord(' '):
+                                        threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                                 except Exception as e:
                                     print(f"Error {e}")
 
