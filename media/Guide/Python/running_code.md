@@ -14,7 +14,7 @@
 
 
 ## Calibration
-The first step is to start the server from **RAPID** as shown in [this guide](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md) 
+The first step is to start the server from **RAPID** as shown in [this guide](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md) 
 
 It is important to note that the quality of the calibration relies on how many positions are captured and that the calibration is done thoroughly and precise, which is why we have made the calibration fully automatic. To get started run the code: 
 

@@ -16,8 +16,11 @@
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="#requirements">Requirements</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#license">License</a>
+  <a href="#how-to-clone-git">How To Clone Git</a> •
+  <a href="#get-started">Get Started</a> •
+  <a href="#rapid">Rapid</a> •
+  <a href="#python">Python</a> •
+  <a href="#yumi-irb-14000">YuMi IRB 14000</a> •
 </p>
 
 ![screenshot](/media/images/banner.gif)
@@ -48,8 +51,8 @@ The project aims to create a robotic system capable of dynamically locating diff
   Lägg in mer här?
 -->
   - Robotstudio
-
-## How To Use
+  - YUMI IRB 14000
+## How To Clone Git
 
 Clone this repo , you'll need [Git](https://git-scm.com) installed on your computer. From your command line:
 
@@ -62,6 +65,8 @@ $ cd MARC-HT25
 ```
 > [!Note]
 > Everything in this guide was tested on windows
+> 
+## Get Started
 
 <!-- There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot. [Python guide](/media/Guide/Python/README.md) for setting up Python and the camera to communicate with the robot. -->
 
@@ -79,9 +84,6 @@ If you need help with starting or working with the robot follow the [YuMi IRB 14
 MIT
 
 ---
-
-
-
 
 ## Other
 
