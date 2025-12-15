@@ -1,6 +1,7 @@
 MODULE Server_functions
     VAR errnum ERR_NOT_VALID_STRING := 42;
     
+    ! currently hard coded because lack of time. But will be the position of the hand over sequence
     FUNC pos GetHandOverPos()
         RETURN [350,0,150];
     ENDFUNC
