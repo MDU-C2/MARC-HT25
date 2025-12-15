@@ -101,7 +101,7 @@ def cam_calibration():
     stereo.setOutputSize(mono_left.getResolutionWidth(), mono_left.getResolutionHeight())
     stereo.setSubpixel(True) 
 
-    configPath = "blob_v8_calibration/gripper_nano.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+    configPath = "blob_aruco/best_1.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
     with open(configPath, "r") as f:
         config = json.load(f)
     nnConfig = config.get("nn_config", {})
@@ -120,7 +120,7 @@ def cam_calibration():
     nnMappings = config.get("mappings", {})
     labels = nnMappings.get("labels", {})
 
-    nnPath = "blob_v8_calibration/gripper_nano_openvino_2022.1_5shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+    nnPath = "blob_aruco/best_1_openvino_2022.1_5shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
 
     # Specific settings for the network
     detection_nn.setConfidenceThreshold(confidenceThreshold)
@@ -194,7 +194,7 @@ def camera_setup(cam_coords, robot_file):
     stereo.setOutputSize(mono_left.getResolutionWidth(), mono_left.getResolutionHeight())
     stereo.setSubpixel(True) 
 
-    configPath = "blob_mugs/best_mugs.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+    configPath = "blob_v5/best_Yolo5_small.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
     with open(configPath, "r") as f:
         config = json.load(f)
     nnConfig = config.get("nn_config", {})
@@ -213,7 +213,7 @@ def camera_setup(cam_coords, robot_file):
     nnMappings = config.get("mappings", {})
     labels = nnMappings.get("labels", {})
 
-    nnPath = "blob_mugs/best_mugs_openvino_2022.1_5shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+    nnPath = "blob_v5/best_Yolo5_small_openvino_2022.1_5shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
 
     # Specific settings for the network
     detection_nn.setConfidenceThreshold(confidenceThreshold)

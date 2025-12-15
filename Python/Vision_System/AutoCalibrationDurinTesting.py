@@ -95,47 +95,47 @@ if client.connectV2():
                         label = label_map[det.label]
                     conf  = int(det.confidence * 100)  # confidence percentage
 
-                    if label == "Gripper": # Only process non-gripper detections (cups)
-                        # Get bounding box coordinates (normalized 0..1 from NN, convert to pixel coords)
-                        x1 = int(det.xmin * frame.shape[1])
-                        y1 = int(det.ymin * frame.shape[0])
-                        x2 = int(det.xmax * frame.shape[1])
-                        y2 = int(det.ymax * frame.shape[0])
 
-                        # Draw rectangle on RGB frame
-                        cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
+                    # Get bounding box coordinates (normalized 0..1 from NN, convert to pixel coords)
+                    x1 = int(det.xmin * frame.shape[1])
+                    y1 = int(det.ymin * frame.shape[0])
+                    x2 = int(det.xmax * frame.shape[1])
+                    y2 = int(det.ymax * frame.shape[0])
 
-                        # Draw label and confidence
-                        cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20),
-                                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    # Draw rectangle on RGB frame
+                    cv.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
 
-                        # Draw spatial coordinates (X, Y, Z in mm)
-                        coords = det.spatialCoordinates  # spatial coordinates relative to camera
-                        cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35),
-                                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                        cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50),
-                                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                        cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65),
-                                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
-                        #if cv.waitKey(1) & 0xFF == ord(' '):
-                        if wait == False: 
-                            Saved_Coordinates.append([coords.x,coords.y,coords.z]) # save camera coordinates
-                            try:
-                                robot_position = client.GetPosition()# get coordinates from robot
-                            except:
-                                print("error getting coordinates from robot")
-                            saved_robo_coordinates.append(robot_position) # save robot coordinates
-                            print("coordinates saved", len(Saved_Coordinates))
-                            print("Robot:", robot_position)
-                            print("Camera", [coords.x,coords.y,coords.z])
-                            count += 1
-                            
-                        if count < num_positions_copy and wait == False:
-                            
-                            threading.Thread(target=local_move, args=(positions, count)).start()
+                    # Draw label and confidence
+                    cv.putText(frame, f"{label} ({conf}%)", (x1+5, y1+20),
+                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+
+                    # Draw spatial coordinates (X, Y, Z in mm)
+                    coords = det.spatialCoordinates  # spatial coordinates relative to camera
+                    cv.putText(frame, f"X: {int(coords.x)} mm", (x1+5, y1+35),
+                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50),
+                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65),
+                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    #if cv.waitKey(1) & 0xFF == ord(' '):
+                    if wait == False: 
+                        Saved_Coordinates.append([coords.x,coords.y,coords.z]) # save camera coordinates
+                        try:
+                            robot_position = client.GetPosition()# get coordinates from robot
+                        except:
+                            print("error getting coordinates from robot")
+                        saved_robo_coordinates.append(robot_position) # save robot coordinates
+                        print("coordinates saved", len(Saved_Coordinates))
+                        print("Robot:", robot_position)
+                        print("Camera", [coords.x,coords.y,coords.z])
+                        count += 1
+                        
+                    if count < num_positions_copy and wait == False:
+                        
+                        threading.Thread(target=local_move, args=(positions, count)).start()
 
 
-                    
+                
 
 
                 # Show the frames in windows
