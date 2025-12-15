@@ -65,7 +65,7 @@ class Communication():
         # self._connection_test_thread.start()
 
 
-    
+
 
 
 
