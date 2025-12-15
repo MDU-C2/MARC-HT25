@@ -151,13 +151,9 @@ def run():
                 label = str(det.label)
                 if det.label < len(labels):
                     label = labels[det.label]
-                
-                # if handle, skip 
-                if label != "handle":
-                    continue
 
                 conf  = int(det.confidence * 100) # Confidence percentage
-                
+            
                 # Get bounding box (pixel) coordinates 
                 x1 = int(det.xmin * frame.shape[1])
                 y1 = int(det.ymin * frame.shape[0])
@@ -243,7 +239,7 @@ def run():
                 break
 
     cv.destroyAllWindows()
-    
+
     # finish protocol
     if save_protocol:
         tp.ask_user(file_path, "end")
