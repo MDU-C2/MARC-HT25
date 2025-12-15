@@ -81,25 +81,12 @@ MODULE server
             CASE "Get_Coordinates": 
                 sendHandCoordinates;
                 
-            CASE "Get_Orientation":
-                sendHandOrientation;
-                
             CASE "Move":
-                TPWrite("[INFO] client wants to move the arm");
-                IF (MoveRob(GetRobTarget())) THEN
-                ELSE
-                    SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
-                ENDIF
-                
-            CASE "Grip":
-                Grip;
-                
-            CASE "Release":
-                Release;
+                Move;    
                 
             CASE "Home":
                 moveToHomeTarget;
-                
+
             CASE "Pick_Up_Sequence":
                  pickupSequence; 
                  
@@ -111,10 +98,7 @@ MODULE server
                 
             CASE "Move_Calibration_home": 
                 calibrationMoveHome;
-                
-            CASE "EGM_movement":
-                EGMMovement;
-                
+                           
             DEFAULT:
                 TPWrite("[INFO] message from client: "+message);
                 SocketSend client_socket\Str:="default_"+message;

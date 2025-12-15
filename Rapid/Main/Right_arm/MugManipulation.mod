@@ -1,13 +1,19 @@
 MODULE MugManipulation
+! FETCH MUG
+!    ***********************************************************
 
-    ! fetch up mug
+!   This system extract the wanted hand pose depending on the position and mug normal
+!   Then the system move the gripper to that pose with a offset "offset_lenght"
+!   Init a gripp in and out sequence that fetch the mug in the local z offset of the gripper
+
+!    ***********************************************************
     PROC FetchMug(pos mug_position, num offset_lenght, pos mug_normal)
         VAR robtarget target;
         VAR orient hand_rotation;
         VAR pos offset_dir;
+        
         !go to postion
         hand_rotation := NormalToOrientationSemiOptimal(mug_position,mug_normal);
-!        hand_rotation := NormalToOrientation(mug_normal);
         
         offset_dir := RotatePointUsingQuaternion([0,0,1],hand_rotation);
         offset_dir.x := Round(offset_dir.x \Dec:=4);
@@ -17,37 +23,31 @@ MODULE MugManipulation
         target := CRobT(\Tool := tGripper);
         ConfJ \Off;
 
-        TPWrite "mugs pos:" \Pos:=mug_position;
-        mug_position := mug_position + [0,0,1]*zOffset(mug_normal) + ([1,0,0]*x_offset + [0,1,0]*y_offset +[0,0,1]*z_offset);
-        TPWrite "mugs after offsets pos:" \Pos:=mug_position;
+        ! final mug position         mug standin up or laying down     standard gripper offset 
+        mug_position := mug_position  + [0,0,1]*zOffset(mug_normal) + ([1,0,0]*x_offset + [0,1,0]*y_offset +[0,0,1]*z_offset);
         
         target.rot := hand_rotation;
         target.trans := mug_position - offset_dir*offset_lenght;
-        TPWrite "mugs offset pos:" \Pos:=mug_position;
-!        moveJ target,movespeed,z50,tGripper;
         MovementProc target,step_size,max_magnitude,movement_speed;
         
         ! grippers out
-        WaitTime(1);
+        WaitTime(sequence_delay);
         g_GripOut;
                 
-        !ask for confermation
-        TPWrite("At mug picking frame");
         
         !pick up mug
-        target.trans := mug_position + offset_dir*gripper_offset ;
+        target.trans := mug_position + offset_dir*gripper_offset;
         moveL target,movement_speed,z50,tGripper;
-!        MovementProc target,step_size,max_magnitude,movement_speed;
         
         ! grippers in
-        WaitTime(1);
+        WaitTime(sequence_delay);
         g_GripIn;
         
-        target.trans := mug_position - offset_dir*offset_lenght;
+        target.trans := mug_position - offset_dir*offset_lenght  + [0,0,1]*offset_z_when_fetching;
         moveL target,movement_speed,z50,tGripper;
-!        MovementProc target,step_size,max_magnitude,movement_speed;
         
     ENDPROC
+    
     
   
     PROC handOverSequence()
@@ -94,39 +94,48 @@ MODULE MugManipulation
         
     ENDPROC
         
-    ! leave mug
+    
+! LEAVE MUG
+!    ***********************************************************
+
+!   Leave the mug at a designated end pose
+!   generate a wanted hand pose depending on mug position and normal
+!   move to pose with a "offset_lenght"
+!   move down and release gripper then move back up
+
+!    ***********************************************************
    PROC LeaveMug(pos mug_end_position, pos mug_end_normal, num offset_lenght)
         VAR robtarget target;
         VAR orient hand_rotation;
         VAR pos offset;
         
         hand_rotation := NormalToOrientationSemiOptimal(mug_end_position,mug_end_normal);
-        offset := [0,0,1]*offset_lenght+ ([1,0,0]*x_offset + [0,1,0]*y_offset +[0,0,1]*z_offset); ! we always want to move straight up after leaving mug
+        offset := [0,0,1]*offset_lenght; ! we always want to move straight up after leaving mug
         target := CRobT(\Tool := tGripper);
         ConfJ \Off;
 
-        TPWrite "q:" \Orient:=hand_rotation;
-       
         target.rot := hand_rotation;
         target.trans := mug_end_position + offset;
         
-!        moveJ target,movespeed,z50,tGripper;
         MovementProc target,step_size,max_magnitude,movement_speed;
-        WaitTime(1);
+        WaitTime(sequence_delay);
                 
+        !ask for confermation
+        TPWrite("At mug picking frame");
+        
         ! Leave mug
         target.trans := mug_end_position;
         moveL target,movement_speed,z50,tGripper;
         
         ! grippers out
-        WaitTime(1);
-        g_GripOut;
+        WaitTime(sequence_delay);
         
-        target.trans := mug_end_position + (offset*1.5);
+        target.trans := mug_end_position + offset;
         moveL target,movement_speed,z50,tGripper;
-        
+       
    ENDPROC
    
+   ! hardcoded end pose because lack of time
    PROC LeaveMugV2()
         VAR robtarget end_target;
         
@@ -134,7 +143,6 @@ MODULE MugManipulation
         
         ConfJ \On;
         
-               
         MoveJ end_target,movement_speed,fine,tGripper;
         MoveJ Offs(end_target,0,0,-60),movement_speed,fine,tGripper;
         
