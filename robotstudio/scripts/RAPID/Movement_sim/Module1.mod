@@ -8,8 +8,7 @@ MODULE Module1
 !     Author: fjn20007
     
 !    ***********************************************************
-!    CONST robtarget home_target := [[609,13,136],[0.56458,0.45107,0.48932,0.48820],[-1,-1,0,4],[-177.987,9E+09,9E+09,9E+09,9E+09,9E+09]];
-    
+
     CONST robtarget home_target := [[609,13,136],[0.56458,0.45107,0.48932,0.48820],[-1,-1,0,4],[-177.987,9E+09,9E+09,9E+09,9E+09,9E+09]];
     CONST robtarget calib_home_target := [[442.004,-92.0926,171.604],[0.0189937,-0.0236138,0.999427,-0.0150419],[-1,1,-1,4],[-152.666,9E+09,9E+09,9E+09,9E+09,9E+09]];
     
@@ -23,7 +22,8 @@ MODULE Module1
         CONST num z_offset := 0;                
         CONST num pick_z_offset := 200;         
 
-        g_calibrate; ! Calibrate gripper (Requires YuMi lib)
+!        shared_vars.target := CrobT(\Tool:=tGripper);
+!        g_calibrate; ! Calibrate gripper (Requires YuMi lib)
         TPErase;     ! Erase all text on FlexPendant
         ConfJ\On;   ! Turn on configuration mode
         ConfL\On;
@@ -41,11 +41,11 @@ MODULE Module1
 !                g_GripIn;
 
             CASE flag_move_home: !Move to home position (revelotion counter calibration position) (Requires YuMi lib)
-                MoveToHome; 
+!                MoveToHome; (Does not work in sim)
             CASE flag_gripper_grip: !Close gripper to minimum (Requires YuMi lib)
-                g_gripIn;   
+!                g_gripIn;   (Does not work in sim)
             CASE flag_gripper_release: !Open gripper to maximum (Requires YuMi lib)
-                g_gripOut; 
+!                g_gripOut;  (Does not work in sim)
             CASE flag_move_home_target: !Move to home_target
                 ConfJ\On;
                 ConfL\On;
@@ -53,16 +53,15 @@ MODULE Module1
                 ConfJ\Off;
                 ConfL\Off;
             CASE flag_move_gripsequence:
-            
                 MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,pick_z_offset), step_size, max_magnitude, movement_speed;
-                g_GripOut; 
+!                g_GripOut; (Does not work in sim)
                 MovementProc Offs(shared_movement_vars.target,x_offset,y_offset,z_offset), step_size, max_magnitude, movement_speed;
             CASE flag_move_leavesequence: !Leave cup
                 ConfJ\On;
-                g_GripIn; 
+!                g_GripIn; (Does not work in sim)
                 MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
                 MoveJ Offs(cup_target,x_offset,y_offset,z_offset),movement_speed,fine,tGripper;
-                g_GripOut;
+!                g_GripOut; (Does not work in sim)
                 MoveJ Offs(cup_target,x_offset,y_offset,pick_z_offset),movement_speed,fine,tGripper;
                 ConfJ\Off;
             CASE flag_move_EGM: !EGM movement
@@ -75,7 +74,6 @@ MODULE Module1
             CASE flag_move_calibration:
                 ConfJ\On;
                 ConfL\On;
-                MoveJ calib_home_target,movement_speed,fine,tGripper;
                 MoveJ shared_movement_vars.target,movement_speed,fine,tGripper;
                 ConfJ\Off;
                 ConfL\Off;
@@ -84,4 +82,3 @@ MODULE Module1
         ENDWHILE
     ENDPROC
 ENDMODULE
-

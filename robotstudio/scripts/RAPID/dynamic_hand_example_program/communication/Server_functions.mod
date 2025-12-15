@@ -1,12 +1,5 @@
 MODULE Server_functions
     VAR errnum ERR_NOT_VALID_STRING := 42;
-    
-!    ***********************************************************
-!     Function: RobtargetToString
-
-!     Description:  Takes a rob_target and returns a string containing pos & orient ([x,y,z],[q1,q2,q3,q4])
-    
-!    ***********************************************************
     FUNC string RobtargetToString(robtarget input_target)
 
         VAR string robtarget_string;
@@ -25,53 +18,22 @@ MODULE Server_functions
         RETURN robtarget_string;
        
     ENDFUNC
-    
-!    ***********************************************************
-!     Function: RobPosToString
 
-!     Description:  Takes a pos and returns a string containing pos ([x,y,z])
-    
-!    ***********************************************************
-    FUNC string RobPosToString(pos input_pos)
+        
+    FUNC string RobPosToString(pos input_target)
 
         VAR string robtarget_string;
         
         !extracting all single values
        robtarget_string := "[" +
-            ValToStr(Round(input_pos.x)) + "," +
-            ValToStr(Round(input_pos.y)) + "," +
-            ValToStr(Round(input_pos.z)) + "]";
+            ValToStr(Round(input_target.x)) + "," +
+            ValToStr(Round(input_target.y)) + "," +
+            ValToStr(Round(input_target.z)) + "]";
     
         RETURN robtarget_string;
        
     ENDFUNC
-  
-!    ***********************************************************
-!     Function: RobOrientToString
-
-!     Description:  Takes an orient and returns a string containing orient ([q1,q2,q3,q4])
     
-!    ***********************************************************
-    FUNC string RobOrientToString(orient input_orient)
-        
-        VAR string roborient_string;
-        
-       roborient_string := "[" +
-            ValToStr(Round(input_orient.q1)) + "," +
-            ValToStr(Round(input_orient.q2)) + "," +
-            ValToStr(Round(input_orient.q3)) + "," +
-            ValToStr(Round(input_orient.q4)) + "]";
-    
-        RETURN roborient_string;
-        
-    ENDFUNC
-    
-!    ***********************************************************
-!     Function: rob_coordinates
-
-!     Description:  Checks if a string contains a valid pos and inputs pos values to rob_pos
-    
-!    ***********************************************************
     FUNC bool rob_coordinates(string input_string,INOUT pos rob_pos)
         
         
@@ -129,13 +91,7 @@ MODULE Server_functions
             ENDIF
     ENDFUNC
     
-!    ***********************************************************
-!     Function: rob_orientation
-
-!     Description:  Checks if a string contains a valid orientation and inputs orient values to rob_ori
-
-!    ***********************************************************
-    FUNC bool rob_orientation(string input_string,INOUT orient rob_ori)
+FUNC bool rob_orientation(string input_string,INOUT orient rob_ori)
         VAR num start_index := 1;
         VAR num end_index := 0;
 
@@ -201,13 +157,8 @@ MODULE Server_functions
                 RETURN FALSE; ! Not valid
             ENDIF
     ENDFUNC
-        
-!    ***********************************************************
-!     Function: NormilizeRotation
-
-!     Description:  Normalizes a quaterniot (rot)
-
-!    ***********************************************************
+    
+    
     FUNC orient NormilizeRotation(orient rot)
         
         VAR num total;
@@ -224,7 +175,3 @@ MODULE Server_functions
         RETURN rot;
     ENDFUNC
 ENDMODULE
-
-
-
-

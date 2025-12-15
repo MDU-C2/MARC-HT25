@@ -13,6 +13,9 @@ MODULE server
     VAR robtarget cup_end_frame:=[[0,0,0],[0,0,0,0],[1,1,0,0],[11,12.3,9E9,9E9,9E9,9E9]];
     ! dummy values
 
+    CONST num min_z_value := 120;
+    VAR num position_in_file_index;
+    
     ! Open socket connection
     PROC server_init()
         ! port values
@@ -58,6 +61,7 @@ MODULE server
     ! hold comminication while client is connected
     ! close communication if timer runs out or clinet close communication
     PROC single_client_communication()
+        VAR mug_vector buffer;
         ! only want one clinet, therefore we do not need to open other ports and arange new connections!
 
         ! while we want to have a communication we keep on having one
@@ -73,44 +77,44 @@ MODULE server
             CASE "Connection_test": 
                 TPWrite("[INFO] client is sending test message");
                 SocketSend client_socket\Str:="Connection_Confirmed";
+                
             CASE "Get_Coordinates": 
                 sendHandCoordinates;
+                
             CASE "Get_Orientation":
                 sendHandOrientation;
+                
             CASE "Move":
                 TPWrite("[INFO] client wants to move the arm");
                 IF (MoveRob(GetRobTarget())) THEN
-                    !Successfull move sequence
-                    !SocketSend client_socket\Str:="AskNext";
-                    ! add real cordinates here
                 ELSE
                     SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
-                    !move failed
                 ENDIF
+                
             CASE "Grip":
                 Grip;
+                
             CASE "Release":
                 Release;
+                
             CASE "Home":
                 moveToHomeTarget;
+                
             CASE "Pick_Up_Sequence":
-                ! -----------------------------------------------------------------------------------Elliot function ------------------------------------------------------------------------------
-                !flag for pick up sequence is: flag_move_gripsequence
-                !Please add communication functionalities of process in communication\processes\pickupSequence and call for it here
-                !
-                !
-                !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                 pickupSequence; 
+                 
             CASE "Leave_Sequence":
-                ! -----------------------------------------------------------------------------------Elliot function ------------------------------------------------------------------------------
-                !flag for leave sequence is: flag_move_leavesequence
-                !Please add communication functionalities of process in communication\processes\leaveSequence and call for it here
-                !
-                !
-                !----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                leaveSequence;
+                
             CASE "Move_Calibration_Position": 
                 calibrationMovement;
+                
+            CASE "Move_Calibration_home": 
+                calibrationMoveHome;
+                
             CASE "EGM_movement":
                 EGMMovement;
+                
             DEFAULT:
                 TPWrite("[INFO] message from client: "+message);
                 SocketSend client_socket\Str:="default_"+message;

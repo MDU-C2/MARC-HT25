@@ -219,7 +219,11 @@ MODULE movementFunctions
 !    ***********************************************************
     PROC moveToHomeTarget()
         ConfJ\On;
-        MoveJ home_target,v300,fine,tGripper;
+!        MoveJ home_target,v300,fine,tGripper;
+!        MoveJ calib_home_target,v300,fine,tGripper;
+!        MoveJ home_target_v2,v300,fine,tGripper;
+        MoveJ home_target_v3,v300,fine,tGripper;
+        
         ConfJ\Off;
     ENDPROC
 ENDMODULE
