@@ -197,36 +197,41 @@ def run():
                 
                 # If something is queued, start a robot move thread
                 if obj_queue:    
-                        try:
-                            # Rotate the current (previously set) normalized orientation vector from camera frame into robot frame
-                            norm = np.matmul(rotation_matrix, normalized_vector)
+                    try:
+                        #To use the current label
+                        normalized_vector = orientation_map.get(label)
+                        norm = np.matmul(rotation_matrix, normalized_vector)
 
-                            # Check if the cup is NOT upright / upside-down.
-                            if (abs(normalized_vector[1]) < abs(normalized_vector[2]) or abs(normalized_vector[1]) < abs(normalized_vector[0])):
-                                # Sideways cup:
-                                # Project the rotated vector onto the XY plane by removing its Z component
-                                norm -= [0.0, 0.0, np.dot(norm, [0.0, 0.0, 1.0])]
+                        # Rotate the current (previously set) normalized orientation vector from camera frame into robot frame
+                        # norm = np.matmul(rotation_matrix, normalized_vector)
+                        
+                        
+                        # Check if the cup is NOT upright / upside-down.
+                        if (abs(normalized_vector[1]) < abs(normalized_vector[2]) or abs(normalized_vector[1]) < abs(normalized_vector[0])):
+                            # Sideways cup:
+                            # Project the rotated vector onto the XY plane by removing its Z component
+                            norm -= [0.0, 0.0, np.dot(norm, [0.0, 0.0, 1.0])]
 
-                                # Normalize to unit length
-                                norm = norm / np.sqrt(np.dot(norm, norm))
-                                np.set_printoptions(precision=3)
+                            # Normalize to unit length
+                            norm = norm / np.sqrt(np.dot(norm, norm))
+                            np.set_printoptions(precision=3)
 
-                            else:
-                                # Upright or upside-down cup:
-                                # Force approach direction to be purely along ±Z
-                                norm[0] = 0.0
-                                norm[1] = 0.0
-                                norm[2] = normalized_vector[1] / abs(normalized_vector[1])
+                        else:
+                            # Upright or upside-down cup:
+                            # Force approach direction to be purely along ±Z
+                            norm[0] = 0.0
+                            norm[1] = 0.0
+                            norm[2] = normalized_vector[1] / abs(normalized_vector[1])
 
-                            # Update orientation vector for the NEXT iteration
-                            # (note: this means the current norm was computed using the previous label’s orientation)
-                            normalized_vector = orientation_map.get(label)
+                        # Update orientation vector for the NEXT iteration
+                        # (note: this means the current norm was computed using the previous labels orientation)
+                        #normalized_vector = orientation_map.get(label)
 
-                            # Start robot motion in a separate thread
-                            threading.Thread(target=local_move, args=(quaternion, client, obj_queue, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
+                        # Start robot motion in a separate thread
+                        threading.Thread(target=local_move, args=(quaternion, client, obj_queue, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
 
-                        except Exception as e:
-                            print(f"Error {e}")
+                    except Exception as e:
+                        print(f"Error {e}")
 
 
             # Show the frames in windows
@@ -235,7 +240,6 @@ def run():
                 client.connect()
             # Exit on 'q' key
             if cv.waitKey(1) & 0xFF == ord('q'):
-
                 break
 
     cv.destroyAllWindows()
