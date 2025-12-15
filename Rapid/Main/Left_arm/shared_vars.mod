@@ -40,6 +40,8 @@ MODULE shared_vars
     CONST num flag_pick_up_mug := 10;
     CONST num flag_leave_mug := 11;
     CONST num flag_hand_over := 12;
+    CONST num flag_move_calibration_home := 13;
+    CONST num flag_move_calibration_outofway := 14;
     
     
     ! ========== CALIBRATION ========== 

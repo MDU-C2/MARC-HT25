@@ -104,7 +104,13 @@ MODULE processes
         SocketSend client_socket\Str:="Robot_Wants_To_Send_Coordinates";
         SocketReceive client_socket\Str:=tempdata; ! ACK
         
-        hand_frame:=CRobT(\Tool:=tGripper);
+       IF position_in_file_index < calib_array_size + 1 THEN
+            hand_frame:=CRobT(\Tool:=tGripper);
+        ELSE
+            hand_frame:=current_right_target;
+       ENDIF
+       ! testing 
+        hand_frame.trans.z := - hand_frame.trans.z;
         SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
         SocketReceive client_socket\Str:=tempdata; ! ACK
     
@@ -130,7 +136,11 @@ MODULE processes
         SocketSend client_socket\Str:="Robot_Wants_To_Send_Orientation";
         SocketReceive client_socket\Str:=tempdata; ! ACK
         
-        hand_frame:=CRobT(\Tool:=tGripper);
+        IF position_in_file_index < calib_array_size + 1 THEN
+            hand_frame:=CRobT(\Tool:=tGripper);
+        ELSE
+            hand_frame:=current_right_target;
+        ENDIF
         SocketSend client_socket\Str:=RobOrientToString(hand_frame.rot);
         SocketReceive client_socket\Str:=tempdata; ! ACK
     
@@ -153,21 +163,37 @@ MODULE processes
 !    *********************************************************** 
     PROC calibrationMovement()
         VAR bool ok;
-        VAR num index;
         
-        shared_movement_right.flag := flag_move_calibration;
-        shared_movement_right.wait_flag:=TRUE;
+
         WaitUntil shared_movement_right.wait_flag=FALSE; !Wait for movement to be ready
+        WaitUntil shared_movement_left.wait_flag=FALSE;
         
         SocketSend client_socket\Str:="AskCalPoint";
         SocketReceive client_socket\Str:=message; ! position number
-        ok := StrToVal(message,index); ! saves value in index
+        ok := StrToVal(message,position_in_file_index); ! saves value in index
         
-        WaitUntil shared_movement_left.wait_flag=FALSE; !Wait for movement to be ready
-        shared_movement_left.flag:=flag_move_calibration; !Set flag to 9 (calibration movement)
-        shared_movement_left.target := calib_robtargets{index}; !set shared robtarget to corresponding calibration position
-        shared_movement_left.wait_flag:=TRUE;
-        WaitUntil shared_movement_left.wait_flag=FALSE; !Wait for movement to be done
+        IF position_in_file_index < 41 THEN
+            
+            ! move right out of way
+            shared_movement_right.flag := flag_move_calibration_outofway;
+            shared_movement_right.wait_flag:=TRUE;
+            WaitUntil shared_movement_right.wait_flag=FALSE; !Wait for movement to be ready
+            
+            shared_movement_left.flag:=flag_move_calibration; !Set flag to 9 (calibration movement)
+            shared_movement_left.target := calib_robtargets{position_in_file_index}; !set shared robtarget to corresponding calibration position
+            shared_movement_left.wait_flag:=TRUE;
+            WaitUntil shared_movement_left.wait_flag=FALSE; !Wait for movement to be done
+        ELSE
+            ! move left out of way
+            shared_movement_left.flag := flag_move_calibration_outofway;
+            shared_movement_left.wait_flag:=TRUE;
+            WaitUntil shared_movement_left.wait_flag=FALSE; !Wait for movement to be ready
+            
+            shared_movement_right.flag:=flag_move_calibration; !Set flag to 9 (calibration movement)
+            shared_movement_right.target := calib_robtargets_right{position_in_file_index - 40}; !set shared robtarget to corresponding calibration position
+            shared_movement_right.wait_flag:=TRUE;
+            WaitUntil shared_movement_right.wait_flag=FALSE; !Wait for movement to be done
+        ENDIF
     
     ERROR
         ! if errors occure during run
@@ -179,10 +205,33 @@ MODULE processes
                 
     ENDPROC 
     
+    PROC calibrationMoveHome()
+        IF position_in_file_index < calib_array_size + 1 THEN 
+            
+            shared_movement_left.flag:=flag_move_calibration_home; 
+            shared_movement_left.wait_flag:=TRUE; !Wait for movement to be ready
+
+        ELSE
+            shared_movement_right.flag:=flag_move_calibration_home; 
+            shared_movement_right.wait_flag:=TRUE; !Wait for movement to be ready
+        ENDIF
+        
+        WaitUntil shared_movement_left.wait_flag=FALSE; !Wait for movement to be done
+        WaitUntil shared_movement_right.wait_flag=FALSE; !Wait for movement to be done
+    ENDPROC
+    
     PROC pickupSequence()
        
         VAR mug_vector buffer;
         buffer := GetRobVector();
+        
+        ! if mug standing up
+        IF abs(buffer.normal.z) < abs(buffer.normal.x) AND abs(buffer.normal.z) < abs(buffer.normal.y) THEN
+            TPWrite "mug z value: " \Num:=buffer.normal.z;
+            IF buffer.position.z < min_z_value THEN
+                buffer.position.z := min_z_value;
+            ENDIF
+        ENDIF
         ! mug to far to the right
         IF buffer.position.y < -100 THEN
             MoveRobMugVector buffer,FALSE;

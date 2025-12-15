@@ -9,8 +9,6 @@ MODULE shared_vars
 !                   This specific module is used to share variables between movement and communication tasks.
 !    ***********************************************************
 
-
-    
     ! ==== dynamic global vars ====
     RECORD mug_vector
         pos position;
@@ -43,9 +41,14 @@ MODULE shared_vars
     CONST num flag_pick_up_mug := 10;
     CONST num flag_leave_mug := 11;
     CONST num flag_hand_over := 12;
+    CONST num flag_move_calibration_home := 13;
+    CONST num flag_move_calibration_outofway := 14;
+    
     
     ! ========== CALIBRATION ========== 
     CONST num calib_array_size := 40;
     PERS robtarget calib_robtargets{calib_array_size};
+    PERS robtarget calib_robtargets_right{calib_array_size};
+    PERS robtarget current_right_target;
     
 ENDMODULE

@@ -13,6 +13,9 @@ MODULE server
     VAR robtarget cup_end_frame:=[[0,0,0],[0,0,0,0],[1,1,0,0],[11,12.3,9E9,9E9,9E9,9E9]];
     ! dummy values
 
+    CONST num min_z_value := 120;
+    VAR num position_in_file_index;
+    
     ! Open socket connection
     PROC server_init()
         ! port values
@@ -105,6 +108,9 @@ MODULE server
                 
             CASE "Move_Calibration_Position": 
                 calibrationMovement;
+                
+            CASE "Move_Calibration_home": 
+                calibrationMoveHome;
                 
             CASE "EGM_movement":
                 EGMMovement;

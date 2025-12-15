@@ -36,17 +36,20 @@ MODULE movementFunctions
             current_target := CRobT(\Tool:=tGripper);
         ENDWHILE
 
+        !Check if calculated joint values at robot target configuration is valid
+        desired_joint_value := CalcJointT(testtarget,tGripper);
+        
         MoveJ desired_target,movement_speed,fine,tGripper;
 !        ProcerrRecovery \SyncOrgMoveInst;
         
         ERROR
         IF ERRNO = ERR_ROBLIMIT THEN !Joint values outside of working range
             ResetRetryCount;
-            IF testing > 1 THEN
-                moveToHomeTarget;
-                TPWrite "Failed to reach target";
-                RETURN;
-            ENDIF
+!            IF testing > 1 THEN
+!                moveToHomeTarget;
+!                TPWrite "Failed to reach target";
+!                RETURN;
+!            ENDIF
             IF VectMagn(desired_target.trans-current_target.trans) > max_magnitude THEN
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
                 MoveJ disc_target,movement_speed,z50,tGripper;
