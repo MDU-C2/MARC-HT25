@@ -24,7 +24,6 @@ MODULE shared_vars
       mug_vector mug;
     ENDRECORD
     
-    PERS movement_vars shared_movement_left;
     PERS movement_vars shared_movement_right;
     
     CONST num flag_ERROR := -1;
@@ -41,11 +40,9 @@ MODULE shared_vars
     CONST num flag_presentation_fetch := 10;
     CONST num flag_presentation_leave := 11;
     
-    
     ! ========== CALIBRATION ========== 
     CONST num calib_array_size := 40;
-    PERS robtarget calib_robtargets{calib_array_size};
     PERS robtarget calib_robtargets_right{calib_array_size};
-    PERS robtarget current_right_target; ! because communication is left arm dependetnt, we need to be able to gain right hand target
+    PERS robtarget current_right_target; ! to return right hand values, because communication is "left arm" dependent
     
 ENDMODULE

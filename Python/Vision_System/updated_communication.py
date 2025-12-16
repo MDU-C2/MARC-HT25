@@ -35,6 +35,7 @@ class Communication():
         self.ASKCALPOINT = ["AskCalPoint", ]
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
+        self.NEXTSTEP = ["Next_step",]
 
         ## List of what python can send
 
@@ -84,6 +85,8 @@ class Communication():
                 case next if next in self.ASKNEXT:
                     return None
                 
+                case next_step if next_step in self.NEXTSTEP:
+                        return True
                 case ack if ack in self.ACKS:
                     continue
 
@@ -236,7 +239,16 @@ class Communication():
         return
 
       
-    
+    def Presentation(self,cv):
+        with self._mutex_function:  # Lock mutex for function-level thread safety
+            self._send_message("Presentation")
+            _continue = self._handle_response()
+            while _continue != None:
+                if (cv.waitKey(1) & 0xFF == ord(' ')):
+                    self._send_message("ACK")
+                    _continue = self._handle_response()
+           
+
     def GetPosition(self):
 
         with self._mutex_function:  # Lock mutex for function-level thread safety
