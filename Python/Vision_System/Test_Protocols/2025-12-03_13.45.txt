@@ -1,0 +1,45 @@
+File created on 2025-12-03_13.45
+---------- Test Information ----------
+Tested Variable: The protocol
+---------- Meta Data ----------
+Number of calibration positions: 40
+---------- Calibration Accuracy ----------
+RMS alignment error: 24.318 mm
+
+------- Cup 1 Coordinates -------
+Detection Label: upside_down
+Detection Confidence: 50.0%
+Camera Coordinates: [357.53, 160.21, 100.74]
+Time taken for pick and place: 4.078 seconds
+
+------- Cup 2 Coordinates -------
+Detection Label: upside_down
+Detection Confidence: 66.0%
+Camera Coordinates: [358.83, 163.99, 99.59]
+Time taken for pick and place: 4.678 seconds
+
+------- Cup 3 Coordinates -------
+Detection Label: upside_down
+Detection Confidence: 68.0%
+Camera Coordinates: [383.02, 137.26, 97.11]
+Time taken for pick and place: 4.586 seconds
+
+------- Cup 4 Coordinates -------
+Detection Label: upside_down
+Detection Confidence: 58.0%
+Camera Coordinates: [289.98, 14.1, 102.97]
+Time taken for pick and place: 4.079 seconds
+
+------- Cup 5 Coordinates -------
+Detection Label: upside_down
+Detection Confidence: 54.0%
+Camera Coordinates: [288.07, 14.7, 103.0]
+Time taken for pick and place: 3.766 seconds
+
+---------- Test Conclusion ----------
+Test Conclusion: Very well
+---------- Timing Summary ----------
+Trials: 5
+Average pick/place time: 4.238 s
+Std dev: 0.383 s
+

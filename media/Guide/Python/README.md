@@ -8,35 +8,34 @@
   <br>
 </h1>
 
+## Installation
+
+You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
+
+In the installer check the box to add Python to the PATH.
+
+
+Next step is to set up a virtual Python environment.
+
+```bash
+# Create a virtual environment with Python 3.11 (Python 3.11 is needed for some libraries used)
+> py -3.11 -m venv .venv
+
+# Activate the virtual environment (make sure you are in the folder with the .venv when doing this)
+> .venv\Scripts\activate
+```
+
 ## Requirements
 To run the codes provided in this repository multiple Python libraries needs to be installed. These are:
 
 * OpenCV
 * DepthAI
 * Numpy
-* Blobconverter
-* json
 
-## Installation
-
-You need to install [Python 3.11](https://www.python.org/downloads/release/python-3110/)
-
-In the installer check the box to add Python to the PATH
-
-
-Next step is to set up a virtual Python environment
-
-```bash
-# Create a virtual environment with Python 3.11 (Python 3.11 is needed for some libraries used)
-> py -3.11 -m venv .venv
-
-# Activate the virtual environment (make sure you are in the correct folder when doing this)
-> .venv\Scripts\activate
-```
-Now it's time to install the correct libraries, this is done by running the **requirements.txt** file included in the Git repository
+This is done by running the **requirements.txt** file located in the **Vision_System** folder included in the Git repository.
 
 ```bash
 #Run the requirements.txt file
 > pip install -r requirements.txt
 ```
-Now the setup is complete and you should be able to run the code by following this [walkthrough](/media/Guide/Python/running_code.md)
+Now the setup is complete and you should be able to run the code by following this [walkthrough](/media/Guide/Python/running_code.md).

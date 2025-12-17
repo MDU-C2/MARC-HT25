@@ -1,11 +1,11 @@
 
 <h1 align="center">
+  Dishwasher Loading And Unloading Robot
   <br>
   <br>
   <img src="media/images/marc.png" alt="MARC Logo" width="400">
   <br>
   <br>
-  Dishwasher loading and unloading robot
   <br>
 </h1>
 
@@ -19,24 +19,24 @@
   <a href="#how-to-clone-git">How To Clone Git</a> •
   <a href="#get-started">Get Started</a> •
   <a href="#rapid">Rapid</a> •
-  <a href="#python">Python</a> •
-  <a href="#yumi-irb-14000">YuMi IRB 14000</a> •
+  <a href="media\Guide\Python\README.md">Python</a> •
+  <a href="media\Guide\Yumi IRB 14000\README.md">YuMi IRB 14000</a> •
 </p>
 
 
 ![screenshot](/media/images/banner.gif)
 
+The project aims to create a robotic system capable of dynamically locating different kinds of mugs in different orientations and correctly picking them up using a **Dual Arm YuMi**.
 ## Key Features
 
-* Dynamic robot capable of picking up and placing cups in a designated area
+* Dynamic robot capable of picking up and placing mugs in a predefined position.
 
 * Object awareness
-  - Identifies cups and their pose.
+  - Identifies mugs, their postion and pose.
 
 * Components used
-  - YUMI IRB 14000
-  - OAK D PRO Camera
-  - Pc with Windows 11 
+  - YUMI IRB14000
+  - OAK-D PRO Camera
 * Languages used
   - Python
   - RAPID
@@ -48,8 +48,6 @@
     - OpenCV
     - DepthAI
     - Numpy
-    - Blobconverter
-    - json
 <!--
   Lägg in mer här?
 -->

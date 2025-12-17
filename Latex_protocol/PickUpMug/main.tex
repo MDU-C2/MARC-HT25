@@ -1,0 +1,35 @@
+
+\documentclass{article}
+\usepackage{amssymb} % needed for math
+\usepackage{amsmath} % needed for math
+\usepackage[utf8]{inputenc} % this is needed for german umlauts
+\usepackage[swedish]{babel} % this is needed for german umlauts, [english, ngerman]
+\usepackage[T1]{fontenc}    % this is needed for correct output of umlauts in pdf
+\usepackage[margin=2.5cm]{geometry} %layout
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{comment}
+\hypersetup{pdfborder={0 0 0}} % remove borders around links
+
+\begin{document}
+\selectlanguage{english}
+
+\author{Dishwasher robot} % Elliot :]
+\date{\today}
+
+\title{Mug pick up test protocol}
+
+\begin{Form}
+
+\maketitle
+
+\input{sections/user_info}
+\input{sections/test_information}
+\newpage
+\input{sections/result}
+\input{sections/end_information}
+
+% \hfill ~\\
+\end{Form}
+
+\end{document}
