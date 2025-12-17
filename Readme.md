@@ -23,6 +23,7 @@
   <a href="#yumi-irb-14000">YuMi IRB 14000</a> •
 </p>
 
+
 ![screenshot](/media/images/banner.gif)
 
 ## Key Features
@@ -71,7 +72,7 @@ $ cd MARC-HT25
 > 
 ## Get Started
 
-There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot. [Python guide](/media/Guide/Python/README.md) for setting up Python and the camera to communicate with the robot.
+There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot and [Python guide](/media/Guide/Python/README.md) for setting up Python and the camera to communicate with the robot.
 
 **If this is your first time working in this project, it is sugessted to follow the [step by step guide](/media/Guide/step_by_step_guide.md).**
 ## Rapid

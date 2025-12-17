@@ -2,10 +2,22 @@
 
 The RAPID code can be run together with the vision system in a simulated environment or on the physical YuMi robot. This section goes through how to set up and start the RAPID code in both cases.
 
+## Content
+
+- <a href="#simulation-setup-virtual-controller">Simulation setup (Virtual Controller)</a>
+    - <a href="#robotware">RobotWare</a>
+    - <a href="#create-a-station-with-yumi-and-virtual-controller">Create station</a>
+
+- <a href="#yumi-setup-physical-controller">YuMi setup (Physical controller)</a>
+
+- <a href="#adding-tasks">Adding tasks</a>
+- <a href="#loading-programsmodules-to-tasks">Loading programs/modules to tasks</a>
+
+
 ## Simulation setup (Virtual Controller)
 
 ### RobotWare
-Firstly, make sure to install **RobotWare** or that the correct version is installed. First click the **Add-Ins** tab at the top of the screen and select the following:
+Firstly, make sure to install **RobotWare** or make sure that the correct version is installed. First click the **Add-Ins** tab at the top of the screen and select the following:
 
 1. RobotApps
 2. Gallery
