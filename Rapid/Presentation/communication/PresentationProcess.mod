@@ -24,6 +24,7 @@ MODULE PresentationProcess
             
             ! go to position and change orientation
             
+            TPWrite "go to pose + offset";
             shared_movement_right.wait_flag := TRUE;
             WaitUntil shared_movement_right.wait_flag = FALSE;
             AskNext;
@@ -34,6 +35,7 @@ MODULE PresentationProcess
             AskNext;
             
             ! wait to move close
+            TPWrite "go to pose";
             shared_movement_right.wait_flag := TRUE;
             WaitUntil shared_movement_right.wait_flag = FALSE;
             AskNext;
@@ -44,6 +46,7 @@ MODULE PresentationProcess
             AskNext;
             
             ! wait to move away
+            TPWrite "go to pose + offset";
             shared_movement_right.wait_flag := TRUE;
             WaitUntil shared_movement_right.wait_flag = FALSE;
             AskNext;
@@ -127,22 +130,46 @@ MODULE PresentationProcess
             
         ENDIF
       
+        TPWrite "Start leave process";
            
         ! === LEAVE MUG ===
         
-        AskNext;
         shared_movement_right.flag := flag_move_home_target;
         shared_movement_right.wait_flag := TRUE;
         
         WaitUntil shared_movement_right.wait_flag = FALSE;
         AskNext;
         
+        TPWrite "Go home";
         shared_movement_right.flag := flag_presentation_leave;
         shared_movement_right.wait_flag := TRUE;
+        
+        ! go to leave pose + offset
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;
+        shared_movement_right.wait_flag := TRUE;
+        
+        ! go to leave pose
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;
+        shared_movement_right.wait_flag := TRUE;
+        
+        ! go to leave pose + offset
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;
+        shared_movement_right.wait_flag := TRUE;
+        
         
         WaitUntil shared_movement_right.wait_flag = FALSE;
         AskNext;
         
+        ! go home
+        shared_movement_right.wait_flag := TRUE;
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        
+        shared_movement_right.wait_flag := TRUE;
+        shared_movement_right.flag := flag_move_home_target;
+        AskNext;
         
     ENDPROC
     

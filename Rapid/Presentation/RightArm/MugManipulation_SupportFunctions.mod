@@ -85,7 +85,7 @@ MODULE MugManipulation_SupportFunctions
        VAR num scaler;
        scaler := .2; ! weight the normal vector minial value
     
-       position := position - shoulderPos(position,[300,200,460],100); ! this to gain the vector from the sholder and not the base
+       position := position - shoulderPos(position,[300,-200,460],100); ! this to gain the vector from the sholder and not the base
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
             ! generate "easy" vector to span plane
@@ -251,7 +251,7 @@ MODULE MugManipulation_SupportFunctions
         VAR pos s_shoulder;
         VAR pos h_shoulder;
         VAR num v1_magn;
-        h_shoulder := [origo.x,origo.y+500,origo.z];
+        h_shoulder := [origo.x,origo.y-500,origo.z];
         
         v1 := [mug_pos.x - origo.x,mug_pos.y-origo.y,origo.z];
         s_shoulder :=  [origo.x-v1.x,origo.y-v1.y,v1.z];

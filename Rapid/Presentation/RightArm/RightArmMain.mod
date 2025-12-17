@@ -91,8 +91,10 @@ MODULE RightArmMain
             CASE flag_leave_mug:
 !                 LeaveMug shared_movement_right.mug.position,[0,0,-1],pick_offset;
                 LeaveMugV2;
+            CASE flag_presentation_fetch:
+                PresentationFetchMug shared_movement_right.mug.position,pick_offset,shared_movement_right.mug.normal;  
             CASE flag_presentation_leave:
-                PresentationLeaveMug [[513.42,-441.85,110.96],[0.353418,-0.368452,0.597902,-0.617941],[1,1,1,4],[-179.943,9E+09,9E+09,9E+09,9E+09,9E+09]],pick_offset;
+                PresentationLeaveMug [[313.42,-341.85,110.96],[0.353418,-0.368452,0.597902,-0.617941],[1,1,1,4],[-179.943,9E+09,9E+09,9E+09,9E+09,9E+09]],pick_offset;
             CASE flag_hand_over: 
                 ! hand over sequence
                 handOverSequence;

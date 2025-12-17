@@ -63,10 +63,15 @@ MODULE MugManipulation
     PROC handOverSequence(num offset_lenght)
         VAR robtarget target;
         VAR pos offset_dir;
-       
+        VAR jointtarget joints;
         ! get right pose
         target := CRobT(\Tool := tGripper);
         
+        joints := CJointT();
+        joints.robax.rax_6:=0;
+        joints.robax.rax_4:=0;
+        MoveAbsJ joints,movement_speed,z50,tGripper;
+        TPWrite "axes 6 = 0";
         target.rot := MugHandOverOrient(); ! should add normal
         
         offset_dir := RotatePointUsingQuaternion([0,0,1],target.rot);
