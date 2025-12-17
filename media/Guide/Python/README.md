@@ -21,7 +21,7 @@ Next step is to set up a virtual Python environment.
 # Create a virtual environment with Python 3.11 (Python 3.11 is needed for some libraries used)
 > py -3.11 -m venv .venv
 
-# Activate the virtual environment (make sure you are in the correct folder when doing this)
+# Activate the virtual environment (make sure you are in the folder with the .venv when doing this)
 > .venv\Scripts\activate
 ```
 

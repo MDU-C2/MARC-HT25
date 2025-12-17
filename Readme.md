@@ -19,8 +19,8 @@
   <a href="#how-to-clone-git">How To Clone Git</a> •
   <a href="#get-started">Get Started</a> •
   <a href="#rapid">Rapid</a> •
-  <a href="#python">Python</a> •
-  <a href="#yumi-irb-14000">YuMi IRB 14000</a> •
+  <a href="media\Guide\Python\README.md">Python</a> •
+  <a href="media\Guide\Yumi IRB 14000\README.md">YuMi IRB 14000</a> •
 </p>
 
 ![screenshot](/media/images/banner.gif)
