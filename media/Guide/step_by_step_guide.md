@@ -20,7 +20,8 @@ $ git clone https://github.com/MDU-C2/MARC-HT25.git
 # Go into the repository
 $ cd MARC-HT25
 ```
-
+### Starting YuMi
+The YuMi may start in in system failure mode. [Follow this guide]() for instructions on how to solve this.
 
 ## 2. Setup
 This section goes through how to set **RobotStudio** and **Python** settings up in order to run the code in this repository.
@@ -54,7 +55,7 @@ Make sure all the cables are connected, open RobotStudio and open either VsCode 
 
 
 ### Rapid code
-To start the robot system, select all the **tasks** in **RobotStudio**, reset the pointers (Ctrl+Shft+M) and start the system(F8).
+To start the robot system, select all the **Tasks** in **RobotStudio**, reset the pointers (Ctrl+Shft+M) and start the system(F8).
 
 The system should start and wait for a connection with the vision system.
 
