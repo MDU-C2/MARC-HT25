@@ -36,6 +36,7 @@ class Communication():
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
         self.NEXTSTEP = ["Next_step",]
+        self.ERROR = ["[ERROR]_wrong_format,try_again(exampel[x,y,z])","[ERROR]_wrong_format,send_normal","[ERROR]_wrong_format,try_again(exampel[q1,q2,q3,q4])",]
 
         ## List of what python can send
 
@@ -62,8 +63,8 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        # self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
-        # self._connection_test_thread.start()
+        self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
+        self._connection_test_thread.start()
 
 
 
@@ -119,6 +120,8 @@ class Communication():
                 case askmug_normal if askmug_normal in self.ASKMUGNORMAL: # RAPID wants mug normal
                     with self._mutex_variable:  # Lock mutex for thread-safe access
                         self._send_message(str(self.MugNormal)) # Send mug normal
+                case error if error in self.ERROR:
+                    print("Known error occured")
 
                 case _: # Error and unexpected response handling
                     #self.ErrorHandling()
@@ -245,6 +248,7 @@ class Communication():
             _continue = self._handle_response()
             while _continue != None:
                 if (cv.waitKey(1) & 0xFF == ord(' ')):
+                    self.reset_connection_timer()
                     self._send_message("ACK")
                     _continue = self._handle_response()
            
