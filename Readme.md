@@ -23,6 +23,7 @@
   <a href="#yumi-irb-14000">YuMi IRB 14000</a> •
 </p>
 
+
 ![screenshot](/media/images/banner.gif)
 
 The project aims to create a robotic system capable of dynamically locating different kinds of mugs in different orientations and correctly picking them up using a **Dual Arm YuMi**.
@@ -51,7 +52,9 @@ The project aims to create a robotic system capable of dynamically locating diff
   Lägg in mer här?
 -->
   - Robotstudio
+    - RobotWare
   - YUMI IRB 14000
+  - OAK-D PRO Camera
 ## How To Clone Git
 
 Clone this repo , you'll need [Git](https://git-scm.com) installed on your computer. From your command line:
@@ -68,17 +71,23 @@ $ cd MARC-HT25
 > 
 ## Get Started
 
-<!-- There are two parts to this software, the Robot side (RAPID) and the camera side (Python). Follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide for how to work with the robot. [Python guide](/media/Guide/Python/README.md) for setting up Python and the camera to communicate with the robot. -->
+There are two parts to this software, the Robot side (RAPID) and the camera side (Python).
 
-<!-- When working with the software there are two main parts, the robot side (RAPID) and the camera side (Python).  -->
+**If this is your first time working in this project, it is suggested to follow the [step by step guide](/media/Guide/step_by_step_guide.md).**
+## Rapid
+Rapid is the language to program the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md). It is used to do the following parts of the project.
+- [Get started](/media/Guide/Yumi%20IRB%2014000/RAPIDstart.md)
+- [Communication](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md)
+- [Move arm](/media/Guide/Yumi%20IRB%2014000/move_arm.md)
 
-## Setting Up Python & Camera
-To get started you should follow the [Python guide](/media/Guide/Python/README.md) which will go through all steps necessary for setting up the Python environment, calibrating the camera and running the Python side of the software. 
+## Python
+- [Python](/media/Guide/Python/README.md)
+- [Run Python code](/media/Guide/Python/running_code.md)
 
-## Starting The Robot
-If you need help with starting or working with the robot follow the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) guide.
-
-
+## YuMi IRB 14000
+[YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) is the robot used. It currently boot with system failure, to solve this and to get started follow the links down below. 
+- [Start the system](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
+- [System failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md)
 ## License
 
 MIT

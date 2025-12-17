@@ -1,6 +1,16 @@
-Here you will follow a step by step guide to set everything up to run your first script.
+# Step by step guide
+Here you will follow a step by step guide to set everything up to run the system.
 
-## Start the system 
+## Content/Quickstart
+1. <a href="#1-clone-the-repo">Clone the Repo</a>
+2. <a href="#2-setup">Setup</a>
+    - <a href="#rapid-setup">RAPID-setup</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.md)
+    - <a href="#python-setup">Python-setup</a> - [(guide link)](/media/Guide/Python/Readme.md)
+    - <a href="#robot--camera-setup">Robot/Camera-setup</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
+3. <a href="#3-run-the-code">Run the code</a>
+    - <a href="#rapid-code">RAPID code</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
+    - <a href="#python-code">Python code</a> - [(guide link)](/media/Guide/Python/running_code.md)
+## 1. Clone the Repo
 Start by making a clone of this repo , you'll need [Git](https://git-scm.com) installed on your computer. From your command line:
 
 ```bash
@@ -10,27 +20,55 @@ $ git clone https://github.com/MDU-C2/MARC-HT25.git
 # Go into the repository
 $ cd MARC-HT25
 ```
+### Starting YuMi
+The YuMi may start in in system failure mode. [Follow this guide]() for instructions on how to solve this.
 
-Also make sure you have Robotstudio installed in your machine that will run the [YuMi](/media/Guide/Yumi%20IRB%2014000/README.md).
+## 2. Setup
+This section goes through how to set **RobotStudio** and **Python** settings up in order to run the code in this repository.
+### RAPID-setup
+If the RAPID code is already on the robot, you can skip over to the <a href="#python-setup">Python-setup</a>. However, if you want to set up a simulated controller or load/modify RAPID code on the YuMi, continue with the following steps.
 
-**Then start the robot by following this guide [YuMi guide](/media/Guide/Yumi%20IRB%2014000/README.md).**
->[!Note]
- >If you get a [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error. This can solved by following this [link](/media/Guide/Yumi%20IRB%2014000/systemfailure.md).
 
-Make sure you have the right version of [Python](/media/Guide/Python/README.md). If you do not have the right version some libraries will not work.
+The easiest way to modify and run RAPID code is by using **RobotStudio**. You can start a [30-day free trial](https://new.abb.com/products/robotics/nl/software-and-digital/robotstudio/robotstudio-desktop) through the ABB website or you can ask a teacher or the IT department to make **RobotStudio** available in the **Software Center** on any school computer. 
 
-Lastly set up the camera so that it can see the whole work space of the robot.
 
-## Run calibration script 
-Make sure all the cables are connected and open Robotstudio and VsCode. 
 
-### Rapid
-Connect the controller and make sure you get WriteAcces, then include the programs **Communication,RightArm,LeftArm** all found in seperate folders in **\MARC-HT25\Rapid**. Make sure **RightArm** is connected to the right arm of the yumi and the **LeftArm** is connected to the left arm of the yumi. 
-Then it should just be to put the pointer to top of main (ctrl+shift+m) and then start the code (f8).
+<!-- ÄNDRA TILL RÄTT FILNAMN / MAPPNAMN / TASKNAMN -->
+When you have **RobotStudio**, you need to include the programs **Communication,RightArm,LeftArm** all found in seperate folders in **\MARC-HT25\Rapid**. Make sure **RightArm** is connected to the right arm of the yumi and the **LeftArm** is connected to the left arm of the yumi. 
 
-For a even more indepth introduction follow [start Rapid](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md).
+You can follow [these steps](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.md) to configure the correct settings within **RobotStudio**.
+>Note: It is possible to run the code on the YuMi through the flex pendant but RobotStudio offers a friendlier and easier to use interface.
+### Python-setup
+You can find all the necessary information about the Python setup by going through [this section](/media/Guide/Python/Readme.md).
+### Robot / camera-setup
+Connect the YuMi robot to the computer you are working on by following [this guide](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
 
-### Python
-First the camera need to be callibrated, do this by starting Rapid but only start the communication program. Then start the **calibrate_single_file.py**. Here the camera should pop up in a new window and you should see what the camera seas. The system should outocalibrate for you. 
+>Note:
+ If you get a [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error, it can solved by following this [link](/media/Guide/Yumi%20IRB%2014000/systemfailure.md).
 
-For more indepth or that this text is not up to date follow [start python](/media/Guide/Python/running_code.md).
+ Lastly set up the camera so that it can see the whole work space of the robot.
+## 3. Run the code
+Now that everything is set up correctly, you can run the system by following the steps in this section.
+
+Make sure all the cables are connected, open RobotStudio and open either VsCode or powershell/cmd in the python main folder. 
+
+
+
+### Rapid code
+To start the robot system, select all the **Tasks** in **RobotStudio**, reset the pointers (Ctrl+Shft+M) and start the system(F8).
+
+The system should start and wait for a connection with the vision system.
+
+For more indepth intstructions follow the [start RAPID guide](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md).
+
+>Note: If the connection is lost during runtime, the system may need to be restarted.
+
+
+
+<!-- ÄNDRA TILL RÄTT FILNAMN -->
+### Python code
+First the camera needs to be callibrated, make sure the robot system is running. Then start the **calibrate_single_file.py**. Here the camera should pop up in a new window and you should see the view of the camera. Choose the amount of positions and starting position and the system should outocalibrate for you.
+
+When the calibration is done start the **MAIN PYTHON FILE HERE** and the system is ready. If everything is set up properly, you should be able to place mugs in the YuMi workspace (infront of the robot) and it should automatically try to move the mug.
+
+For more indepth instructions follow the [start python guide](/media/Guide/Python/running_code.md).
