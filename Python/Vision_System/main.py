@@ -22,7 +22,14 @@ def local_move(orient, client, obj_list, normalized_vector, save_protocol ,file_
         if busy != True:
             start_time = time.time()
             busy = True
-            client.Move(obj_list[0], orient, normalized_vector)
+
+            # ADD MUG SEQUENCE HERE
+
+            client.MoveHome()
+
+            client.PickUpSequence(obj_list[0], orient, normalized_vector)
+            # client.Move(obj_list[0], orient, normalized_vector)
+            
             
             end_time = time.time()
             process_time = end_time - start_time
@@ -40,6 +47,7 @@ def run():
     normalized_vector = [0,0,1] # Initial orientation vector for the gripper
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
+
             'Back': [ 0.0, 0.0,-1.0],
             'Front': [0.0, 0.0,1.0],
             'left_side': [-1.0, 0.0, 0.0],
@@ -47,6 +55,7 @@ def run():
             'upright': [0.0, 1.0 ,0.0],
             'upside_down': [0.0, -1.0, 0.0],
             'Gripper': [0.0, 0.0, -1.0],
+
             # 'Back': [-1.0, 0.0, 0.0],
             # 'Front': [1.0, 0.0, 0.0],
             # 'left_side': [0.0, -1.0, 0.0],
@@ -62,7 +71,7 @@ def run():
     client.connect()
     
 
-    homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
+    homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup2(cam_coords, robot_file)
     
     #==================================== TEST PROTOCOL SETUP ====================================
 
@@ -139,8 +148,8 @@ def run():
 
 
                     if busy == False and label != "Gripper":
-
-                        if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
+                        if cv.waitKey(1) & 0xFF == ord(' '):
+                        #if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                             coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
                             in_list = False
@@ -156,8 +165,10 @@ def run():
 
                             if obj_list:    
                                 try:    
+                                    normalized_vector = orientation_map.get(label)
                                     norm = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
-                                    if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # z not the biggest value -> mug is not up nor down
+                                    print(f"[DEBUG] normal vector: {normalized_vector}")
+                                    if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # robot z not the biggest value -> mug is not up nor down
                                         norm -= [0,0,np.dot(norm,[0,0,1])]
                                         norm =  norm/np.sqrt(np.dot(norm,norm))
                                         np.set_printoptions(precision=3)
@@ -167,7 +178,8 @@ def run():
                                         norm[1] = 0
                                         norm[0] = 0
 
-                                    normalized_vector = orientation_map.get(label)
+                                    #normalized_vector = orientation_map.get(label)
+
                                     threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                                 except Exception as e:
                                     print(f"Error {e}")

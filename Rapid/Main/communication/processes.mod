@@ -109,8 +109,7 @@ MODULE processes
         ELSE
             hand_frame:=current_right_target;
        ENDIF
-       ! testing 
-        hand_frame.trans.z := - hand_frame.trans.z;
+       ! testing
         SocketSend client_socket\Str:=RobPosToString(hand_frame.trans);
         SocketReceive client_socket\Str:=tempdata; ! ACK
     
@@ -232,6 +231,7 @@ MODULE processes
                 buffer.position.z := min_z_value;
             ENDIF
         ENDIF
+        buffer.position.z := 65;
         ! mug to far to the right
         IF buffer.position.y < -100 THEN
             MoveRobMugVector buffer,FALSE;
@@ -543,6 +543,7 @@ MODULE processes
             SocketSend client_socket\Str:="Ask_Coordinate";
 
             SocketReceive client_socket\Str:=message;
+            
             sucess:=rob_coordinates(message,target.position);
         ENDWHILE
         TPWrite "Recieved pos(GetRobTarget):"\Pos:=target.position;
