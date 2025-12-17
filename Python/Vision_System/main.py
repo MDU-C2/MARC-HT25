@@ -33,8 +33,18 @@ def local_move(orient, client, obj_list, normalized_vector, save_protocol ,file_
             start_time = time.time()
             busy = True
 
+<<<<<<< HEAD
+            # ADD MUG SEQUENCE HERE
+
+            client.MoveHome()
+
+            client.PickUpSequence(obj_list[0], orient, normalized_vector)
+            # client.Move(obj_list[0], orient, normalized_vector)
+            
+=======
             # execute move function for robot
             client.Move(obj_list[0], orient, normalized_vector)
+>>>>>>> 04adbcbe836cbf5f427e60da47948a61a5584e8e
             
             end_time = time.time()
             process_time = end_time - start_time
@@ -81,6 +91,7 @@ def run():
 
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
+
             'Back': [ 0.0, 0.0,-1.0],
             'Front': [0.0, 0.0,1.0],
             'left_side': [-1.0, 0.0, 0.0],
@@ -88,6 +99,17 @@ def run():
             'upright': [0.0, 1.0 ,0.0],
             'upside_down': [0.0, -1.0, 0.0],
             'Gripper': [0.0, 0.0, -1.0],
+<<<<<<< HEAD
+
+            # 'Back': [-1.0, 0.0, 0.0],
+            # 'Front': [1.0, 0.0, 0.0],
+            # 'left_side': [0.0, -1.0, 0.0],
+            # 'right_side': [0.0, 1.0, 0.0],
+            # 'upright': [0.0, 0.0, 1.0],
+            # 'upside_down': [0.0, 0.0, -1.0],
+            # 'Gripper': [0.0, 0.0, -1.0],
+=======
+>>>>>>> 04adbcbe836cbf5f427e60da47948a61a5584e8e
         }
     quaternion = [1,0,0,0] # Dump value, robot expects it, but we do not use it here
 
@@ -99,8 +121,13 @@ def run():
     client = Communication()
     client.connect()
     
+<<<<<<< HEAD
+
+    homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup2(cam_coords, robot_file)
+=======
     #Build the pipline based and get calibration data
     homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
+>>>>>>> 04adbcbe836cbf5f427e60da47948a61a5584e8e
     
     #==================================== TEST PROTOCOL SETUP ====================================
 
@@ -184,6 +211,12 @@ def run():
                 coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates
 
 
+<<<<<<< HEAD
+                    if busy == False and label != "Gripper":
+                        if cv.waitKey(1) & 0xFF == ord(' '):
+                        #if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
+                            coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+=======
                 # Prevent duplicates (very simple: close in X coords OR close in Y coords)
                 in_list = False
                 for i in obj_queue:
@@ -201,6 +234,7 @@ def run():
                         #To use the current label
                         normalized_vector = orientation_map.get(label)
                         norm = np.matmul(rotation_matrix, normalized_vector)
+>>>>>>> 04adbcbe836cbf5f427e60da47948a61a5584e8e
 
                         # Rotate the current (previously set) normalized orientation vector from camera frame into robot frame
                         # norm = np.matmul(rotation_matrix, normalized_vector)
@@ -216,6 +250,28 @@ def run():
                             norm = norm / np.sqrt(np.dot(norm, norm))
                             np.set_printoptions(precision=3)
 
+<<<<<<< HEAD
+                            if obj_list:    
+                                try:    
+                                    normalized_vector = orientation_map.get(label)
+                                    norm = np.matmul(rotation_matrix,normalized_vector)#[0,0,-1])
+                                    print(f"[DEBUG] normal vector: {normalized_vector}")
+                                    if (abs(normalized_vector[1]) < abs(normalized_vector[2])) or (abs(normalized_vector[1]) <  abs(normalized_vector[0])): # robot z not the biggest value -> mug is not up nor down
+                                        norm -= [0,0,np.dot(norm,[0,0,1])]
+                                        norm =  norm/np.sqrt(np.dot(norm,norm))
+                                        np.set_printoptions(precision=3)
+                                    else:
+                                        # standing upright
+                                        norm[2] = normalized_vector[1]/abs(normalized_vector[1])
+                                        norm[1] = 0
+                                        norm[0] = 0
+
+                                    #normalized_vector = orientation_map.get(label)
+
+                                    threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
+                                except Exception as e:
+                                    print(f"Error {e}")
+=======
                         else:
                             # Upright or upside-down cup:
                             # Force approach direction to be purely along ±Z
@@ -226,6 +282,7 @@ def run():
                         # Update orientation vector for the NEXT iteration
                         # (note: this means the current norm was computed using the previous labels orientation)
                         #normalized_vector = orientation_map.get(label)
+>>>>>>> 04adbcbe836cbf5f427e60da47948a61a5584e8e
 
                         # Start robot motion in a separate thread
                         threading.Thread(target=local_move, args=(quaternion, client, obj_queue, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()

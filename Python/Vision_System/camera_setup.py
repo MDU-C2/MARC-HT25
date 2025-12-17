@@ -154,7 +154,104 @@ def camera_setup(cam_coords, robot_file):
 
     camera_points = extract_data(cam_coords) # Get coordinates from the camera 
     robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
+    
     rotation_matrix, translation_vector = estimate_rigid_transform(camera_points, robot_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
+    homogeneous = build_homogeneous(rotation_matrix,translation_vector) # Convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
+
+    # Create DepthAI pipeline
+    pipeline = dai.Pipeline()
+
+    # Define the camera nodes
+    cam_rgb   = pipeline.create(dai.node.ColorCamera)
+    mono_left  = pipeline.create(dai.node.MonoCamera)
+    mono_right = pipeline.create(dai.node.MonoCamera)
+    stereo     = pipeline.create(dai.node.StereoDepth)
+    detection_nn = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
+
+    # Define XLink outputs for streaming frames and detections to host
+    xout_rgb   = pipeline.create(dai.node.XLinkOut)
+    xout_depth = pipeline.create(dai.node.XLinkOut)
+    xout_nn    = pipeline.create(dai.node.XLinkOut)
+    xout_rgb.setStreamName("rgb")
+    xout_depth.setStreamName("depth")
+    xout_nn.setStreamName("detections")
+
+    # Camera configuration (RGB camera)
+    cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
+    cam_rgb.setPreviewSize(640, 640) # Neural network input size. (MUST MATCH THE RUNNING MODELS SIZE)
+    cam_rgb.setInterleaved(False)
+    cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+
+    # Mono cameras (for depth)
+    mono_left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    mono_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    mono_left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+    mono_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+
+    # Stereo depth configuration
+    stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+    stereo.setDepthAlign(dai.CameraBoardSocket.RGB)       
+    stereo.setOutputSize(mono_left.getResolutionWidth(), mono_left.getResolutionHeight())
+    stereo.setSubpixel(True) 
+
+    configPath = "blob_v5/best_Yolo5_small.json" # Path to the config JSON file for the model (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+    with open(configPath, "r") as f:
+        config = json.load(f)
+    nnConfig = config.get("nn_config", {})
+
+    # Extract the metadata from the JSON file
+    metadata = nnConfig.get("NN_specific_metadata", {})
+    classes = metadata.get("classes", {})
+    coordinates = metadata.get("coordinates", {})
+    anchors = metadata.get("anchors", {})
+    anchorMasks = metadata.get("anchor_masks", {})
+    iouThreshold = metadata.get("iou_threshold", {})
+    confidenceThreshold = metadata.get("confidence_threshold", {})
+
+    print(metadata)
+
+    nnMappings = config.get("mappings", {})
+    labels = nnMappings.get("labels", {})
+
+    nnPath = "blob_v5/best_Yolo5_small_openvino_2022.1_5shave.blob" # PATH TO THE .BLOB FILE (MUST BE CHANGED IF YOU WANT TO USE A NEW MODEL)
+
+    # Specific settings for the network
+    detection_nn.setConfidenceThreshold(confidenceThreshold)
+    detection_nn.setNumClasses(classes)
+    detection_nn.setCoordinateSize(coordinates)
+    detection_nn.setAnchors(anchors)
+    detection_nn.setAnchorMasks(anchorMasks)
+    detection_nn.setIouThreshold(iouThreshold)
+    detection_nn.setBlobPath(nnPath)
+    detection_nn.setNumInferenceThreads(2)
+    detection_nn.input.setBlocking(False)
+
+    syncNN = True
+
+    # Linking
+    cam_rgb.preview.link(detection_nn.input)
+    mono_left.out.link(stereo.left)
+    mono_right.out.link(stereo.right)
+    stereo.depth.link(detection_nn.inputDepth)
+
+    detection_nn.passthrough.link(xout_rgb.input) # Passthrough RGB frames (frames that went into NN)
+    detection_nn.passthroughDepth.link(xout_depth.input) # Aligned depth frames
+    detection_nn.out.link(xout_nn.input) # Detection outputs (bounding boxes + coordinates)
+
+    return homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points
+
+def camera_setup2(cam_coords, robot_file):
+    best_comb =  [9, 10, 4, 53, 38, 23, 78, 73, 72, 56, 75, 50, 21, 26, 22, 70, 35, 1, 13, 19, 30, 5, 77, 14, 18, 52, 68, 34, 62, 43, 29, 54, 41, 59, 42, 63, 7, 16, 67, 47, 48, 33, 74, 51, 37, 55, 44, 2, 32, 3, 0, 31, 64, 6, 8, 40, 36, 66, 20, 28, 61, 76, 57, 39, 15, 25, 27, 60, 11, 17, 45, 71, 12, 65, 24, 46, 49, 58]
+    cam_points = []
+    rob_points = []
+    camera_points = extract_data(cam_coords) # Get coordinates from the camera 
+    robot_points = extract_data(robot_file) # Get coordinats from the robot (both .txt files)
+    for comb in best_comb:
+        cam_points.append(camera_points[comb])
+        rob_points.append(robot_points[comb])
+    print(rob_points, cam_points)
+    rotation_matrix, translation_vector = estimate_rigid_transform(cam_points, rob_points) # Do an estimation from both the 3d robot and camera coordinates to get rotation matrix and translation vector
     homogeneous = build_homogeneous(rotation_matrix,translation_vector) # Convert the rotation and translation into a 4x4 homogeneous matrix that can be used to convert camera coordinates into robotframe
 
     # Create DepthAI pipeline
