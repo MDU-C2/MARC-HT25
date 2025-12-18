@@ -42,7 +42,8 @@ First extend the Configuration tab in the active station and do the following:
 5. Choose type **UDPUC**
 
 6. Remote Address: **127.0.0.1** (localhost IP address)
->Note: This address will be different when setting up EGM on a physical controller.
+>[!Note]
+>This address will be different when setting up EGM on a physical controller.
 
 7. Remote port number: **6510**
 

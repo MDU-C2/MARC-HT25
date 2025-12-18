@@ -3,12 +3,12 @@
 
 
 ## How to run cup gripper software/program(s)
-> To run the cup gripper program on the robot follow the instructions in the links below.
+To run the cup gripper program on the robot follow it is recommended to follow the [step by step guide](/media/Guide/step_by_step_guide.md).
 
-
-- [Communication](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md)
-- [Move arm](/media/Guide/Yumi%20IRB%2014000/move_arm.md)
-- [Start the system](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
+### Some info about the Programs
+- [Communication module](/media/Guide/Yumi%20IRB%2014000/communication_rapid.md)
+- [Movement functions](/media/Guide/Yumi%20IRB%2014000/move_arm.md)
+- [Start RAPID code](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
 
 
 
