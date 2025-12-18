@@ -101,6 +101,6 @@ All of the necessary modules should now be loaded to the **Communication** task.
 
 The same procedure is done for the T_ROB_L and T_ROB_R arm tasks where **\MARC-HT25\RAPID\Main\Left_arm -> Movement_progress** and **\MARC-HT25\RAPID\Main\Right_arm -> Movement_progress** is loaded to each task respectively.
 
-When everything is lodaded it should look something like this:
+When everything is loaded it should look something like this:
 
 ![loadedmodules](/media/images/loadedmodules.png)
