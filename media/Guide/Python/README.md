@@ -17,7 +17,7 @@ In the installer check the box to add Python to the PATH.
 
 Next step is to set up a virtual Python environment.
 >[!Note]
-> Make sure you are in the MARC directory when doing this what is listed below
+> Make sure you are in the MARC directory when doing what is listed below
 ```bash
 # Create a virtual environment with Python 3.11 (Python 3.11 is needed for some libraries used)
 > py -3.11 -m venv .venv
