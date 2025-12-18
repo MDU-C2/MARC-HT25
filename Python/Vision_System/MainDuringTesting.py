@@ -123,16 +123,16 @@ def run():
         homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
         
         # get avg of matrices
-        input_file = "AveragedOutput.txt"
+        #input_file = "AveragedOutput.txt"
         # input_file = "RT.txt"
-        R_list, t_list = parse_file(input_file)
+        # R_list, t_list = parse_file(input_file)
 
-        R_avg = average_rotations(R_list)
-        t_avg = average_translations(t_list)
+        # R_avg = average_rotations(R_list)
+        # t_avg = average_translations(t_list)
 
-        homogeneous = build_homogeneous(R_avg, t_avg)
-        rotation_matrix = R_avg
-        translation_vector = t_avg
+        #homogeneous = build_homogeneous(R_avg, t_avg)
+        #rotation_matrix = R_avg
+        #translation_vector = t_avg
         #==================================== TEST PROTOCOL SETUP ====================================
 
 
@@ -238,6 +238,8 @@ def run():
                                             norm[0] = 0
 
                                         print(f"[DEBUG] normal vector after matrix: {norm}")
+                                        #print("coordinates", obj_list)
+                                        #obj_list.pop(0) 
                                         threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                                     except Exception as e:
                                         print(f"Error {e}")

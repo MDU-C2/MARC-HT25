@@ -6,5 +6,5 @@
 	<Module>Server_functions.mod</Module>
 	<Module>processes.mod</Module>
 	<Module>file_management_functions.mod</Module>
-	<Module>shared_vars.mod</Module>
+
 </Program>

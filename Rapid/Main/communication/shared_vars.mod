@@ -31,6 +31,8 @@ MODULE shared_vars
     CONST num flag_nothing:=0;
     CONST num flag_move:= 1;
     CONST num flag_move_home:= 2;
+
+
     CONST num flag_move_home_target:= 3;
     CONST num flag_move_calibration:= 4;
     CONST num flag_pick_up_mug := 5;
@@ -40,12 +42,11 @@ MODULE shared_vars
     CONST num flag_move_calibration_outofway := 9;
     CONST num flag_presentation_fetch := 10;
     CONST num flag_presentation_leave := 11;
-    
-    
+
     ! ========== CALIBRATION ========== 
     CONST num calib_array_size := 40;
     PERS robtarget calib_robtargets{calib_array_size};
     PERS robtarget calib_robtargets_right{calib_array_size};
-    PERS robtarget current_right_target; ! because communication is left arm dependetnt, we need to be able to gain right hand target
+    PERS robtarget current_right_target;
     
 ENDMODULE

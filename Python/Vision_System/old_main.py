@@ -34,79 +34,32 @@ def local_move(orient, client, obj_list, normalized_vector, save_protocol ,file_
             obj_list.pop(0)
             busy = False
 
-def classify_mug_orientation(det, frame):
-    """
-    Classifies mug orientation using only the bounding box shape.
-    Returns: 'upright', 'side', 'top', 'bottom'
-    """
-
-    # Bounding box size
-    h_img, w_img = frame.shape[:2]
-    x1 = int(det.xmin * w_img)
-    y1 = int(det.ymin * h_img)
-    x2 = int(det.xmax * w_img)
-    y2 = int(det.ymax * h_img)
-
-    w = x2 - x1
-    h = y2 - y1
-
-    aspect = h / (w + 1e-6)
-
-    # ---- 1. Standing upright ----
-    if aspect > 1.25:
-        return "upright"
-
-    # ---- 2. Lying on its side ----
-    if aspect < 0.75:
-        return "side"
-
-    # ---- For remaining cases:
-    # A mug front/back looks more circular (top/bottom) ----
-    # If bounding box width and height are almost equal → circular
-    ratio = min(w, h) / max(w, h)
-
-    if ratio > 0.85:
-        # Must determine top vs bottom using depth value variation
-        # Bottom view usually has stable depth across bbox (flat base)
-        # Top (rim) has depth variation due to cavity
-
-        # Sample depth at center and top edge
-        cx = int((x1 + x2) / 2)
-        cy = int((y1 + y2) / 2)
-
-        depth_center = det.spatialCoordinates.z
-        # Compare center depth vs average bounding box depth
-        # (very simple approximation)
-        # If cavity → center depth appears "deeper"
-        if depth_center > det.spatialCoordinates.z + 5:
-            return "top"
-        else:
-            return "bottom"
-
-    # If shape is ambiguous, treat as side:
-    return "side"
-
-
 def run():
     global busy, times_sec
     file_path = None
     normalized_vector = [0,0,1] # Initial orientation vector for the gripper
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
-    "upright":       [0.0,  1.0,  0.0],   # mug standing
-    "side":          [1.0,  0.0,  0.0],   # mug lying sideways
-    "top":           [0.0, -1.0,  0.0],   # rim facing camera
-    "bottom":        [0.0,  0.0, -1.0],   # base facing camera
-}
-
+            'Back': [ 0.0, 0.0,-1.0],
+            'Front': [0.0, 0.0,1.0],
+            'left_side': [-1.0, 0.0, 0.0],
+            'right_side': [1.0, 0.0, 0.0],
+            'upright': [0.0, 1.0 ,0.0],
+            'upside_down': [0.0, -1.0, 0.0],
+            'Gripper': [0.0, 0.0, -1.0],
+            # 'Back': [-1.0, 0.0, 0.0],
+            # 'Front': [1.0, 0.0, 0.0],
+            # 'left_side': [0.0, -1.0, 0.0],
+            # 'right_side': [0.0, 1.0, 0.0],
+            # 'upright': [0.0, 0.0, 1.0],
+            # 'upside_down': [0.0, 0.0, -1.0],
+            # 'Gripper': [0.0, 0.0, -1.0],
+        }
     quaternion = [1,0,0,0] # Dump value, not used in robot but needs to be sent.
     cam_coords = 'saved_coordinates.txt' # Path to camera coordinates .txt file
     robot_file = 'robo_coords.txt' # Path to robot coordinates .txt file
-    try:
-        client = Communication()
-        client.connect()
-    except e as exception:
-        print(1)
+    client = Communication()
+    client.connect()
     
 
     homogeneous, syncNN, pipeline, labels, rotation_matrix, translation_vector, camera_points, robot_points = cs.camera_setup(cam_coords, robot_file)
@@ -186,9 +139,7 @@ def run():
 
 
                     if busy == False and label != "Gripper":
-                        orientation_label = classify_mug_orientation(det,frame)
-                        normalized_vector = orientation_map.get(orientation_label, [0,0,1])
-                        label = orientation_label
+
                         if not (coords.z == 0.0 or coords.z > 1500 or (coords.x < -150 and coords.y > 90 and coords.z > 800) or (coords.z > 1046) and (det == "Gripper")): # Fix to not use invalid coordinates while the camera is auto focusing
                             coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
@@ -217,9 +168,7 @@ def run():
                                         norm[0] = 0
 
                                     normalized_vector = orientation_map.get(label)
-                                    if cv.waitKey(1) & 0xFF == ord(' '):
-                                        print(label)
-                                        threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
+                                    threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                                 except Exception as e:
                                     print(f"Error {e}")
 

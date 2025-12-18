@@ -1,6 +1,45 @@
 MODULE MugManipulation_SupportFunctions
    !!! ================== SUPPORT FUNCTIONS =========================== !!!
    
+   !Align the y axes to the normal axes
+   FUNC orient NormalToOrientation(pos normal)
+       
+       VAR pos e{3}; ! base frame vectors
+       ! to make it consistant with documentation
+       VAR num x{3};
+       VAR num y{3};
+       VAR num z{3};
+       VAR num buffer{3};
+       VAR num Matrix{3,3};
+       VAR num R{3,3};
+       VAR orient q;
+       
+       Normilize normal;
+       
+       ! span the R3 Space
+       SpanPlaneFromNormal normal,e;
+      
+       ! make the Span ortogonal to get proporties of Rotation matrix
+       OrtogonalMatrix3x3 e;
+       
+       
+       ! to make equations more consistant with documentation
+       PosToNumArr e{1},x;
+       PosToNumArr e{2},y;
+       PosToNumArr e{3},z;
+
+    ! ===== uggly and hard coded version of what is above
+    buffer := x;
+    x := [-y{1},-y{2},-y{3}];
+    y:= buffer;
+    
+    
+    !%Chiaverini-Siciliano method
+    q := ChiaveriniSiciliano(x,y,z);!now we have a queternium from a normal vector!
+ 
+      RETURN q;
+   ENDFUNC
+   
    !Align y axes with normal and align zaxes to a semi optimal vector from robot to mug
    FUNC orient NormalToOrientationSemiOptimal(pos mug_position,pos normal)
        
@@ -21,14 +60,21 @@ MODULE MugManipulation_SupportFunctions
       
        ! make the Span ortogonal to get proporties of Rotation matrix
        OrtogonalMatrix3x3 e;
+       
+       
+       ! to make equations more consistant with documentation
+!       PosToNumArr e{1},x;
+!       PosToNumArr e{2},y;
+!       PosToNumArr e{3},z;
         
         ! To make the frame "right" compared to the wated outcome
        PosToNumArr e{1},y;
        PosToNumArr e{2},z;
        PosToNumArr e{3},x;
 
-        !%Chiaverini-Siciliano method
-        q := ChiaveriniSiciliano(x,y,z);!now we have a queternium from a normal vector!
+    
+    !%Chiaverini-Siciliano method
+    q := ChiaveriniSiciliano(x,y,z);!now we have a queternium from a normal vector!
  
       RETURN q;
    ENDFUNC
@@ -52,6 +98,35 @@ MODULE MugManipulation_SupportFunctions
        
    ENDPROC
    
+   ! get 2 vector non parallel to normal
+   PROC SpanPlaneFromNormal(pos normal, INOUT pos e{*})
+       VAR pos e1;
+       VAR pos e2;
+       VAR pos e3;
+       
+       !normilze normal and add it to e1
+       e1 := normal;
+       Normilize e1;
+       
+    ! generate "easy" vector to span plane
+    !NOTE: we want to grip y and z from negativ to positive  
+       IF Abs(e1.x) <= Abs(e1.y) AND Abs(e1.x) <= Abs(e1.z) THEN ! x is smallest numeric 
+        e2 := [1,0,0]; 
+      ELSEIF Abs(e1.y) <= Abs(e1.x) AND Abs(e1.y) <= Abs(e1.z) THEN ! y is smallest numeric 
+        e2 := [0,-1,0];  
+      ELSE !z is smallest numeric 
+        e2 := [0,0,-1]; 
+      ENDIF
+
+
+      e3 := CrossProd(e1,e2);
+      
+      e{1} := e1;
+      e{2} := e2;
+      e{3} := e3;
+      
+   ENDPROC 
+     
    ! get 2 vector non parallel to normal, but one of them is in specific direction
    PROC SpanPlaneFromNormalSemiOptimal(pos mug_position, pos normal, INOUT pos e{*})
        VAR pos e1;
@@ -72,22 +147,45 @@ MODULE MugManipulation_SupportFunctions
       
    ENDPROC 
    
+   ! if mug is to close to robot, we want to change the "sholder" directin, making the robot fetch the mug in a different direction
+   FUNC pos dynamicSholderPos(pos mug_position,num max_lenght)
+       
+       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
+       TPWrite "magnitude:", \Num:=max_lenght;
+        IF mug_position.x < 200 AND mug_position.y > 200 THEN 
+            RETURN [520,300,300];
+        ELSEIF sqrt(DotProd(mug_position,mug_position)) < max_lenght THEN
+           RETURN sholder_pos_far;
+        ELSE
+           RETURN sholder_pos_close;
+        ENDIF
+       
+   ENDFUNC
    
    ! support function to span plane to find the specifit directional vector
    FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
        
        ! We want to make the magnitude of cross product of n and v1 to be as big as possible,
        ! This to make the area between them as big as possible, aka include more information and less distortion
+       
        ! We also want to make sure that if the mug is laying down (n = [?,?,0]) the vector should be close to [small,small,sgn(mug.pos.z - robtarget.pos.z)] 
        
        VAR pos u;
        VAR pos v;
        VAR num scaler;
        scaler := .2; ! weight the normal vector minial value
+       
+!       position := position - dynamicSholderPos(position,350); ! this to gain the vector from the sholder and not the base.
     
-       position := position - shoulderPos(position,[300,200,460],100); ! this to gain the vector from the sholder and not the base
+       TPWrite "dir:" \Pos:=position;
+!        TPWrite "mug:" \Pos:=position;
+       position := position - shoulderPos(position,[250,200,460],75); ! this to gain the vector from the sholder and not the base.
+       
+!!        TPWrite "z vector:" \Pos:=position;
+       
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
+       TPWrite "u:" \Pos:=u;
             ! generate "easy" vector to span plane
         !NOTE: we want to grip y and z from negativ to positive  
            IF Abs(normal.z) <= Abs(normal.y) AND Abs(normal.z) <= Abs(normal.x) THEN ! z is smallest numeric 
@@ -98,6 +196,7 @@ MODULE MugManipulation_SupportFunctions
             v := [sign(u.x)*scaler,0,0];
           ENDIF
        
+       TPWrite "v:" \Pos:=v;
        v := v + u;
        
        v := v/sqrt(DotProd(v,v));
@@ -105,6 +204,8 @@ MODULE MugManipulation_SupportFunctions
        v := v - Project(v,normal);
        
        v := v/sqrt(DotProd(v,v));
+       
+      TPWrite "z vector:" \Pos:=v;
        
        RETURN v;
        
@@ -228,10 +329,24 @@ MODULE MugManipulation_SupportFunctions
         RETURN q;
     ENDFUNC
     
+    
+    
     ! get wanted orientation
-    ! sadly was not working with dynamic so needed to be hard coded
     FUNC orient MugHandOverOrient()
+
+        VAR orient target;
+        VAR num e1{3};
+        VAR num e2{3};
+        VAR num e3{3};
+        
+        
+!            PosToNumArr [1,0,0],e1;
+!            PosToNumArr [0,0,1],e2;
+!            PosToNumArr [0,-1,0],e3;
         RETURN  NOrient([0,0,.707,-.707]); 
+       
+        
+!        RETURN ChiaveriniSiciliano(e1,e2,e3);!now we have a queternium from a normal vector!
     ENDFUNC       
     
       ! the mug is longer if it standing up rather then laying down
@@ -239,11 +354,23 @@ MODULE MugManipulation_SupportFunctions
         
         ! mug standing upright
         IF abs(normal.z) >= abs(normal.x) AND abs(normal.z) >= abs(normal.y) THEN
-            RETURN mug_offset_standingup;
+            RETURN 0;
         ELSE
-            RETURN mug_offset_layingdown;
+            RETURN -20;
         ENDIF
             
+    ENDFUNC
+    
+    FUNC pose HandOverTarget(pose end_target, pose mug_current_target)
+        VAR pose middle_target;
+        
+        ! half way mark
+        middle_target.trans := end_target.trans  - (end_target.trans - mug_current_target.trans)/2;
+        
+        ! to make it easier for the leaving arm
+        middle_target.rot := end_target.rot;
+    
+        RETURN middle_target;
     ENDFUNC
     
     FUNC pos shoulderPos(pos mug_pos, pos origo, num radius)
@@ -256,11 +383,14 @@ MODULE MugManipulation_SupportFunctions
         v1 := [mug_pos.x - origo.x,mug_pos.y-origo.y,origo.z];
         s_shoulder :=  [origo.x-v1.x,origo.y-v1.y,v1.z];
         v1_magn := Sqrt(v1.x*v1.x + v1.y*v1.y);
-        IF v1_magn > radius THEN
+        IF mug_pos.x < 200 AND mug_pos.y > 200 THEN 
+            RETURN [520,300,300];
+        ELSEIF v1_magn > radius THEN
             RETURN s_shoulder;
         ELSE
             RETURN h_shoulder;
         ENDIF
     ENDFUNC
+    
     
 ENDMODULE

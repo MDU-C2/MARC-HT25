@@ -24,13 +24,11 @@ It is important to note that the quality of the calibration relies on how many p
 # Now a program should start
 ```
 
-* You will be prompted to enter the amount of calibration positions that you want to use (at least X positions are recommended). 
+* You will be prompted to enter the amount of calibration positions that you want to use (at least 3 positions are needed for the calibration to work although we recomend running as many positions as possible to get the best calibration. In our case we have used 80 calibration positions). 
 
-* The next prompt will ask if you want to randomize the positions (recommended if you did not choose all 40 positions).
+* You will then be asked if you want a specific starting index (defaults to the first position if the user inputs "n" or an invalid starting point).
 
-* If you did not randomize the positions you will be asked if you want a specific starting index (defaults to the first position if the user inputs "n" or an invalid starting point).
-
-* Now the robot will start the automatic calibration. When the calibration is done the program will close and two .txt files will appear (**robo_coords.txt** and **saved_coords.txt**). These files contain positions of the gripper in the camera frame and the grippers location in the robot frame. These coordinates are used in the main file to calculate the translation between the camera and the robot, which in turn ensures that the object coordinates in the camera frame can correctly be translated to the robot frame.
+* When the program has loaded you have to press **space** to start the calibration. Then the robot will start the automatic calibration. When the calibration is done the program will close and two .txt files will appear (**robo_coords.txt** and **saved_coords.txt**). These files contain positions of the aruco tag on the gripper in the camera frame and the grippers location in the robot frame. These coordinates are used in the main file to calculate the translation between the camera and the robot, which in turn ensures that the object coordinates in the camera frame can correctly be translated to the robot frame.
 
 <!-- It is important to note that the quality of the calibration relies on how many positions are captured and that the calibration is done thoroughly and precise. It is also very important to have the gripper in the same position as you want it to grab the mug, since the calibration will capture the coordinates with the grippers relation to the mug. **For example:** If you want the robot to grab the mug from the right hand side, you would calibrate with positions where the gripper is grasping from the right hand side.
 
