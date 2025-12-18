@@ -84,8 +84,8 @@ For more indepth intstructions follow the [start RAPID guide](/media/Guide/Yumi%
 
 <!-- ÄNDRA TILL RÄTT FILNAMN -->
 ### Python code
-First the camera needs to be callibrated, make sure the robot system is running. Then start the **CALIB PYTHON FILE HERE**. Here the camera should pop up in a new window and you should see the view of the camera. Choose the amount of positions and starting position and the system should outocalibrate for you.
+First the camera needs to be callibrated, make sure the robot system is running. Then start the **auto_calibration.py**. Here the camera should pop up in a new window and you should see the view of the camera. Choose the amount of positions and starting position and the system should outocalibrate for you.
 
-When the calibration is done start the **MAIN PYTHON FILE HERE** and the system is ready. If everything is set up properly, you should be able to place mugs in the YuMi workspace (infront of the robot) and it should automatically try to move the mug.
+When the calibration is done start the **main.pyW** and the system is ready. If everything is set up properly, you should be able to place mugs in the YuMi workspace (infront of the robot) and it should automatically try to move the mug.
 
 For more indepth instructions follow the [start python guide](/media/Guide/Python/running_code.md).
