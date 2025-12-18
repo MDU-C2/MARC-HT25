@@ -1,13 +1,68 @@
 MODULE processes
+!    ***********************************************************
+!     Process: EGMMovement
 
+!     Description: Gets starting position from tcp socket and initiates EGM in bot python and movement task.
     
-    PROC Move()
-     TPWrite("[INFO] client wants to move the arm");
-        IF (MoveRob(GetRobTarget())) THEN
-        ELSE
-            SocketSend client_socket\Str:="[ERROR]can't reach that possition,try again";
+!    ***********************************************************
+    PROC EGMMovement()
+        VAR robtarget starting_point := [[442.004,-92.0926,171.604],[0.0189937,-0.0236138,0.999427,-0.0150419],[-1,1,-1,4],[-152.666,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        
+        WaitUntil shared_movement_left.wait_flag=FALSE;
+        
+        shared_movement_left.flag:=flag_move_EGM;
+        shared_movement_left.target:=starting_point;
+!        SocketSend client_socket\Str:="enable_EGM";
+        
+        shared_movement_left.wait_flag:=TRUE;
+        
+    ENDPROC
+    
+    
+!    ***********************************************************
+!     Process: Grip
+
+!     Description: Sets shared flag to initiate Gripper Grip in movement task.
+    
+!    ***********************************************************
+    PROC Grip()
+        TPWrite("[INFO] client wants to close the gripper");
+        WaitUntil shared_movement_left.wait_flag=FALSE;
+        shared_movement_left.flag:=flag_gripper_grip; 
+        shared_movement_left.wait_flag:=TRUE;
+  
+    ERROR
+        ! if errors occure during run
+        IF ERRNO=ERR_SOCK_CLOSED THEN
+            ! clinet closed connection before sending end ack!
+            server_init;
+            RETURN ;
         ENDIF
     ENDPROC
+    
+    
+!    ***********************************************************
+!     Process: Release
+
+!     Description: Sets shared flag to initiate Gripper Release in movement task.
+    
+!    ***********************************************************
+    PROC Release()
+        TPWrite("[INFO] client wants to open gripper");
+
+        WaitUntil shared_movement_left.wait_flag=FALSE;
+        SocketSend client_socket\Str:="AskNext";
+
+        shared_movement_left.flag:=flag_gripper_release; 
+        shared_movement_left.wait_flag:=TRUE;
+   ERROR
+        ! if errors occure during run
+        IF ERRNO=ERR_SOCK_CLOSED THEN
+            ! clinet closed connection before sending end ack!
+            server_init;
+            RETURN ;
+        ENDIF
+    ENDPROC 
     
     
 !    ***********************************************************
@@ -69,6 +124,37 @@ MODULE processes
     
     
 !    ***********************************************************
+!     Process: sendHandOrientation
+
+!     Description: Sends current left hand frame orientation over TCP socket (to python vision system) as a string
+    
+!    *********************************************************** 
+    PROC sendHandOrientation()
+        VAR string tempdata;
+        TPWrite "[INFO] client wants hand orientation";
+        SocketSend client_socket\Str:="Robot_Wants_To_Send_Orientation";
+        SocketReceive client_socket\Str:=tempdata; ! ACK
+        
+        IF position_in_file_index < calib_array_size + 1 THEN
+            hand_frame:=CRobT(\Tool:=tGripper);
+        ELSE
+            hand_frame:=current_right_target;
+        ENDIF
+        SocketSend client_socket\Str:=RobOrientToString(hand_frame.rot);
+        SocketReceive client_socket\Str:=tempdata; ! ACK
+    
+    ERROR
+        ! if errors occure during run
+        IF ERRNO=ERR_SOCK_CLOSED THEN
+            ! clinet closed connection before sending end ack!
+            server_init;
+            RETURN ;
+        ENDIF
+        
+    ENDPROC
+    
+    
+!    ***********************************************************
 !     Process: calibrationMovement
 
 !     Description: Asks for calibration position index over TCP and set shared target to corresponding posision, set flag to 9 (Calib movement).
@@ -85,7 +171,7 @@ MODULE processes
         SocketReceive client_socket\Str:=message; ! position number
         ok := StrToVal(message,position_in_file_index); ! saves value in index
         
-        IF position_in_file_index < calib_array_size +1 THEN
+        IF position_in_file_index < 41 THEN
             
             ! move right out of way
             shared_movement_right.flag := flag_move_calibration_outofway;
@@ -103,7 +189,7 @@ MODULE processes
             WaitUntil shared_movement_left.wait_flag=FALSE; !Wait for movement to be ready
             
             shared_movement_right.flag:=flag_move_calibration; !Set flag to 9 (calibration movement)
-            shared_movement_right.target := calib_robtargets_right{position_in_file_index - calib_array_size}; !set shared robtarget to corresponding calibration position
+            shared_movement_right.target := calib_robtargets_right{position_in_file_index - 40}; !set shared robtarget to corresponding calibration position
             shared_movement_right.wait_flag:=TRUE;
             WaitUntil shared_movement_right.wait_flag=FALSE; !Wait for movement to be done
         ENDIF
@@ -118,13 +204,6 @@ MODULE processes
                 
     ENDPROC 
     
-    
-
-!    ***********************************************************
-
-!   make left or right arm go to home dependent on wich index in calibrate position we are in
-
-!    ***********************************************************
     PROC calibrationMoveHome()
         IF position_in_file_index < calib_array_size + 1 THEN 
             
@@ -140,13 +219,6 @@ MODULE processes
         WaitUntil shared_movement_right.wait_flag=FALSE; !Wait for movement to be done
     ENDPROC
     
-
-
-!    ***********************************************************
-
-!   Make right or left arm init pick up sequence depending on y axes recived.
-
-!    ***********************************************************
     PROC pickupSequence()
        
         VAR mug_vector buffer;
@@ -176,14 +248,6 @@ MODULE processes
                 
     ENDPROC
     
-    
-
-!    ***********************************************************
-
-!   Interate through a hard coded hand over sequence
-!   This was intendent to be dynamic but there was not enough time
-
-!    ***********************************************************
     PROC HandOverSequence()
         
         ! assumes left is holding the mug in right orient
@@ -242,7 +306,62 @@ MODULE processes
         WaitUntil shared_movement_right.wait_flag = FALSE;
         
     ENDPROC
+!    ***********************************************************
+!     Function: GetRobTarget_two
 
+!     Description: Recieve and check coordinates and orientation from TCP socket (from python vision system)
+
+!     Returns: Returns a left arm robtarget
+    
+!    *********************************************************** 
+    FUNC robtarget GetRobTarget_two()
+        VAR bool sucess:=FALSE;
+        VAR robtarget return_target;
+        return_target:=[[611.44,-10,224.449],[0.00944177,-0.683755,0.728027,-0.0486451],[0,-1,-2,4],[-160.18,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        !CRobT(\Tool:= tGripper); !init values
+
+        WaitTime(delay_time);
+        SocketSend client_socket\Str:="Ask_MugCoordinate";
+        SocketReceive client_socket\Str:=message;
+        sucess:=rob_coordinates(message,return_target.trans);
+        WHILE NOT sucess DO
+            SocketSend client_socket\Str:="[ERROR]_wrong_format,try_again(exampel[x,y,z])";
+            WaitTime(delay_time);
+            SocketSend client_socket\Str:="Ask_MugCoordinate";
+
+            SocketReceive client_socket\Str:=message;
+            sucess:=rob_coordinates(message,return_target.trans);
+        ENDWHILE
+        TPWrite "Recieved pos(GetRobTarget):"\Pos:=return_target.trans;
+        
+        
+        SocketSend client_socket\Str:="Ask_MugOrientation";
+
+        ! expect message [q1,q2,q3,q4] commands next
+        SocketReceive client_socket\Str:=message;
+        sucess:=rob_orientation(message,return_target.rot);
+
+        WHILE NOT sucess DO
+            SocketSend client_socket\Str:="[ERROR]_wrong_format,try_again(exampel[q1,q2,q3,q4])";
+            WaitTime(delay_time);
+            SocketSend client_socket\Str:="Ask_MugOrientation";
+
+            SocketReceive client_socket\Str:=message;
+            sucess:=rob_orientation(message,return_target.rot);
+        ENDWHILE
+
+        return_target.rot:=NormilizeRotation(return_target.rot);
+
+        WaitTime(delay_time);
+
+        RETURN return_target;
+    ERROR
+        IF ERRNO = ERR_SOCK_CLOSED THEN
+            SocketClose client_socket;
+        ENDIF
+    ENDFUNC
+    
+    
 !    ***********************************************************
 !     Function: GetMugCoordinates
 
@@ -272,13 +391,42 @@ MODULE processes
         RETURN return_Coordinates;
     ENDFUNC
     
-
-
+    
 !    ***********************************************************
+!     Function: GetMugOrient
 
-!   Move left arm dependent on target recived
+!     Description: Recieve and check orientation from TCP socket (from python vision system)
 
-!    ***********************************************************
+!     Returns: Returns an left arm orient
+    
+!    *********************************************************** 
+    FUNC orient getMugOrient()
+        VAR bool sucess:=FALSE;
+        VAR orient return_Orientation;
+        
+        SocketSend client_socket\Str:="Ask_MugOrientation";
+
+        ! expect message [q1,q2,q3,q4] commands next
+        SocketReceive client_socket\Str:=message;
+        sucess:=rob_orientation(message,return_Orientation);
+
+        WHILE NOT sucess DO
+            SocketSend client_socket\Str:="[ERROR]_wrong_format,try_again(exampel[q1,q2,q3,q4])";
+            WaitTime(delay_time);
+            SocketSend client_socket\Str:="Ask_MugOrientation";
+
+            SocketReceive client_socket\Str:=message;
+            sucess:=rob_orientation(message,return_Orientation);
+        ENDWHILE
+
+        return_Orientation:=NormilizeRotation(return_Orientation);
+
+        WaitTime(delay_time);
+
+        RETURN return_Orientation;
+        
+    ENDFUNC
+
     FUNC bool MoveRob(robtarget target)
 
         WaitUntil shared_movement_left.wait_flag=FALSE;
@@ -309,14 +457,6 @@ MODULE processes
         ENDIF
     ENDFUNC
 
-    
-
-!    ***********************************************************
-
-!   Return a robot target recived from client
-!   Currently hard coded config
-
-!    ***********************************************************
     FUNC robtarget GetRobTarget()
         VAR bool sucess:=FALSE;
         VAR robtarget return_target;
@@ -367,14 +507,8 @@ MODULE processes
     ENDFUNC
     
     
+    ! ============================ ebn support functions ================================
       ! move robot to target
-
-!    ***********************************************************
-
-!   Move robot left or right hand dependent on bool "left_arm"
-!   Set move position to target.trans and orient dependent on target.normal
-
-!    ***********************************************************
     PROC MoveRobMugVector(mug_vector target, bool left_arm)
     
         IF left_arm THEN
@@ -394,13 +528,7 @@ MODULE processes
         
     ENDPROC
 
-
-!    ***********************************************************
-
-!   return a position and mug normal recived from client
-
-!    ***********************************************************
-FUNC mug_vector GetRobVector()
+    FUNC mug_vector GetRobVector()
         VAR bool sucess;
         VAR mug_vector target;
         target:=[[611.44,-10,224.449],[0,0,1]]; ! temp
