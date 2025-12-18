@@ -5,7 +5,7 @@ Here you will follow a step by step guide to set everything up to run the system
 1. <a href="#1-clone-the-repo">Clone the Repo</a>
 2. <a href="#2-setup">Setup</a>
     - <a href="#rapid-setup">RAPID-setup</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.md)
-    - <a href="#python-setup">Python-setup</a> - [(guide link)](/media/Guide/Python/Readme.md)
+    - <a href="#python-setup">Python-setup</a> - [(guide link)](/media/Guide/Python/README.md)
     - <a href="#robot--camera-setup">Robot/Camera-setup</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
 3. <a href="#3-run-the-code">Run the code</a>
     - <a href="#rapid-code">RAPID code</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
