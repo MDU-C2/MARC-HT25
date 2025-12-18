@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<Program>
+	<Module>Presentation.mod</Module>
+	<Module>LeftArmMain.mod</Module>
+	<Module>EGMprocesses.mod</Module>
+	<Module>movementFunctions.mod</Module>
+	<Module>shared_vars.mod</Module>
+	<Module>MugManipulation.mod</Module>
+	<Module>MugManipulation_SupportFunctions.mod</Module>
+</Program>
