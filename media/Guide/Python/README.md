@@ -35,6 +35,8 @@ To run the codes provided in this repository multiple Python libraries needs to 
 This is done by running the **requirements.txt** file located in the **Vision_System** folder included in the Git repository.
 
 ```bash
+#Go to the correct directory
+> cd Python\Vision_System
 #Run the requirements.txt file
 > pip install -r requirements.txt
 ```
