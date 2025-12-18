@@ -19,11 +19,11 @@ The RAPID code can be run together with the vision system in a simulated environ
 ### RobotWare
 Firstly, make sure to install **RobotWare** or make sure that the correct version is installed. First click the **Add-Ins** tab at the top of the screen and select the following:
 
-1. RobotApps
-2. Gallery
-3. RobotWare for IRC5
-4. Select version (Latest version should work)
-5. Add
+
+1. Gallery
+2. RobotWare for IRC5
+3. Select version (Latest version should work)
+4. Add
 
 ![RobotWare](/media/images/RobotWare.png)
 
@@ -62,6 +62,7 @@ To add a task, first open the **Controller Configuration** in the active station
 
 4. Enter a name, for example "Communication"
 5. Change the type to **Normal**
+6. Change Use Mechanical Unit Group to **rob_l**
 6. Press **OK**
 
 ![TaskSettings](/media/images/TaskSettings.png)
@@ -96,5 +97,8 @@ The following instructions show how to load the RAPID code from this repository:
 
 All of the necessary modules should now be loaded to the **Communication** task.
 
-The same procedure is done for the left and right arm tasks where **Movement_left** and **Movement_right** is loaded to each respectively.
+The same procedure is done for the T_ROB_L and T_ROB_R arm tasks where **\MARC-HT25\RAPID\Main\Left_arm -> Movement_progress** and **\MARC-HT25\RAPID\Main\Right_arm -> Movement_progress** is loaded to each task respectively.
 
+When everything is lodaded it should look something like this:
+
+![loadedmodules](/media/images/loadedmodules.png)

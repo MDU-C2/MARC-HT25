@@ -3,13 +3,14 @@ The following sections about system failure is only if you are are using the sam
 
 When you start the robot you will most likely get the error "SMB communication failure" on the FlexPendant (the wired controller) and a system failure. System failure will prevent you from doing most things with the robot. To get out of this you will need to go to Restart -> advanced -> Shutdown main computer, then turn off the power knob. Turn on the power knob again and robot (controller) should start without system failure. However you will probably have to recalibrate the right arm. (Click the image play the video).
 
->**Note:** To calibrate the right arm you will have to [align all the joints](/media/documents/RAPID%20Manuals/Yumi%20Rev%20counter%20update.pdf) on the right arm with the calibration marks. After you have done that start the calibration program on the FlexPendant, all joints should be selected, just press next.
+>[!Note]
+>To calibrate the right arm you will have to [align all the joints](/media/documents/RAPID%20Manuals/Yumi%20Rev%20counter%20update.pdf) on the right arm with the calibration marks. After you have done that start the calibration program on the FlexPendant, all joints should be selected, just press next.
 
 
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/O1MPd2k_ZHU/0.jpg)](http://www.youtube.com/watch?v=O1MPd2k_ZHU)
 
-
->**Note:** If system failure persists despite following the above method. Try to "Revert to last auto saved" instead of "Shutdown main computer". This should remove the system failure and the need to calibrate the right arm.
+>[!Note]
+>If system failure persists despite following the above method. Try to "Revert to last auto saved" instead of "Shutdown main computer". This should remove the system failure and the need to calibrate the right arm.
 
 
 

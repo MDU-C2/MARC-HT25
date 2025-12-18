@@ -46,6 +46,6 @@ First extend the Configuration tab in the active station and do the following:
 
 7. Remote port number: **6510**
 
-8. Clocl **OK**
+8. Click **OK**
 
 ![UDPsettings](/media/images/UDPsettings.png)

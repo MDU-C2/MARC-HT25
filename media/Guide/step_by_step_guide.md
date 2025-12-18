@@ -20,11 +20,33 @@ $ git clone https://github.com/MDU-C2/MARC-HT25.git
 # Go into the repository
 $ cd MARC-HT25
 ```
-### Starting YuMi
-The YuMi may start in in system failure mode. [Follow this guide]() for instructions on how to solve this.
+
 
 ## 2. Setup
-This section goes through how to set **RobotStudio** and **Python** settings up in order to run the code in this repository.
+This section goes through how to start the robot and configure **RobotStudio** and **Python** settings in order to run the code in this repository.
+
+### Starting YuMi
+Start the YuMI by turning the power knob at the base of the robot.
+
+
+<h1 align="center">
+  <br>
+  <img src="../images/Power.jpg" alt="MARC Logo" width="400">
+  <br>
+</h1>
+
+
+>[!Note]
+ >If you are using the same YuMI IRB14000 as we did you should read how to fix the [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error. This should not be a problem though as it seems it was fixed by a person at ABB near the end of the project period.
+
+### Robot / camera-setup
+Connect the YuMi robot to the computer you are working on by following [this guide](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
+
+>[!Note]
+>If you get a [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error, it can solved by following this [link](/media/Guide/Yumi%20IRB%2014000/systemfailure.md).
+
+ Lastly set up the camera so that it can see the whole work space of the robot.
+
 ### RAPID-setup
 If the RAPID code is already on the robot, you can skip over to the <a href="#python-setup">Python-setup</a>. However, if you want to set up a simulated controller or load/modify RAPID code on the YuMi, continue with the following steps.
 
@@ -34,19 +56,14 @@ The easiest way to modify and run RAPID code is by using **RobotStudio**. You ca
 
 
 <!-- ÄNDRA TILL RÄTT FILNAMN / MAPPNAMN / TASKNAMN -->
-When you have **RobotStudio**, you need to include the programs **Communication,RightArm,LeftArm** all found in seperate folders in **\MARC-HT25\Rapid**. Make sure **RightArm** is connected to the right arm of the yumi and the **LeftArm** is connected to the left arm of the yumi. 
+When you have **RobotStudio**, you need to include the programs **Communication,Left_arm,Right_arm** all found in seperate folders in **\MARC-HT25\Rapid\Main**. Make sure **Left_arm** is loaded onto the **T_ROBL** task and **Right_arm** is loaded to  **T_ROBR** task on the yumi. 
 
 You can follow [these steps](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.md) to configure the correct settings within **RobotStudio**.
->Note: It is possible to run the code on the YuMi through the flex pendant but RobotStudio offers a friendlier and easier to use interface.
+>[!Note]
+>It is possible to run the code on the YuMi through the flex pendant but RobotStudio offers a friendlier and easier to use interface.
 ### Python-setup
-You can find all the necessary information about the Python setup by going through [this section](/media/Guide/Python/Readme.md).
-### Robot / camera-setup
-Connect the YuMi robot to the computer you are working on by following [this guide](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
+You can find all the necessary information about the Python setup by going through [this guide](/media/Guide/Python/README.md).
 
->Note:
- If you get a [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error, it can solved by following this [link](/media/Guide/Yumi%20IRB%2014000/systemfailure.md).
-
- Lastly set up the camera so that it can see the whole work space of the robot.
 ## 3. Run the code
 Now that everything is set up correctly, you can run the system by following the steps in this section.
 
@@ -60,8 +77,8 @@ To start the robot system, select all the **Tasks** in **RobotStudio**, reset th
 The system should start and wait for a connection with the vision system.
 
 For more indepth intstructions follow the [start RAPID guide](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md).
-
->Note: If the connection is lost during runtime, the system may need to be restarted.
+>[!Note]
+>If the connection is lost during runtime, the system may need to be restarted.
 
 
 
