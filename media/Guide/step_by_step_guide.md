@@ -39,7 +39,7 @@ When you have **RobotStudio**, you need to include the programs **Communication,
 You can follow [these steps](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.md) to configure the correct settings within **RobotStudio**.
 >Note: It is possible to run the code on the YuMi through the flex pendant but RobotStudio offers a friendlier and easier to use interface.
 ### Python-setup
-You can find all the necessary information about the Python setup by going through [this section](/media/Guide/Python/Readme.md).
+You can find all the necessary information about the Python setup by going through [this section](/media/Guide/Python/README.md).
 ### Robot / camera-setup
 Connect the YuMi robot to the computer you are working on by following [this guide](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
 
