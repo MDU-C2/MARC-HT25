@@ -68,6 +68,7 @@ To add a task, first open the **Controller Configuration** in the active station
 
 ![TaskSettings](/media/images/TaskSettings.png)
 
+>[!Note]
 >Make sure Motion Task is set to **No**, since you can only have one motion task for each mechanical unit (each arm) and there should already be two tasks corresponding to each arm on the controller.
 
 7. Restart the controller
