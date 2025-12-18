@@ -39,6 +39,7 @@ At the top of the screen, click **File** and select the following:
 5. Tick **Customize options** and Press **create**
 
 ![NewProject](/media/images/NewProject.png)
+>[!Note]
 >If you want the controller to be able to run EGM, in the Change Options window, navigate to the **Engineering Tools** catagory and tick the **Externally Guided Motion (EGM)** option.
 
 ![RobotWare](/media/images/EGMOptions.png)
