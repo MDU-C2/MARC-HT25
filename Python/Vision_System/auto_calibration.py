@@ -76,7 +76,7 @@ def run():
                     label = label_map[det.label]
                 conf  = int(det.confidence * 100)  # confidence percentage
 
-                if label == "Gripper": # Only process non-gripper detections (cups)
+                if label == "!Gripper": # Only process non-gripper detections (cups)
                     # Get bounding box coordinates (normalized 0..1 from NN, convert to pixel coords)
                     x1 = int(det.xmin * frame.shape[1])
                     y1 = int(det.ymin * frame.shape[0])

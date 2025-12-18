@@ -2,13 +2,17 @@ import socket
 import time
 import ast
 import threading
+import cv2 as cv
+# from pynput import mouse
 
 
 class Communication():
     """Class to handle communication with RAPID server"""
     max_sleep_duration = 60
+    space = False
     activ = True
     def __init__(self):
+
         self.sleep_time = 0
 
         self._mutex_variable = threading.Lock()  #mutex for accessing variables
@@ -63,8 +67,8 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
-        self._connection_test_thread.start()
+        # self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
+        # self._connection_test_thread.start()
 
 
 
@@ -87,6 +91,7 @@ class Communication():
                     return None
                 
                 case next_step if next_step in self.NEXTSTEP:
+                        print("Next step received")
                         return True
                 case ack if ack in self.ACKS:
                     continue
@@ -132,6 +137,7 @@ class Communication():
                     return None
             
 
+        
 
     def _keep_connection_alive(self):
         """Sleep 60s then send a test message to RAPID. Windows does not like open sockets without activity."""
@@ -241,16 +247,22 @@ class Communication():
                 self.MugOrientation = list(MugOrientation)
         return
 
-      
-    def Presentation(self,cv):
+
+    def Presentation(self, coordinates, orientation, normalized_vector):
         with self._mutex_function:  # Lock mutex for function-level thread safety
+            with self._mutex_variable:
+                self.MugCoordinates = list(coordinates)
+                self.MugOrientation = list(orientation)
+                self.MugNormal = list(normalized_vector)
             self._send_message("Presentation")
             _continue = self._handle_response()
+
             while _continue != None:
-                if (cv.waitKey(1) & 0xFF == ord(' ')):
-                    self.reset_connection_timer()
+                if self.space:
+                    print("space pressed")
                     self._send_message("ACK")
-                    _continue = self._handle_response()
+                    self.space = False
+                    _continue =  self._handle_response()
            
 
     def GetPosition(self):
