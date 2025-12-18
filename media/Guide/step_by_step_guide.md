@@ -42,9 +42,9 @@ You can follow [these steps](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.m
 You can find all the necessary information about the Python setup by going through [this section](/media/Guide/Python/README.md).
 ### Robot / camera-setup
 Connect the YuMi robot to the computer you are working on by following [this guide](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
+
 >[!Note]
->
- If you get a [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error, it can solved by following this [link](/media/Guide/Yumi%20IRB%2014000/systemfailure.md).
+>If you get a [system failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md) error, it can solved by following this [link](/media/Guide/Yumi%20IRB%2014000/systemfailure.md).
 
  Lastly set up the camera so that it can see the whole work space of the robot.
 ## 3. Run the code
