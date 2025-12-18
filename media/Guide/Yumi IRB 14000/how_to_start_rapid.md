@@ -23,6 +23,6 @@ The program pointers need to be set to main in order for the system to work prop
 3. In the **Run Mode** drop down menu, select **single cycle** so that the RAPID program doesn't restart after execution
 4. Click **Start**
 >[!Note]
->Note: The shortcut to start the code is **f8**
+>The shortcut to start the code is **f8**
 
 ![PointerToMain](/media/images/PointerToMain.png)
