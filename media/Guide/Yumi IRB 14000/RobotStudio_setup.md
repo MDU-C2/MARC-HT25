@@ -39,6 +39,7 @@ At the top of the screen, click **File** and select the following:
 5. Tick **Customize options** and Press **create**
 
 ![NewProject](/media/images/NewProject.png)
+>[!Note]
 >If you want the controller to be able to run EGM, in the Change Options window, navigate to the **Engineering Tools** catagory and tick the **Externally Guided Motion (EGM)** option.
 
 ![RobotWare](/media/images/EGMOptions.png)
@@ -67,6 +68,7 @@ To add a task, first open the **Controller Configuration** in the active station
 
 ![TaskSettings](/media/images/TaskSettings.png)
 
+>[!Note]
 >Make sure Motion Task is set to **No**, since you can only have one motion task for each mechanical unit (each arm) and there should already be two tasks corresponding to each arm on the controller.
 
 7. Restart the controller
@@ -99,6 +101,6 @@ All of the necessary modules should now be loaded to the **Communication** task.
 
 The same procedure is done for the T_ROB_L and T_ROB_R arm tasks where **\MARC-HT25\RAPID\Main\Left_arm -> Movement_progress** and **\MARC-HT25\RAPID\Main\Right_arm -> Movement_progress** is loaded to each task respectively.
 
-When everything is lodaded it should look something like this:
+When everything is loaded it should look something like this:
 
 ![loadedmodules](/media/images/loadedmodules.png)

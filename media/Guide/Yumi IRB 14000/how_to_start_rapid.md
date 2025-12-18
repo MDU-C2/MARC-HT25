@@ -18,9 +18,11 @@ The program pointers need to be set to main in order for the system to work prop
 
 1. Click **RAPID** at the top of RobotStudio
 2. Click **Program Pointer** and in the drop down menu, select **Set Program Pointer to Main in all tasks**
->Note: The shortcut to reset the pointers is **Ctrl + Shft + M**
+>[!Note]
+>The shortcut to reset the pointers is **Ctrl + Shft + M**
 3. In the **Run Mode** drop down menu, select **single cycle** so that the RAPID program doesn't restart after execution
 4. Click **Start**
->Note: The shortcut to start the code is **f8**
+>[!Note]
+>The shortcut to start the code is **f8**
 
 ![PointerToMain](/media/images/PointerToMain.png)
