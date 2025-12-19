@@ -7,5 +7,4 @@
 	<Module>shared_vars.mod</Module>
 	<Module>MugManipulation.mod</Module>
 	<Module>MugManipulation_SupportFunctions.mod</Module>
-	<Module>Presentation.mod</Module>
 </Program>

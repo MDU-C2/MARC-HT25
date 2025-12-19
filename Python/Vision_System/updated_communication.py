@@ -4,11 +4,12 @@ import ast
 import threading
 import cv2 as cv
 # from pynput import mouse
+lock = threading.Lock()
 
 
 class Communication():
     """Class to handle communication with RAPID server"""
-    max_sleep_duration = 60
+    max_sleep_duration = 10
     space = False
     activ = True
     def __init__(self):
@@ -25,7 +26,7 @@ class Communication():
 
     
         ## What python can recive SEE BELOW
-        self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
+        self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done","Connection_Confirmed",
                 "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal", "Ack_EGM"] # these should be removed except ACK, it is not in the main switch case but inside a case
         
         self.CLOSE = ["Disconnect", ]
@@ -34,7 +35,7 @@ class Communication():
 
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
-        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", "Ask_next"] # RAPID is ready for the next command
+        self.ASKNEXT = ["AskNext",  "Ack_Grip_Done", "Ack_Release done", "Ask_next"] # RAPID is ready for the next command
 
         self.ASKCALPOINT = ["AskCalPoint", ]
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
@@ -91,7 +92,6 @@ class Communication():
                     return None
                 
                 case next_step if next_step in self.NEXTSTEP:
-                        print("Next step received")
                         return True
                 case ack if ack in self.ACKS:
                     continue
@@ -148,7 +148,7 @@ class Communication():
             if self.sleep_time > self.max_sleep_duration:
                 if self.connected:
                     self.ConnectionTest()
-                    self.sleep_time = self.reset_connection_timer()
+                    self.reset_connection_timer()
             else:
                 self.sleep_time += time.time() - start
 
@@ -249,21 +249,44 @@ class Communication():
 
 
     def Presentation(self, coordinates, orientation, normalized_vector):
-        with self._mutex_function:  # Lock mutex for function-level thread safety
-            with self._mutex_variable:
-                self.MugCoordinates = list(coordinates)
-                self.MugOrientation = list(orientation)
-                self.MugNormal = list(normalized_vector)
-            self._send_message("Presentation")
-            _continue = self._handle_response()
+        coiqter = 0
+        max_time = 10
+        start = 0
+        self._mutex_function.acquire()  # Lock mutex for function-level thread safety
+        
+        self._mutex_variable.acquire()
+        self.MugCoordinates = list(coordinates)
+        self.MugOrientation = list(orientation)
+        self.MugNormal = list(normalized_vector)
+        self._mutex_variable.release()
 
-            while _continue != None:
-                if self.space:
-                    print("space pressed")
-                    self._send_message("ACK")
-                    self.space = False
-                    _continue =  self._handle_response()
+        self._send_message("Presentation")
+        _continue = self._handle_response()
+        self._mutex_function.release()
+        # self.reset_connection_timer()
+
+        while _continue != None:
+            start = time.time()
+            if self.space:
+
+                self._mutex_function.acquire()
+                self._send_message("ACK")
+                _continue =  self._handle_response()
+                self._mutex_function.release()
+
+                self._mutex_variable.acquire()
+                # self.reset_connection_timer()
+                self.space = False
+                self._mutex_variable.release()
+                coiqter = 0
+            elif coiqter > max_time:
+                self.ConnectionTest()
+                coiqter = 0
+            coiqter += time.time() - start
+        # self._mutex_function.release()
+        # self._mutex_function.release()
            
+
 
     def GetPosition(self):
 

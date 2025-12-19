@@ -6,5 +6,4 @@
 	<Module>movementFunctions.mod</Module>
 	<Module>EGMprocesses.mod</Module>
 	<Module>LeftArmMain.mod</Module>
-	<Module>Presentation.mod</Module>
 </Program>

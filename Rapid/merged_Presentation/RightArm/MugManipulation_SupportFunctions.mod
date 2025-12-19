@@ -146,20 +146,7 @@ MODULE MugManipulation_SupportFunctions
       e{3} := e3;
       
    ENDPROC 
-   
-   ! if mug is to close to robot, we want to change the "sholder" directin, making the robot fetch the mug in a different direction
-   FUNC pos dynamicSholderPos(pos mug_position,num max_lenght)
-       
-       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
-       TPWrite "magnitude:", \Num:=max_lenght;
-       IF sqrt(DotProd(mug_position,mug_position)) < max_lenght THEN
-           RETURN sholder_pos_far;
-       ELSE
-           RETURN sholder_pos_close;
-       ENDIF
-       
-   ENDFUNC
-   
+
    ! support function to span plane to find the specifit directional vector
    FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
        
@@ -342,9 +329,9 @@ MODULE MugManipulation_SupportFunctions
         
         ! mug standing upright
         IF abs(normal.z) >= abs(normal.x) AND abs(normal.z) >= abs(normal.y) THEN
-            RETURN 5;
+            RETURN 0;
         ELSE
-            RETURN -30;
+            RETURN -20;
         ENDIF
             
     ENDFUNC

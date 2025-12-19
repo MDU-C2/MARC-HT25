@@ -147,6 +147,19 @@ MODULE MugManipulation_SupportFunctions
       
    ENDPROC 
    
+   ! if mug is to close to robot, we want to change the "sholder" directin, making the robot fetch the mug in a different direction
+   FUNC pos dynamicSholderPos(pos mug_position,num max_lenght)
+       
+       TPWrite "pos magnitude:", \Num:=sqrt(DotProd(mug_position,mug_position));
+       TPWrite "magnitude:", \Num:=max_lenght;
+       IF sqrt(DotProd(mug_position,mug_position)) < max_lenght THEN
+           RETURN sholder_pos_far;
+       ELSE
+           RETURN sholder_pos_close;
+       ENDIF
+       
+   ENDFUNC
+   
    ! support function to span plane to find the specifit directional vector
    FUNC pos SemiOptimalPickUpOrientation(pos position,pos normal)
        
@@ -160,17 +173,10 @@ MODULE MugManipulation_SupportFunctions
        VAR num scaler;
        scaler := .2; ! weight the normal vector minial value
        
-!       position := position - dynamicSholderPos(position,350); ! this to gain the vector from the sholder and not the base.
-    
-       TPWrite "dir:" \Pos:=position;
-!        TPWrite "mug:" \Pos:=position;
-       position := position - shoulderPos(position,[250,200,460],75); ! this to gain the vector from the sholder and not the base.
-       
-!!        TPWrite "z vector:" \Pos:=position;
+       position := position - shoulderPos(position,[300,-200,460],75); ! this to gain the vector from the sholder and not the base.
        
        u := position/sqrt(DotProd(position,position)); ! robtarget.trans from robot base = [0,0,0] meaning u = pos - [0,0,0] = pos;
        
-       TPWrite "u:" \Pos:=u;
             ! generate "easy" vector to span plane
         !NOTE: we want to grip y and z from negativ to positive  
            IF Abs(normal.z) <= Abs(normal.y) AND Abs(normal.z) <= Abs(normal.x) THEN ! z is smallest numeric 
@@ -181,16 +187,12 @@ MODULE MugManipulation_SupportFunctions
             v := [sign(u.x)*scaler,0,0];
           ENDIF
        
-       TPWrite "v:" \Pos:=v;
        v := v + u;
        
        v := v/sqrt(DotProd(v,v));
        
        v := v - Project(v,normal);
-       
        v := v/sqrt(DotProd(v,v));
-       
-      TPWrite "z vector:" \Pos:=v;
        
        RETURN v;
        
@@ -328,7 +330,8 @@ MODULE MugManipulation_SupportFunctions
 !            PosToNumArr [1,0,0],e1;
 !            PosToNumArr [0,0,1],e2;
 !            PosToNumArr [0,-1,0],e3;
-        RETURN  NOrient([0,0,.707,-.707]); 
+        RETURN  NOrient([.707,-.707,0,0]);
+!        RETURN  NOrient([.707,-.707,0,0]);
        
         
 !        RETURN ChiaveriniSiciliano(e1,e2,e3);!now we have a queternium from a normal vector!
@@ -339,26 +342,26 @@ MODULE MugManipulation_SupportFunctions
         
         ! mug standing upright
         IF abs(normal.z) >= abs(normal.x) AND abs(normal.z) >= abs(normal.y) THEN
-            RETURN 0;
+            RETURN 5;
         ELSE
-            RETURN -20;
+            RETURN -30;
         ENDIF
             
     ENDFUNC
     
-    FUNC pose HandOverTarget(pose end_target, pose mug_current_target)
-        VAR pose middle_target;
-        
-        ! half way mark
-        middle_target.trans := end_target.trans  - (end_target.trans - mug_current_target.trans)/2;
-        
-        ! to make it easier for the leaving arm
-        middle_target.rot := end_target.rot;
+  FUNC pose HandOverTarget(pose end_target, pose mug_current_target)
+    VAR pose middle_target;
+    
+    ! half way mark
+    middle_target.trans := end_target.trans  - (end_target.trans - mug_current_target.trans)/2;
+    
+    ! to make it easier for the leaving arm
+    middle_target.rot := end_target.rot;
     
         RETURN middle_target;
     ENDFUNC
     
-    FUNC pos shoulderPos(pos mug_pos, pos origo, num radius)
+     FUNC pos shoulderPos(pos mug_pos, pos origo, num radius)
         VAR pos v1;
         VAR pos s_shoulder;
         VAR pos h_shoulder;
@@ -368,14 +371,11 @@ MODULE MugManipulation_SupportFunctions
         v1 := [mug_pos.x - origo.x,mug_pos.y-origo.y,origo.z];
         s_shoulder :=  [origo.x-v1.x,origo.y-v1.y,v1.z];
         v1_magn := Sqrt(v1.x*v1.x + v1.y*v1.y);
-        IF mug_pos.x < 200 AND mug_pos.y > 200 THEN 
-            RETURN [520,300,300];
-        ELSEIF v1_magn > radius THEN
+        IF v1_magn > radius THEN
             RETURN s_shoulder;
         ELSE
             RETURN h_shoulder;
         ENDIF
     ENDFUNC
-    
     
 ENDMODULE

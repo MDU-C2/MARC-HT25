@@ -48,7 +48,6 @@ MODULE PresentationProcess
             ! wait to move away
             shared_movement_right.wait_flag := TRUE;
             WaitUntil shared_movement_right.wait_flag = FALSE;
-            AskNext;
             
         ELSE
             shared_movement_left.mug := buffer; 
@@ -125,8 +124,8 @@ MODULE PresentationProcess
             
             ! let right hand move back
             shared_movement_right.wait_flag := TRUE;
-        
-            
+            WaitUntil shared_movement_right.wait_flag = FALSE;
+                   
         ENDIF
       
            
@@ -145,6 +144,29 @@ MODULE PresentationProcess
         WaitUntil shared_movement_right.wait_flag = FALSE;
         AskNext;
         
+        shared_movement_right.wait_flag := TRUE;
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;   
+        
+        shared_movement_right.wait_flag := TRUE;
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;
+        
+        shared_movement_right.wait_flag := TRUE;
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;
+               
+        shared_movement_right.wait_flag := TRUE;
+        WaitUntil shared_movement_right.wait_flag = FALSE;
+        AskNext;
+        
+        shared_movement_right.flag := flag_move_home_target;
+        shared_movement_right.wait_flag := TRUE;
+        shared_movement_left.flag := flag_move_home_target;
+        shared_movement_left.wait_flag := TRUE;
+        
+        
+        WaitUntil shared_movement_right.wait_flag = FALSE;
         
     ENDPROC
     
@@ -153,6 +175,13 @@ MODULE PresentationProcess
 
         SocketSend client_socket\Str:="Next_step";
         SocketReceive client_socket \Str:=message;
+        WHILE message = "Connection_test" DO
+            SocketSend client_socket\Str:="AskNext";
+            SocketReceive client_socket \Str:=message;
+!            WaitTime(delay_time);
+!            SocketSend client_socket\Str:="Next_step";
+!            SocketReceive client_socket \Str:=message;
+        ENDWHILE
         
     ERROR
      IF ERRNO = ERR_SOCK_CLOSED THEN

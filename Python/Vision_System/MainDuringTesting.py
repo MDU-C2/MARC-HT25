@@ -102,10 +102,10 @@ def run():
     normalized_vector = [0,0,1] # Initial orientation vector for the gripper
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
-            'Back': [ 0.0, 0.0,-1.0],
-            'Front': [0.0, 0.0,1.0],
-            'left_side': [-1.0, 0.0, 0.0],
-            'right_side': [1.0, 0.0, 0.0],
+            'Back': [ 0.0, 0.0,1.0],
+            'Front': [0.0, 0.0,-1.0],
+            'left_side': [1.0, 0.0, 0.0],
+            'right_side': [-1.0, 0.0, 0.0],
             'upright': [0.0, 1.0 ,0.0],
             'upside_down': [0.0, -1.0, 0.0],
             'Gripper': [0.0, 0.0, -1.0],

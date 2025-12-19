@@ -84,8 +84,8 @@ def local_move(orient, client, obj_list, normalized_vector, save_protocol ,file_
 
             client.Presentation(obj_list[0], orient, normalized_vector)
             # client.Move(obj_list[0], orient, normalized_vector)
-            print("debugg")
             
+            client.MoveHome()
             
             end_time = time.time()
             process_time = end_time - start_time
@@ -103,10 +103,10 @@ def run():
     normalized_vector = [0,0,1] # Initial orientation vector for the gripper
     #Normalized orientation vectors for different cup orientations
     orientation_map = {
-            'Back': [ 0.0, 0.0,-1.0],
-            'Front': [0.0, 0.0,1.0],
-            'left_side': [-1.0, 0.0, 0.0],
-            'right_side': [1.0, 0.0, 0.0],
+            'Back': [ 0.0, 0.0,1.0],
+            'Front': [0.0, 0.0,-1.0],
+            'left_side': [1.0, 0.0, 0.0],
+            'right_side': [-1.0, 0.0, 0.0],
             'upright': [0.0, 1.0 ,0.0],
             'upside_down': [0.0, -1.0, 0.0],
             'Gripper': [0.0, 0.0, -1.0],
@@ -242,10 +242,10 @@ def run():
                                         threading.Thread(target=local_move, args=(quaternion, client, obj_list, [float(norm[0]),float(norm[1]),float(norm[2])], save_protocol, file_path, conf, label), daemon=True).start()
                                     except Exception as e:
                                         print(f"Error {e}")
-                        else:
-                            if cv.waitKey(1) & 0xFF == ord(' '):
-                                client.space = True
+                        
                     # Show the frames in windows
+                if cv.waitKey(1) & 0xFF == ord(' '):
+                    client.space = True
                 cv.imshow("RGB", frame)
                 if cv.waitKey(1) & 0xFF == ord('r'):
                     client.connect()
