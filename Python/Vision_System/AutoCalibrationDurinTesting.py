@@ -32,8 +32,8 @@ if client.connectV2():
 
         specific_start_pos = input("do you want specific starting position? (y/n): ").lower()
         if specific_start_pos == 'y':
-            start_pos = input(f"enter starting position (1-{40 - num_positions}): ")
-            if start_pos.isdigit() == False or int(start_pos) < 1 or int(start_pos) > (40 - num_positions):
+            start_pos = input(f"enter starting position (1-{79 - num_positions}): ")
+            if start_pos.isdigit() == False or int(start_pos) < 1 or int(start_pos) > (79 - num_positions):
                 print("invalid input, setting to position 1")
                 start_pos = 1
             else:
