@@ -67,7 +67,7 @@ You can find all the necessary information about the Python setup by going throu
 ## 3. Run the code
 Now that everything is set up correctly, you can run the system by following the steps in this section.
 
-Make sure all the cables are connected, open RobotStudio and open either VsCode or powershell/cmd in the python main folder. 
+Make sure all the cables are connected, open RobotStudio and open either Visual Studio Code or powershell/cmd in the python main folder. 
 
 
 

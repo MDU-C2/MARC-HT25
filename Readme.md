@@ -32,7 +32,7 @@ The project aims to create a robotic system capable of dynamically locating diff
 * Dynamic robot capable of picking up and placing mugs in a predefined position.
 
 * Object awareness
-  - Identifies mugs, their postion and pose.
+  - Identifies mugs, their postion and orientation.
 
 * Components used
   - YUMI IRB14000
