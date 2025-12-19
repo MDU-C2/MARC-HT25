@@ -33,15 +33,13 @@ MODULE shared_vars
     CONST num flag_gripper_grip:= 3;
     CONST num flag_gripper_release:= 4;
     CONST num flag_move_home_target:= 5;
-    CONST num flag_move_gripsequence:= 6;
-    CONST num flag_move_leavesequence:= 7;
-    CONST num flag_move_EGM:= 8;
-    CONST num flag_move_calibration:= 9;
-    CONST num flag_pick_up_mug := 10;
-    CONST num flag_leave_mug := 11;
-    CONST num flag_hand_over := 12;
-    CONST num flag_move_calibration_home := 13;
-    CONST num flag_move_calibration_outofway := 14;
+    CONST num flag_move_EGM:= 6;
+    CONST num flag_move_calibration:= 7;
+    CONST num flag_pick_up_mug := 8;
+    CONST num flag_leave_mug := 9;
+    CONST num flag_hand_over := 10;
+    CONST num flag_move_calibration_home := 11;
+    CONST num flag_move_calibration_outofway := 12;
     
     
     ! ========== CALIBRATION ========== 

@@ -31,18 +31,18 @@ MODULE shared_vars
     CONST num flag_nothing:=0;
     CONST num flag_move:= 1;
     CONST num flag_move_home:= 2;
-
-
-    CONST num flag_move_home_target:= 3;
-    CONST num flag_move_calibration:= 4;
-    CONST num flag_pick_up_mug := 5;
-    CONST num flag_leave_mug := 6;
-    CONST num flag_hand_over := 7;
-    CONST num flag_move_calibration_home := 8;
-    CONST num flag_move_calibration_outofway := 9;
-    CONST num flag_presentation_fetch := 10;
-    CONST num flag_presentation_leave := 11;
-
+    CONST num flag_gripper_grip:= 3;
+    CONST num flag_gripper_release:= 4;
+    CONST num flag_move_home_target:= 5;
+    CONST num flag_move_EGM:= 6;
+    CONST num flag_move_calibration:= 7;
+    CONST num flag_pick_up_mug := 8;
+    CONST num flag_leave_mug := 9;
+    CONST num flag_hand_over := 10;
+    CONST num flag_move_calibration_home := 11;
+    CONST num flag_move_calibration_outofway := 12;
+    
+    
     ! ========== CALIBRATION ========== 
     CONST num calib_array_size := 40;
     PERS robtarget calib_robtargets{calib_array_size};

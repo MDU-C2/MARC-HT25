@@ -8,7 +8,6 @@ MODULE movementFunctions
 !
 !               Meant to be used with configuration mode off (ConfL & ConfJ \off)
 !
-! Author: fjn20007
 !
 !***********************************************************
 
@@ -41,40 +40,43 @@ MODULE movementFunctions
         
         MoveJ desired_target,movement_speed,fine,tGripper;
 !        ProcerrRecovery \SyncOrgMoveInst;
-        
+        ConfJ\On;
+        ConfL\On;
         ERROR
         IF ERRNO = ERR_ROBLIMIT THEN !Joint values outside of working range
             ResetRetryCount;
-!            IF testing > 1 THEN
-!                moveToHomeTarget;
-!                TPWrite "Failed to reach target";
-!                RETURN;
-!            ENDIF
+
             IF VectMagn(desired_target.trans-current_target.trans) > max_magnitude THEN
+                
                 disc_target := discretizeTarget(current_target,desired_target,step_size);
                 MoveJ disc_target,movement_speed,z50,tGripper;
                 current_target := CRobT(\Tool:=tGripper);
 
                 IF disc_target = home_target THEN
                     home := TRUE;
-                    Incr testing;
                 ENDIF
+                
                 RETRY;
+                
             ELSEIF NOT home THEN
+                
                 moveToHomeTarget;
                 current_target := CRobT(\Tool:=tGripper);
                 home := TRUE;
                 RETRY;
             ELSE
+                
                 moveToHomeTarget;
                 TPWrite "Failed to reach target";
 
                 RETURN;
             ENDIF
         ELSEIF ERRNO = ERR_OUTSIDE_REACH THEN !Robot cannot reach to desired position
+        
             TPWrite "Outside of reach";
             RETURN;
         ELSEIF ERRNO = ERR_PATH_STOP THEN !Only used if ProcerrRecovery \SyncOrgMoveInst; is active
+        
             TPWrite "Movement stopped!";
             TRYNEXT;
         ENDIF
