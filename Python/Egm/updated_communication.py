@@ -2,23 +2,31 @@ import socket
 import time
 import ast
 import threading
+import cv2 as cv
+# from pynput import mouse
+lock = threading.Lock()
 
 
 class Communication():
     """Class to handle communication with RAPID server"""
-
+    max_sleep_duration = 10
+    space = False
+    activ = True
     def __init__(self):
+
+        self.sleep_time = 0
+
         self._mutex_variable = threading.Lock()  #mutex for accessing variables
         self._mutex_function = threading.Lock()  #mutex for accessing functions
         self.socket = None
         self.port = 1025
-        self.host = '127.0.0.1'
+        self.host = '192.168.125.1'
         self.connected = False
 
 
     
         ## What python can recive SEE BELOW
-        self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done",
+        self.ACKS = ["Ack_succesful","Ack_wait","Ack_Release done","Connection_Confirmed",
                 "Ack_succesfull", "ACK","Ack_Coordinate","Ack_Orientation", "Ack_normal", "Ack_EGM"] # these should be removed except ACK, it is not in the main switch case but inside a case
         
         self.CLOSE = ["Disconnect", ]
@@ -27,11 +35,13 @@ class Communication():
 
         self.ASKMUGCOORDINATES = ["Ask_MugCoordinate", "Ask_Coordinate"] # Python gives a mugs coordinates
         self.ASKMUGORIENTATION = ["Ask_MugOrientation", "Ask_Orientation"]
-        self.ASKNEXT = ["AskNext", "Connection_Confirmed", "Ack_Grip_Done", "Ack_Release done", "Ask_next"] # RAPID is ready for the next command
+        self.ASKNEXT = ["AskNext",  "Ack_Grip_Done", "Ack_Release done", "Ask_next"] # RAPID is ready for the next command
 
         self.ASKCALPOINT = ["AskCalPoint", ]
         self.ASKMUGNORMAL = ["Ask_MugNormal", ]
 
+        self.NEXTSTEP = ["Next_step",]
+        self.ERROR = ["[ERROR]_wrong_format,try_again(exampel[x,y,z])","[ERROR]_wrong_format,send_normal","[ERROR]_wrong_format,try_again(exampel[q1,q2,q3,q4])",]
 
         ## List of what python can send
 
@@ -58,11 +68,11 @@ class Communication():
         self.Robotorientation = [1,0,0,0] # Robot hand orientation, unused?
         self.MugNormal = [0,0,1]
 
-        self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
-        self._connection_test_thread.start()
+        # self._connection_test_thread = threading.Thread(target=self._keep_connection_alive, daemon=True)
+        # self._connection_test_thread.start()
 
 
-    
+
 
 
 
@@ -81,6 +91,8 @@ class Communication():
                 case next if next in self.ASKNEXT:
                     return None
                 
+                case next_step if next_step in self.NEXTSTEP:
+                        return True
                 case ack if ack in self.ACKS:
                     continue
 
@@ -113,6 +125,8 @@ class Communication():
                 case askmug_normal if askmug_normal in self.ASKMUGNORMAL: # RAPID wants mug normal
                     with self._mutex_variable:  # Lock mutex for thread-safe access
                         self._send_message(str(self.MugNormal)) # Send mug normal
+                case error if error in self.ERROR:
+                    print("Known error occured")
 
                 case _: # Error and unexpected response handling
                     #self.ErrorHandling()
@@ -123,13 +137,24 @@ class Communication():
                     return None
             
 
+        
 
     def _keep_connection_alive(self):
         """Sleep 60s then send a test message to RAPID. Windows does not like open sockets without activity."""
-        while True:
-            time.sleep(60)
-            if self.connected:
-                self.ConnectionTest()
+        while self.activ:
+
+            start = time.time()
+            time.sleep(1) 
+            if self.sleep_time > self.max_sleep_duration:
+                if self.connected:
+                    self.ConnectionTest()
+                    self.reset_connection_timer()
+            else:
+                self.sleep_time += time.time() - start
+
+    def reset_connection_timer(self):
+        self.sleep_time = 0
+        # print(f"Sleep timer reset: {self.sleep_time}")
 
     def connect(self):
 
@@ -146,6 +171,23 @@ class Communication():
             except Exception as e:
                 print(f"[ERROR] Connection failed: {e}")
 
+                
+    def connectV2(self):
+
+        with self._mutex_function:  # Lock mutex for function-level thread safety
+
+            """Connect to RAPID server"""
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                #socket.settimeout(120)  # Increased to 120 seconds for robot movement, Dont use time out
+                self.socket.connect((self.host, self.port))
+                self.connected = True
+                print(f"[INFO] Connected to RAPID server at {self.host}:{self.port}")
+                return True
+
+            except Exception as e:
+                print(f"[ERROR] Connection failed: {e}")
+                return False
 
 
     def disconnect(self):
@@ -205,8 +247,47 @@ class Communication():
                 self.MugOrientation = list(MugOrientation)
         return
 
-      
-    
+
+    def Presentation(self, coordinates, orientation, normalized_vector):
+        coiqter = 0
+        max_time = 10
+        start = 0
+        self._mutex_function.acquire()  # Lock mutex for function-level thread safety
+        
+        self._mutex_variable.acquire()
+        self.MugCoordinates = list(coordinates)
+        self.MugOrientation = list(orientation)
+        self.MugNormal = list(normalized_vector)
+        self._mutex_variable.release()
+
+        self._send_message("Presentation")
+        _continue = self._handle_response()
+        self._mutex_function.release()
+        # self.reset_connection_timer()
+
+        while _continue != None:
+            start = time.time()
+            if self.space:
+
+                self._mutex_function.acquire()
+                self._send_message("ACK")
+                _continue =  self._handle_response()
+                self._mutex_function.release()
+
+                self._mutex_variable.acquire()
+                # self.reset_connection_timer()
+                self.space = False
+                self._mutex_variable.release()
+                coiqter = 0
+            elif coiqter > max_time:
+                self.ConnectionTest()
+                coiqter = 0
+            coiqter += time.time() - start
+        # self._mutex_function.release()
+        # self._mutex_function.release()
+           
+
+
     def GetPosition(self):
 
         with self._mutex_function:  # Lock mutex for function-level thread safety

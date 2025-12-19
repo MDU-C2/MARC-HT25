@@ -44,7 +44,8 @@ def is_valid_detection(coords, label):
 
     return True
 
-def CreateSensorMessage(egmSensor, pos, euler, quitval):
+def CreateSensorMessage(egmSensor, pos, euler):
+    # def CreateSensorMessage(egmSensor, pos, euler, quitval):
     
     headerOne=egmSensor.header
     headerOne.seqno=num
@@ -52,7 +53,7 @@ def CreateSensorMessage(egmSensor, pos, euler, quitval):
     
     #to change the position and/or orientation of the robot, change values of input vectors
     planned=egmSensor.planned
-    egmSensor.RAPIDtoRobot.digVal = quitval
+    # egmSensor.RAPIDtoRobot.digVal = quitval
     pose=planned.cartesian
     Position=pose.pos
     Position.x=pos[0]
@@ -66,7 +67,8 @@ def CreateSensorMessage(egmSensor, pos, euler, quitval):
     # Note to self, testa ta bort Euler 
     return egmSensor
 
-def send_pos_egm_thread(egm_ip, egm_port, quitval):
+# def send_pos_egm_thread(egm_ip, egm_port, quitval):
+def send_pos_egm_thread(egm_ip, egm_port):
     
     print("Running EGM python client")
     #lock.acquire()
@@ -98,9 +100,11 @@ def send_pos_egm_thread(egm_ip, egm_port, quitval):
         euler = [CurX,CurY,CurZ] # Temp values, euler not being used
         # Testa ta bort euler i båda, se om det fungerar
         egmSensor=egm.EgmSensor()
-        egmSensor=CreateSensorMessage(egmSensor,global_pos,euler, quitval)
+        egmSensor=CreateSensorMessage(egmSensor,global_pos,euler)
         # egmSensor=CreateSensorMessage(egmSensor,global_pos)
+    
         msg=egmSensor.SerializeToString()
+        print("MSG", msg)
         robot_socket.sendto(msg, addr)
 
         time.sleep(0.1) #To not overload, to many messages can result in not all arriving 
@@ -126,7 +130,7 @@ with dai.Device(pipeline) as device:
     # threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True).start()
     client.EGM_movement()
     
-    t1 = threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port, 0), daemon=True)
+    t1 = threading.Thread(target=send_pos_egm_thread, args=(egm_ip, egm_port), daemon=True)
     if not t1.is_alive(): #safety
         t1.start()
 
@@ -169,25 +173,27 @@ with dai.Device(pipeline) as device:
             cv.putText(frame, f"Y: {int(coords.y)} mm", (x1+5, y1+50), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
             cv.putText(frame, f"Z: {int(coords.z)} mm", (x1+5, y1+65), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
-            if not is_valid_detection(coords, label):
-                continue
-            coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
+            if label != "Gripper":
 
-            in_list = False
-            for i in obj_list:
-                if (math.isclose(coordinates[0],i[0], abs_tol= 10) or math.isclose(coordinates[1],i[1], abs_tol= 10)):
-                    in_list = True
+                # should not add hard coded values for offset
+                # Fix to not use invalid coordinates while the camera is auto focusing
+                coordinates = cs.convert_coordinates(coords.x,coords.y,coords.z, homogeneous) # Convert camera coordinates to robot coordinates (RTF)
 
-            if not in_list:
-                obj_list.append(coordinates)
+                in_list = False
+                for i in obj_list:
+                    if (math.isclose(coordinates[0],i[0], abs_tol= 10) or math.isclose(coordinates[1],i[1], abs_tol= 10)):
+                        in_list = True
 
-            if obj_list:
-                try:
-                    #time.sleep(0.5) # Small delay to ensure busy is set before thread starts
-                    temp_coords = obj_list[0]
-                    global_pos = temp_coords
-                except Exception as e:
-                    print(f"Error {e}")
+                if not in_list:
+                    obj_list.append(coordinates)
+
+                if obj_list:
+                    try:
+                        #time.sleep(0.5) # Small delay to ensure busy is set before thread starts
+                        temp_coords = obj_list[0]
+                        global_pos = temp_coords
+                    except Exception as e:
+                        print(f"Error {e}")
             # Show the frames in windows
         cv.imshow("RGB", frame)
         # if cv.waitKey(1) & 0xFF == ord('r'):
@@ -201,7 +207,8 @@ with dai.Device(pipeline) as device:
         if cv.waitKey(1) & 0xFF == ord(' '):
             global_pos = False
             t1.join()
-            send_pos_egm_thread(egm_ip, egm_port, 1)
+            # send_pos_egm_thread(egm_ip, egm_port, 1)
+            send_pos_egm_thread(egm_ip, egm_port)
             #break #??
 
 cv.destroyAllWindows()
