@@ -41,8 +41,9 @@ MODULE shared_vars
     CONST num flag_hand_over := 10;
     CONST num flag_move_calibration_home := 11;
     CONST num flag_move_calibration_outofway := 12;
-    
-    
+    CONST num flag_presentation_fetch := 13;
+    CONST num flag_presentation_leave := 14;
+
     ! ========== CALIBRATION ========== 
     CONST num calib_array_size := 40;
     PERS robtarget calib_robtargets{calib_array_size};

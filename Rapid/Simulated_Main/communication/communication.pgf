@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <Program>
 	<Module>CommunicationMain.mod</Module>
+	<Module>file_management_functions.mod</Module>
+	<Module>PresentationProcess.mod</Module>
+	<Module>processes.mod</Module>
 	<Module>server.mod</Module>
 	<Module>Server_functions.mod</Module>
-	<Module>processes.mod</Module>
-	<Module>file_management_functions.mod</Module>
 	<Module>shared_vars.mod</Module>
 </Program>

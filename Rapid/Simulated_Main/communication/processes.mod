@@ -1,15 +1,18 @@
 MODULE processes
+
 !    ***********************************************************
 !     Process: EGMMovement
 
 !     Description: Gets starting position from tcp socket and initiates EGM in bot python and movement task.
-    
+
 !    ***********************************************************
     PROC EGMMovement()
-
+        VAR robtarget starting_point := [[442.004,-92.0926,171.604],[0.0189937,-0.0236138,0.999427,-0.0150419],[-1,1,-1,4],[-152.666,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        
         WaitUntil shared_movement_left.wait_flag=FALSE;
         
         shared_movement_left.flag:=flag_move_EGM;
+        shared_movement_left.target:=starting_point;
 !        SocketSend client_socket\Str:="enable_EGM";
         
         shared_movement_left.wait_flag:=TRUE;
@@ -229,7 +232,7 @@ MODULE processes
                 buffer.position.z := min_z_value;
             ENDIF
         ENDIF
-        buffer.position.z := 65;
+        buffer.position.z := min_z_val;
         ! mug to far to the right
         IF buffer.position.y < -100 THEN
             MoveRobMugVector buffer,FALSE;

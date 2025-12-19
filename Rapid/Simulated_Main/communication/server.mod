@@ -10,6 +10,7 @@ MODULE server
     VAR string message:="";
     VAR robtarget hand_frame;
     VAR num message_index:=-1;
+    
     VAR robtarget cup_end_frame:=[[0,0,0],[0,0,0,0],[1,1,0,0],[11,12.3,9E9,9E9,9E9,9E9]];
     ! dummy values
 
@@ -19,7 +20,7 @@ MODULE server
     ! Open socket connection
     PROC server_init()
         ! port values
-        VAR string ipAddress:="127.0.0.1";
+        VAR string ipAddress:= "192.168.125.1";
         ! YuMi ip "192.168.0.1"
         VAR num port:=1025;
 
@@ -51,7 +52,7 @@ MODULE server
             ! if the socket is closed that I lissen too, return from this function
             RETURN;
         ELSEIF ERRNO = ERR_SOCK_ADDR_INVALID THEN
-            ipAddress:="127.0.0.1";
+            ipAddress:="192.168.125.1";
 
             RETRY;
         ENDIF
@@ -100,18 +101,20 @@ MODULE server
             CASE "Home":
                 moveToHomeTarget;
                 
+            CASE "Presentation":
+                Presentation;
+
             CASE "Pick_Up_Sequence":
                  pickupSequence; 
                  
             CASE "Leave_Sequence":
                 leaveSequence;
-                
-            CASE "Move_Calibration_Position": 
-                calibrationMovement;
-                
+          
             CASE "Move_Calibration_home": 
-                calibrationMoveHome;
-                
+               calibrationMoveHome;
+            CASE "Move_Calibration_Position": 
+               calibrationMovement;
+               
             CASE "EGM_movement":
                 EGMMovement;
                 
@@ -119,6 +122,7 @@ MODULE server
                 TPWrite("[INFO] message from client: "+message);
                 SocketSend client_socket\Str:="default_"+message;
             ENDTEST
+            
             WaitTime(delay_time);
             SocketSend client_socket\Str:="Ask_next"; ! ask for next "order"
 
