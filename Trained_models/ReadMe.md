@@ -1,224 +1,253 @@
-# Cup Orientation Detection Model
+# Cup Orientation Detection Models
 
-**Created by: Mahmoud Ayoub**
+**Created by: Mahmoud Ayoub**  
+**Project**: Autonomous Dishwasher Robot - Vision System  
+**Institution**: Mälardalen University
 
 ---
 
 ## 📋 Overview
 
-This folder contains the trained YOLOv8 model for detecting cups in various orientations, along with training scripts and performance metrics. The model is a core component of the robotic dishwasher system, enabling the YuMi robot to identify and grasp cups in different positions.
+Four trained YOLOv8 models for detecting cups in various orientations and the robot gripper. Enables ABB YuMi robot to identify and grasp cups across different environmental conditions.
+
+**Deployment Options:**
+- **On-Camera**: Nano models on OAK-D Pro's Myriad X
+- **External PC**: Medium model for higher accuracy
 
 ---
 
-## 🎯 Model Information
+## 🎯 Models
 
-- **Model File**: `YOLO8n_Model.pt` (50.8 MB)
-- **Architecture**: YOLOv8n (Nano variant)
-- **Framework**: Ultralytics YOLO
-- **Performance**: **99.48% mAP@50**
-- **Training Platform**: Google Colab
-- **Input Size**: 640x640 pixels
+### 1. **best_medium.pt** - Combined Environment
+- **YOLOv8 Medium** | 4,856 images | ~12h training
+- External PC | All environments
 
----
+### 2. **gripper_nano.pt** - Gripper Detection
+- **YOLOv8 Nano** | 668 images | ~2h training
+- Calibration & tracking | Quick retrain
 
-## 🏷️ Detected Classes (8 Classes)
+### 3. **best_nano_1.pt** - Inside
+- **YOLOv8 Nano** | 1,300 images | ~6h training
+- On-camera | Bright indoor lighting
 
-The model detects cups in six different orientations, plus additional objects:
-
-### Cup Orientations:
-1. **Back** - Cup handle facing away
-2. **Front** - Cup handle facing forward
-3. **left_side** - Cup tilted to the left
-4. **right_side** - Cup tilted to the right
-5. **upright** - Cup standing normally
-6. **upside_down** - Cup inverted
-
-### Additional Objects:
-7. **Gripper** - Robot gripper detection
-8. **handle** - Cup handle detection
+### 4. **best_nano_2.pt** - Outside
+- **YOLOv8 Nano** | 1,200 images | ~6h training
+- On-camera | Darker/outdoor lighting
 
 ---
 
-## 📊 Training Results
+## 🏷️ Classes (7 Total)
 
-### Model Performance Metrics
+**Cup Orientations (6):**
+1. **Back** - Handle away
+2. **Front** - Handle forward
+3. **left_side** - Lying left
+4. **right_side** - Lying right
+5. **upright** - Standing
+6. **upside_down** - Inverted
 
-The model achieved exceptional performance across all metrics. Training visualizations are available in the following files:
-
-- **`val_batch2_pred.jpg`** - Sample validation predictions showing accurate cup orientation detection
-- **`confusion_matrix.png`** - Confusion matrix demonstrating high classification accuracy across all 8 classes  
-- **`results.png`** - Comprehensive training metrics including mAP, precision, recall, and loss curves
-
-**Key Achievements:**
-**Key Achievements:**
-- **mAP@50**: 99.48%
-- **Precision**: High accuracy in positive predictions
-- **Recall**: Excellent detection rate with minimal false negatives
-- **Robust Performance**: Consistent results across all cup orientations
+**Additional:**
+7. **Gripper** - Robot gripper
 
 ---
 
-## 📁 Folder Contents
+## 📊 Training Config
+
+| Parameter      | Value                   |
+| -------------- | ----------------------- |
+| **Epochs**     | 100                     |
+| **Batch**      | 16                      |
+| **Image Size** | 640×640                 |
+| **Split**      | 70/20/10                |
+| **Platform**   | Google Colab (Tesla T4) |
+
+### Augmentation
+
+| Type       | best_medium | gripper_nano | nano_1/2 |
+| ---------- | ----------- | ------------ | -------- |
+| Crop Zoom  | 0-23%       | -            | 0-10%    |
+| Saturation | ±30%        | -            | ±15%     |
+| Brightness | ±35%        | ±10%         | ±10%     |
+| Exposure   | ±25%        | -            | ±10%     |
+| Blur       | 2px         | -            | 2px      |
+| Noise      | 2%          | 2%           | 1%       |
+| H-Flip     | No*         | Yes          | No*      |
+
+*Disabled for cups to preserve orientation
+
+---
+
+## 📈 Performance
+
+- **Precision**: 98%
+- **Real-world validated** on YuMi robot
+- **Detects specific orientations** (not just "cup")
+- **Environment-adapted models**
+
+---
+
+## 🗂️ Files
 
 ```
-Training Model/
-│
-├── YOLO8n_Model.pt                          # Trained model weights (50.8 MB)
-├── Cup_Orientation_Training_Colab.ipynb     # Google Colab training notebook
-├── capture_training_images.py               # Script for capturing training images
-├── Model_classes.py                         # Class definitions for the model
-├── val_batch2_pred.jpg                      # Validation predictions visualization
-├── confusion_matrix.png                     # Model confusion matrix
-├── results.png                              # Training metrics and curves
-└── ReadMe.md                                # This file
+├── best_medium.pt
+├── gripper_nano.pt
+├── best_nano_1.pt
+├── best_nano_2.pt
+├── Cup_Orientation_Training_Colab.ipynb
+├── capture_training_images.py
+├── Model_classes.py
+└── ReadMe.md
 ```
 
 ---
 
-## 🔄 Retraining Instructions
+## 🔄 Model Selection
 
-If you need to retrain or fine-tune the model, follow these steps:
+- **best_medium.pt** → External PC, all environments
+- **gripper_nano.pt** → Calibration
+- **best_nano_1.pt** → On-camera, bright inside
+- **best_nano_2.pt** → On-camera, darker/outside
 
-### Prerequisites
-- Google Colab account (for GPU access)
-- Roboflow account (for dataset management)
-- Python 3.8+
-- Ultralytics YOLO library
+---
 
-### Step 1: Prepare Training Data
-
-Use the provided script to capture new training images:
-
-```bash
-python capture_training_images.py
-```
-
-This script will:
-- Connect to the OAK-D camera
-- Capture images at various angles
-- Organize images for annotation
-
-### Step 2: Annotate Dataset
-
-1. Upload images to Roboflow
-2. Annotate cups with bounding boxes
-3. Label each cup with the correct orientation class
-4. Export dataset in YOLOv8 format
-
-### Step 3: Train Model in Google Colab
-
-Open `Cup_Orientation_Training_Colab.ipynb` in Google Colab:
+## 🔧 Integration
 
 ```python
-# Key training parameters used:
-- Model: YOLOv8n
-- Epochs: 100+ (until convergence)
-- Image size: 640x640
-- Batch size: 16
-- Optimizer: Adam
-- Data augmentation: Enabled (flip, rotate, brightness)
-```
+# External PC
+from cup_detector import CupDetector
+detector = CupDetector(
+    model_path='best_medium.pt',
+    confidence_threshold=0.30
+)
 
-### Step 4: Validate Model
-
-After training:
-1. Review confusion matrix for class accuracy
-2. Check validation predictions
-3. Verify mAP@50 score (target: >95%)
-4. Test on real-world scenarios
-
-### Step 5: Deploy Model
-
-Replace the old model in your project:
-
-```bash
-# Rename your trained model
-mv best.pt YOLO8n_Model.pt
-
-# Copy to project directory
-cp YOLO8n_Model.pt /path/to/PythonToRapid/
-```
-
-Update the model path in `cup_detector.py` if necessary:
-
-```python
-self.detector = CupDetector(
-    model_path='YOLO8n_Model.pt',  # Updated model name
-    confidence_threshold=0.6
+# Gripper
+from gripper_detector import GripperDetector
+gripper = GripperDetector(
+    model_path='gripper_nano.pt',
+    confidence_threshold=0.5
 )
 ```
 
 ---
 
-## 🛠️ Model Classes Definition
+## 📝 Retraining
 
-The `Model_classes.py` file can extract the classes in the model in order to check the names:
+### 1. Capture Images
+```bash
+python capture_training_images.py
+```
+- All 6 orientations
+- Diverse backgrounds & lighting
+- 1,200+ images per model
 
----
+### 2. Annotate (Roboflow)
+- Upload images
+- Draw bounding boxes
+- Label orientations
+- Export YOLOv8 format
 
-## 💡 Training Tips
-
-### For Better Results:
-- **Diverse Angles**: Capture cups from multiple viewpoints
-- **Lighting Variations**: Train with different lighting conditions
-- **Background Diversity**: Include various surface textures and colors
-- **Data Augmentation**: Enable flips, rotations, and color jittering
-- **Balanced Dataset**: Ensure equal representation of all orientations
-
-### Common Issues:
-- **Overfitting**: Use more augmentation and regularization
-- **Poor Detection**: Increase dataset size and training epochs
-- **Class Confusion**: Add more examples of confused classes
-- **Low Confidence**: Lower confidence threshold or improve image quality
-
----
-
-## 📈 Model Integration
-
-This model is integrated into the vision system through `cup_detector.py`:
-
+### 3. Train (Google Colab)
 ```python
-# Detection pipeline
-1. YOLO inference → Bounding boxes + class predictions
-2. Orientation mapping → 3D directional vectors
-3. Pose estimation → Full 6DOF pose in robot coordinates
-4. Robot communication → Cup data sent to YuMi
+from ultralytics import YOLO
+model = YOLO('yolov8n.pt')  # or yolov8m.pt
+results = model.train(
+    data='data.yaml',
+    epochs=100,
+    imgsz=640,
+    batch=16
+)
+```
+
+### 4. Deploy
+```python
+# Update model path
+model_path='best_medium.pt'
 ```
 
 ---
 
-## 🔗 Related Files
+## 💡 Tips
 
-- **Main Detection**: `../main.py`
-- **Cup Detector**: `../src/cup_detector.py`
-- **Pose Estimator**: `../src/pose_estimator.py`
-- **Camera Manager**: `../src/camera_manager.py`
+**Data Collection:**
+- Multiple lighting conditions
+- Various backgrounds
+- Different angles
+- Equal samples per class
+
+**Common Issues:**
+- Left/right confusion → Check labels
+- Low confidence → Lower threshold
+- Overfitting → More augmentation
 
 ---
 
-## 📝 Version History
+## 📦 Versions
 
-- **Current Version**: YOLO8n_Model.pt (99.48% mAP@50)
-- **Previous**: best_cup_orientation_New.pt
-- **Training Date**: November 2025
+| Model           | Version | mAP@50 |
+| --------------- | ------- | ------ |
+| best_medium.pt  | v2.1    | 98%+   |
+| gripper_nano.pt | v1.5    | 96%+   |
+| best_nano_1.pt  | v2.0    | 88-90% |
+| best_nano_2.pt  | v2.0    | 88-90% |
+
+---
+
+## 🔗 Related
+
+**Vision:** `main.py`, `cup_detector.py`, `pose_estimator.py`  
+**Calibration:** `auto_calibrate.py`, `gripper_detector.py`  
+**Robot:** `PythonToRapid.py`, `MainProgram_Rapid.txt`
+
+---
+
+## 🐛 Troubleshooting
+
+**Model won't load:**
+```bash
+pip install --upgrade ultralytics
+```
+
+**Poor accuracy:**
+- Check lighting matches training
+- Lower confidence threshold
+- Add more similar data
+
+**Deployment:**
+- Nano only for on-camera
+- Medium requires PC
+- Check GPU availability
+
+---
+
+## 📚 Resources
+
+- [YOLOv8 Docs](https://docs.ultralytics.com/)
+- [DepthAI](https://docs.luxonis.com/)
+- [Roboflow](https://roboflow.com/learn)
+- [Colab](https://colab.research.google.com/)
+- [GitHub](https://github.com/MDU-C2/MARC-HT25)
+
+---
+
+## 🎓 Academic
+
+**Course**: DVA490/DVA474  
+**University**: Mälardalen University  
 
 ---
 
 ## 📧 Contact
 
-**Created by: Mahmoud Ayoub**
-
-For questions about model training or improvements, please refer to the main project documentation.
-
----
-
-## 🎓 Acknowledgments
-
-- **Framework**: Ultralytics YOLOv8
-- **Dataset Management**: Roboflow
-- **Training Platform**: Google Colab
-- **Hardware**: OAK-D Pro Camera
+**Mahmoud Ayoub**  
+mab19001@student.mdu.se
 
 ---
 
-**Last Updated**: November 17, 2025
+## 🙏 Acknowledgments
+
+**Tools**: Ultralytics, Roboflow, Google Colab, DepthAI  
+**Hardware**: OAK-D Pro, ABB YuMi, Tesla T4
+
+---
+
+**Last Updated**: December 23, 2025
