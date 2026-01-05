@@ -4,6 +4,7 @@ Here you will follow a step by step guide to set everything up to run the system
 ## Content/Quickstart
 1. <a href="#1-clone-the-repo">Clone the Repo</a>
 2. <a href="#2-setup">Setup</a>
+    - <a href="Yumi%20IRB%2014000/RobotStudioconnect.md" :Target="_blank">Test</a>
     - <a href="#rapid-setup">RAPID-setup</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/RobotStudio_setup.md)
     - <a href="#python-setup">Python-setup</a> - [(guide link)](/media/Guide/Python/README.md)
     - <a href="#robot--camera-setup">Robot/Camera-setup</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/RobotStudioconnect.md)
