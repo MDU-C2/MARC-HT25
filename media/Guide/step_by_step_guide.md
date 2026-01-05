@@ -11,7 +11,7 @@ Here you will follow a step by step guide to set everything up to run the system
     - <a href="#rapid-code">RAPID code</a> - [(guide link)](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
     - <a href="#python-code">Python code</a> - [(guide link)](/media/Guide/Python/running_code.md)
 ## 1. Clone the Repo
-Start by making a clone of this repo , you'll need [Git](https://git-scm.com) installed on your computer. From your command line:
+Start by making a clone of this repo , you'll need <a href="https://git-scm.com" Target="blank">Git</a> installed on your computer. From your command line:
 
 ```bash
 # Clone this repository
