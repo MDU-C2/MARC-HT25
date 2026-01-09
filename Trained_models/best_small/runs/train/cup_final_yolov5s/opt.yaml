@@ -1,6 +1,6 @@
 weights: yolov5s.pt
 cfg: ''
-data: /content/yolov5/yolov5/Final-Version-1/data.yaml
+data: /content/yolov5/Final-Version-3/data.yaml
 hyp:
   lr0: 0.01
   lrf: 0.01
@@ -57,7 +57,7 @@ exist_ok: false
 quad: false
 cos_lr: false
 label_smoothing: 0.0
-patience: 10
+patience: 5
 freeze:
 - 0
 save_period: -1
