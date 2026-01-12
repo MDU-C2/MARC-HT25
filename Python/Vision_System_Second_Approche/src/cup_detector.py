@@ -1,9 +1,8 @@
 """
 Cup Detector V5
-Detects cups using trained YOLOv8 model best_cup_orientation_New.pt)
+Detects cups using trained YOLOv8 model best_medium.pt)
 Detects gripper and robot markers
 Orientation from YOLO class names
-.\PythonToRapid\Vision_System\venv\Scripts\activate
 """
 
 import cv2
@@ -12,13 +11,13 @@ from pathlib import Path
 
 
 class CupDetector:
-    def __init__(self, use_yolo=True, model_path='best_cup_orientation_New.pt', confidence_threshold=0.25):
+    def __init__(self, use_yolo=True, model_path='best_medium.pt', confidence_threshold=0.25):
         """
         Initialize cup detector with trained YOLOv8 model
 
         Args:
             use_yolo: Use YOLO neural network (True recommended)
-            model_path: Path to trained YOLO model (default: 'best.pt')
+            model_path: Path to trained YOLO model (default: 'best_medium.pt')
             confidence_threshold: Detection confidence threshold (0.0-1.0)
         """
         self.use_yolo = use_yolo
@@ -34,8 +33,9 @@ class CupDetector:
             'right_side': [0.0, 1.0, 0.0],
             'upright': [0.0, 0.0, 1.0],
             'upside_down': [0.0, 0.0, -1.0],
-            'handle': [0.0, 0.0, -1.0],
-            'gripper': [0.0, 0.0, -1.0],
+            'handle': [0.0, 0.0, 0.0],
+            'Gripper': [0.0, 0.0, 0.0],
+            
         }
 
         if use_yolo:
@@ -94,7 +94,7 @@ class CupDetector:
             yolo_detections = self._detect_with_yolo(rgb_frame, depth_frame)
             detections.extend(yolo_detections)
 
-        # 2. Detect robot base marker with color detection
+        # 2. Detect robot base marker with color detection (optinal if needed)
         marker_detections = self._detect_markers(rgb_frame, depth_frame)
         detections.extend(marker_detections)
 

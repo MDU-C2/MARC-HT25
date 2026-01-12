@@ -1,6 +1,3 @@
-######### For presenting ##########
-###################################
-# #!/usr/bin/env python3
 """
 Pose Estimator - PIXEL-BASED VERSION
 Transforms screen coordinates [pixel_x, pixel_y, depth] directly to robot coordinates
@@ -114,11 +111,11 @@ class PoseEstimator:
         # Transform to robot frame
         if in_robot_frame:
             position = self.screen_to_robot(cx, cy, depth)
-            
-            # Apply gripper offset correction
+                # Offset between YOLO detection center and actual TCP
+                # Currently 0 - adjust manually if gripper position is inaccurate
             if detection['class'] == 'gripper':
-                position[0] += 25.0   # X offset correction
-                position[1] += 210.0  # Y offset correction
+                position[0] += 0  # X offset correction
+                position[1] += 0 # Y offset correction
         else:
             # Return screen coordinates
             position = np.array([cx, cy, depth])
@@ -131,8 +128,8 @@ class PoseEstimator:
             orientation = np.array([0.0, 0.0, 1.0])
 
         return {
-            'position': position, # [x,y,z]
-            'orientation': orientation, # [x,y,z]
+            'position': position,
+            'orientation': orientation,
             'class': detection['class'],
             'confidence': detection['confidence'],
             'frame': 'robot' if in_robot_frame else 'screen',

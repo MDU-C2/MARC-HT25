@@ -2,7 +2,6 @@
 Main script - Cup Detection System
 REFACTORED: Only handles detection + visualization
 All robot logic moved to PythonToRapid.py
-.\PythonToRapid\Vision_System\venv\Scripts\activate
 """
 
 import cv2
@@ -14,11 +13,11 @@ from datetime import datetime
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from src.camera_manager import OAKDCamera
-from src.cup_detector import CupDetector
-from src.pose_estimator import PoseEstimator
-from src.visualizer import Visualizer
-from src.PythonToRapid import RobotCommunication
+from camera_manager import OAKDCamera
+from cup_detector import CupDetector
+from pose_estimator import PoseEstimator
+from visualizer import Visualizer
+from PythonToRapid import RobotCommunication
 
 
 class CupDetectionSystem:
@@ -35,8 +34,8 @@ class CupDetectionSystem:
 
         print("[2/5] Loading detection model...")
         self.detector = CupDetector(
-            model_path='best_cup_orientation_New.pt',
-            confidence_threshold=0.6
+            model_path='best_medium.pt',
+            confidence_threshold=0.25 
         )
 
         print("[3/5] Initializing pose estimator...")

@@ -28,7 +28,7 @@ class OAKDCamera:
         self.correction_zones = [
             {'max_depth': 1200, 'scale': 0.97, 'offset': 0},  # Near zone
             {'max_depth': 1350, 'scale': 0.92, 'offset': 0},  # Mid zone
-            {'max_depth': 99999, 'scale': 0.95, 'offset': 0}  # Far zone
+            {'max_depth': 9999, 'scale': 0.95, 'offset': 0}  # Far zone
         ]
 
         print(f"   - DepthAI version: {dai.__version__}")

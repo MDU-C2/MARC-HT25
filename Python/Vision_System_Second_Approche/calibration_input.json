@@ -1,17 +1,618 @@
 {
     "robot_origin": {
-        "name": "Robot Base (Green Marker)",
+        "name": "Robot Base",
         "robot": [
             0,
             0,
             0
         ],
         "screen": [
-            973.0,
-            177.0,
-            1055.0
+            0,
+            0,
+            0
         ],
-        "description": "Robot coordinate system origin - UPDATED CAMERA POSITION"
+        "description": "Robot origin"
     },
-    "cups": []
+    "cups": [
+        {
+            "name": "Pos_1",
+            "zone": "CENTER",
+            "robot": [
+                551.255,
+                30.4541,
+                44.9033
+            ],
+            "screen": [
+                209.019,
+                96.567,
+                1519.998
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_2",
+            "zone": "RIGHT_BACK",
+            "robot": [
+                515.537,
+                -196.269,
+                43.1388
+            ],
+            "screen": [
+                181.801,
+                -91.222,
+                2135.204
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_3",
+            "zone": "FAR_BACK",
+            "robot": [
+                273.764,
+                -196.43,
+                39.5695
+            ],
+            "screen": [
+                290.679,
+                -118.878,
+                2087.053
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_4",
+            "zone": "CENTER",
+            "robot": [
+                523.498,
+                174.051,
+                45.0895
+            ],
+            "screen": [
+                250.321,
+                208.298,
+                1113.856
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_5",
+            "zone": "RIGHT_BACK",
+            "robot": [
+                380.4,
+                -209.622,
+                36.9717
+            ],
+            "screen": [
+                237.38,
+                -128.027,
+                2107.972
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_6",
+            "zone": "FAR_BACK",
+            "robot": [
+                203.086,
+                -223.183,
+                38.7575
+            ],
+            "screen": [
+                312.85,
+                -152.127,
+                2152.162
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_7",
+            "zone": "CENTER",
+            "robot": [
+                509.774,
+                36.4455,
+                50.9603
+            ],
+            "screen": [
+                226.075,
+                103.75,
+                1550.814
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_8",
+            "zone": "MID_BACK",
+            "robot": [
+                276.304,
+                -21.3066,
+                38.6154
+            ],
+            "screen": [
+                320.95,
+                18.643,
+                1586.412
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_9",
+            "zone": "LEFT",
+            "robot": [
+                400.672,
+                212.687,
+                40.2758
+            ],
+            "screen": [
+                311.146,
+                220.852,
+                955.284
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_10",
+            "zone": "RIGHT_BACK",
+            "robot": [
+                406.96,
+                -231.355,
+                38.1624
+            ],
+            "screen": [
+                221.348,
+                -138.346,
+                2184.775
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_11",
+            "zone": "LEFT",
+            "robot": [
+                470.044,
+                207.363,
+                45.4268
+            ],
+            "screen": [
+                278.749,
+                234.74,
+                1020.361
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_12",
+            "zone": "FAR_LEFT",
+            "robot": [
+                304.793,
+                305.002,
+                41.4564
+            ],
+            "screen": [
+                371.728,
+                288.311,
+                698.367
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_13",
+            "zone": "CENTER",
+            "robot": [
+                385,
+                -12.2874,
+                54.6934
+            ],
+            "screen": [
+                274.71,
+                56.791,
+                1698.767
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_14",
+            "zone": "MID_BACK",
+            "robot": [
+                205.263,
+                3.93255,
+                57.6331
+            ],
+            "screen": [
+                358.812,
+                61.599,
+                1666.989
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_15",
+            "zone": "RIGHT_BACK",
+            "robot": [
+                416.311,
+                -213.356,
+                48.4038
+            ],
+            "screen": [
+                219.758,
+                -107.05,
+                2213.497
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_16",
+            "zone": "CENTER",
+            "robot": [
+                534.322,
+                -5.74172,
+                41.5704
+            ],
+            "screen": [
+                206.967,
+                60.273,
+                1594.557
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_17",
+            "zone": "LEFT",
+            "robot": [
+                426.717,
+                229.901,
+                37.3286
+            ],
+            "screen": [
+                304.645,
+                229.059,
+                890.016
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_18",
+            "zone": "FAR_LEFT",
+            "robot": [
+                204.95,
+                345.381,
+                77.5176
+            ],
+            "screen": [
+                426.079,
+                361.722,
+                871.305
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_19",
+            "zone": "CENTER",
+            "robot": [
+                542.388,
+                -39.5704,
+                44.1623
+            ],
+            "screen": [
+                200.073,
+                40.688,
+                1704.969
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_20",
+            "zone": "FAR_LEFT",
+            "robot": [
+                520.879,
+                328.841,
+                37.6346
+            ],
+            "screen": [
+                280.754,
+                322.275,
+                624.919
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_21",
+            "zone": "RIGHT_BACK",
+            "robot": [
+                440.331,
+                -207.24,
+                42.5023
+            ],
+            "screen": [
+                209.445,
+                -108.377,
+                2152.198
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_22",
+            "zone": "FAR_BACK",
+            "robot": [
+                231.205,
+                -201.455,
+                39.1404
+            ],
+            "screen": [
+                303.274,
+                -127.708,
+                2099.762
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_23",
+            "zone": "LEFT",
+            "robot": [
+                391.508,
+                234.472,
+                37.3575
+            ],
+            "screen": [
+                320.572,
+                234.772,
+                874.744
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_24",
+            "zone": "MID_BACK",
+            "robot": [
+                155.306,
+                38.3382,
+                85.9356
+            ],
+            "screen": [
+                386.49,
+                125.827,
+                1797.176
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_25",
+            "zone": "FAR_LEFT",
+            "robot": [
+                169.846,
+                318.745,
+                85.2687
+            ],
+            "screen": [
+                437.247,
+                353.013,
+                995.392
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_26",
+            "zone": "MID_BACK",
+            "robot": [
+                277.232,
+                -126.764,
+                53.3538
+            ],
+            "screen": [
+                301.537,
+                -43.483,
+                2003.051
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_27",
+            "zone": "LEFT",
+            "robot": [
+                409.887,
+                201.837,
+                43.3459
+            ],
+            "screen": [
+                306.102,
+                213.502,
+                1013.756
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_28",
+            "zone": "CENTER",
+            "robot": [
+                274.899,
+                96.9997,
+                38.319
+            ],
+            "screen": [
+                346.41,
+                115.524,
+                1255.39
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_29",
+            "zone": "CENTER",
+            "robot": [
+                548.39,
+                -89.0097,
+                47.9838
+            ],
+            "screen": [
+                183.806,
+                4.603,
+                1879.715
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_30",
+            "zone": "FAR_LEFT",
+            "robot": [
+                394.163,
+                360.013,
+                45.2464
+            ],
+            "screen": [
+                345.287,
+                344.237,
+                587.008
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_31",
+            "zone": "CENTER",
+            "robot": [
+                598.309,
+                95.9621,
+                44.5715
+            ],
+            "screen": [
+                200.148,
+                155.395,
+                1333.637
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_32",
+            "zone": "RIGHT_BACK",
+            "robot": [
+                447.774,
+                -180.739,
+                46.3791
+            ],
+            "screen": [
+                211.699,
+                -81.029,
+                2108.533
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_33",
+            "zone": "LEFT",
+            "robot": [
+                318.486,
+                198.146,
+                37.1674
+            ],
+            "screen": [
+                346.903,
+                196.639,
+                968.025
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_34",
+            "zone": "MID_BACK",
+            "robot": [
+                280.026,
+                -154.356,
+                38.4601
+            ],
+            "screen": [
+                292.648,
+                -90.623,
+                1961.018
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_35",
+            "zone": "CENTER",
+            "robot": [
+                548.93,
+                95.9353,
+                39.5123
+            ],
+            "screen": [
+                221.483,
+                139.305,
+                1290.91
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_36",
+            "zone": "LEFT",
+            "robot": [
+                301.782,
+                265.921,
+                42.852
+            ],
+            "screen": [
+                368.19,
+                260.965,
+                822.903
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_37",
+            "zone": "CENTER",
+            "robot": [
+                479.937,
+                73.9379,
+                44.6036
+            ],
+            "screen": [
+                249.331,
+                123.901,
+                1382.441
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_38",
+            "zone": "MID_BACK",
+            "robot": [
+                252.326,
+                -131.681,
+                42.2967
+            ],
+            "screen": [
+                310.064,
+                -66.547,
+                1934.656
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_39",
+            "zone": "LEFT",
+            "robot": [
+                411,
+                267.245,
+                37.7566
+            ],
+            "screen": [
+                318.114,
+                262.134,
+                786.543
+            ],
+            "description": ""
+        },
+        {
+            "name": "Pos_40",
+            "zone": "FAR_LEFT",
+            "robot": [
+                186.823,
+                245.999,
+                53.4701
+            ],
+            "screen": [
+                412.792,
+                247.972,
+                956.165
+            ],
+            "description": ""
+        }
+    ]
 }
