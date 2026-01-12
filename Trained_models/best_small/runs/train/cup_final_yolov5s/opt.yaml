@@ -1,6 +1,6 @@
 weights: yolov5s.pt
 cfg: ''
-data: /content/yolov5/Final-Version-3/data.yaml
+data: /content/yolov5/Final-Version-4/data.yaml
 hyp:
   lr0: 0.01
   lrf: 0.01
