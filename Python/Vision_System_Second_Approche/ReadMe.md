@@ -12,7 +12,7 @@
 **1. Start RAPID Server (Robot Side)**
 ```
 1. Open RobotStudio
-2. Use rapid_server to YuMi controller
+2. Load rapid_server.txt to YuMi controller
 3. Run the RAPID program → Server starts on port 1025
 4. Verify "Server listening..." message
 ```
@@ -55,12 +55,14 @@ External PC vision system that detects cups, estimates 6DOF poses, and communica
 Vision_System_Second_Approche/
 │
 ├── main.py                      # Main detection loop
+├── OffLine_test.py              # Offline testing without robot
+├── test_calibration.py          # Calibration validation
+│
 ├── rapid_server.txt             # RAPID server code for robot
-├── PythonToRapid.py             # Robot communication (src/)
 ├── calibration_capture.py       # Calibration tool
 ├── auto_calibrate.py            # Automatic calibration
 │
-├── best_medium.pt              # Trained model
+├── best_medium.pt               # Trained model
 ├── calibration_input.json       # Manual calibration data
 ├── calibration_params.json      # Transformation matrices
 ├── calibration_positions.json   # Auto-calibration positions
@@ -102,9 +104,23 @@ pip install -r Requirements.txt
 
 ---
 
-## 🎯 Calibration 
+## 🧪 Testing
 
-## Automatic Calibration
+### Offline Testing (No Robot Required)
+```bash
+python OffLine_test.py
+```
+Tests vision system without robot connection - useful for model and calibration validation.
+
+### Calibration Testing
+```bash
+python test_calibration.py
+```
+Validates calibration accuracy by checking transformation errors across workspace zones.
+
+---
+
+## 🎯 Calibration
 
 ```bash
 python auto_calibrate.py
@@ -114,95 +130,48 @@ Robot moves gripper to predefined positions while vision system captures points 
 
 ---
 
+## 🤖 RAPID Server
+
+### Setup
+1. Load `rapid_server.txt` in RobotStudio
+2. Set IP/port to match Python: `127.0.0.1:1025`
+3. Run RAPID program
+
+### Communication Protocol
+```
+Robot → Python: Connection_test
+Python → Robot: Connection_Confirmed
+Python → Robot: Cups_available
+Robot → Python: Ask_amount_of_cups
+Python → Robot: <number>
+Robot → Python: Ask_Coordinate
+Python → Robot: <x,y,z>
+Robot → Python: Ask_Orientation  
+Python → Robot: <ox,oy,oz>
+Robot → Python: Ask_Wait → Ack_stop
+```
+
+---
+
 ## 🖥️ System Modules
 
 ### 1. main.py
-Main detection loop orchestrating all components.
-
-**Key Functions:**
-- Initialize camera, detector, pose estimator
-- Run detection loop (30 FPS)
-- Manage robot communication thread
-- Handle keyboard controls
+Main detection loop - initializes components, runs detection (30 FPS), manages robot thread.
 
 ### 2. camera_manager.py
-OAK-D camera interface with depth correction.
-
-**Features:**
-- RGB: 1920x1080 @ 30fps
-- Depth: Stereo matching
-- Zone-based correction (3 zones: <1200mm, <1350mm, >1350mm)
-- Camera intrinsics
-
-```python
-camera = OAKDCamera(rgb_resolution="1080p", fps=30)
-rgb_frame, depth_frame = camera.get_frames()
-corrected_depth = camera.correct_depth(depth_value, depth_zone)
-```
+OAK-D interface with zone-based depth correction (3 zones: <1200mm, <1350mm, >1350mm).
 
 ### 3. cup_detector.py
-YOLO detection with marker detection.
-
-**Detection Pipeline:**
-- YOLO inference on RGB frame
-- Class filtering (cups only)
-- Robot base marker (green color detection)
-- Bounding box extraction
-
-```python
-detector = CupDetector(model_path='best_medium.pt', confidence=0.6)
-detections = detector.detect(rgb_frame, depth_frame)
-```
+YOLO detection + robot base marker (green color detection).
 
 ### 4. pose_estimator.py
-Coordinate transformation using calibration matrices.
-
-**Transform Pipeline:**
-```
-Camera [pixel_x, pixel_y, depth_mm]
-    ↓ camera intrinsics
-3D Camera [X, Y, Z]
-    ↓ calibration matrix (zone-specific)
-Robot [x, y, z]
-```
-
-**Orientation Vectors:**
-```python
-'Back': [-1.0, 0.0, 0.0]
-'Front': [1.0, 0.0, 0.0]
-'upright': [0.0, 0.0, 1.0]
-'upside_down': [0.0, 0.0, -1.0]
-'left_side': [0.0, 1.0, 0.0]
-'right_side': [0.0, -1.0, 0.0]
-```
+Transforms camera coordinates [pixel_x, pixel_y, depth_mm] → robot [x, y, z] using zone-specific calibration matrices.
 
 ### 5. PythonToRapid.py
-Thread-safe robot communication.
-
-**Features:**
-- Cup queue with 'sent' flag tracking
-- Background communication thread
-- Event-driven message handling
-- Auto-reconnection
-- Release position configuration
-
-```python
-robot = RobotCommunication(host='127.0.0.1', port=1025)
-robot.add_cups(cups_data)
-robot.start_robot_thread()
-robot.set_release_position(x=421, y=-186, z=200)
-```
+Thread-safe TCP/IP communication with cup queue management and auto-reconnection.
 
 ### 6. visualizer.py
-Real-time display with annotations.
-
-**Display Elements:**
-- Bounding boxes (color-coded)
-- Cup numbers and orientations
-- Confidence scores
-- Depth values
-- Status overlay
-- FPS counter
+Real-time display with bounding boxes, cup numbers, orientations, confidence, depth, and status.
 
 ---
 
@@ -220,99 +189,52 @@ Real-time display with annotations.
 
 ## 🔧 Configuration
 
-### Camera Settings
-```python
-camera = OAKDCamera(
-    rgb_resolution="1080p",  # Options: "720p", "1080p", "4k"
-    fps=30,
-    depth_enabled=True
-)
-```
+Edit in respective files:
 
-### Detection Settings
-```python
-detector = CupDetector(
-    model_path='YOLO8n_Model.pt',
-    confidence_threshold=0.6  # Range: 0.0-1.0
-)
-```
-
-### Robot Connection
-```python
-robot = RobotCommunication(
-    host='127.0.0.1',      # Robot controller IP
-    port=1025              # Match RAPID server port
-)
-robot.set_release_position(x=421, y=-186, z=200)  # mm
-```
+**Camera:** `camera_manager.py` - RGB resolution (720p/1080p/4k), FPS (30)  
+**Detection:** `cup_detector.py` - Model path (`best_medium.pt`), confidence (0.6)  
+**Robot:** `PythonToRapid.py` - IP (127.0.0.1), port (1025), release position
 
 ---
 
 ## 🛠️ Troubleshooting
 
-### Camera Issues
+### Camera
+- **Not detected:** Check USB 3.0 connection, try different port
+- **Low FPS:** Reduce to 720p, close other apps
 
-**No camera detected:**
-```bash
-python -c "import depthai as dai; print(dai.Device.getAllAvailableDevices())"
-```
-- Check USB 3.0 connection
-- Update DepthAI library
-- Try different USB port
+### Detection
+- **No cups:** Lower confidence to 0.4, check lighting
+- **Wrong orientation:** Check handle visibility, verify lighting
 
-**Low FPS:**
-- Reduce resolution to 720p
-- Close other applications
-- Check CPU usage
+### Calibration
+- **Inaccurate:** Recalibrate with 40-80 points
+- **High error:** Add more points in problem zones
 
-### Detection Issues
-
-**No cups detected:**
-- Lower confidence: `confidence_threshold=0.4`
-- Check lighting (avoid shadows)
-- Verify model path
-- Ensure camera focus
-
-**Wrong orientation:**
-- Retrain model with more examples
-- Check cup placement (handle visibility)
-- Increase confidence threshold
-- Verify lighting consistency
-
-### Calibration Issues
-
-**Inaccurate positions:**
-- Recalibrate with 40-80 points
-**Error >20mm:**
-- Add more calibration points in problem zone
-- Check camera stability (no movement during calibration)
-- Verify depth values realistic (not 0 or max)
-
-### Robot Communication Issues
-
-**Cannot connect:**
-```bash
-telnet 127.0.0.1 1025
-```
-- Verify RAPID server running on robot
-- Check IP and port match
-- Disable firewall temporarily
-- Ensure robot controller online
-
-**Cups not sent:**
-- Check status with `p`
-- Toggle auto-start: `a`
-- Manually start: `r`
-- Verify robot state: `ready`
-
-**Communication timeout:**
-- Check network stability
-- Restart RAPID server
-- Restart Python system
-- Verify message protocol in RAPID code
+### Robot Communication
+- **Cannot connect:** Verify RAPID server running, check IP/port (127.0.0.1:1025)
+- **Cups not sent:** Press `p` for status, toggle auto-start with `a`
 
 ---
 
+## 📈 Performance Metrics
+
+**Detection:**
+- **FPS:** ~30 fps @ 1080p
+- **Latency:** ~30ms detection + ~70ms processing = ~100ms total
+- **Accuracy:** 99.48% mAP@50 (YOLO8n)
+
+**Calibration Accuracy:**
+- **Working zone (<1200mm):** <10mm error
+- **Mid zone (<1350mm):** <15mm error  
+- **Extended zone:** <20mm error
+
+**System Reliability:**
+- Thread-safe queue operations
+- Auto-reconnection on network failure
+- 95%+ uptime in testing
+
+---
 
 ## 🔬 Technical Details
 
@@ -328,55 +250,26 @@ telnet 127.0.0.1 1025
 - Units: Millimeters
 - Axes: X (forward), Y (left), Z (up)
 
+---
+
 ## 💡 Best Practices
 
-### For Accurate Detection
-- **Lighting:** Even, diffused lighting (avoid shadows)
-- **Maintenance:** Clean camera lens weekly
-- **Environment:** Avoid reflective surfaces nearby
-- **Background:** Keep workspace clear
+- **Detection:** Even lighting, clean lens, clear workspace
+- **Communication:** Recalibrate monthly, monitor with `p`, test singles first
+- **Development:** Use venv, test before deployment, archive working versions
 
-### For Reliable Communication
-- **Calibration:** Recalibrate monthly or after camera movement
-- **Monitoring:** Check system status regularly (`p` key)
-- **Updates:** Archive working configs before changes
-- **Testing:** Test with single cup before batch processing
-
-### For Development
-- Activate venv before editing
-- Test changes with `python main.py`
-- Archive old versions in `Old_Versions/`
-- Document calibration changes
 ---
 
 ## 📁 Related Files
 
 - **RAPID Server:** `rapid_server.txt` (robot-side communication)
+- **Testing:** `OffLine_test.py` (no robot), `test_calibration.py` (validation)
 - **Model Training:** See `Training_Model/` folder
 - **Dependencies:** `Requirements.txt`
 - **Calibration Data:** 
   - `calibration_input.json` (manual points)
   - `calibration_params.json` (transformation matrices)
   - `calibration_positions.json` (auto-calibration)
-
----
-
-## 📚 External Documentation
-
-- **OAK-D Camera:** [DepthAI Docs](https://docs.luxonis.com/)
-- **YOLOv8:** [Ultralytics Docs](https://docs.ultralytics.com/)
-- **ABB RAPID:** [ABB Robotics Documentation](https://new.abb.com/products/robotics)
-- **OpenCV:** [OpenCV Docs](https://docs.opencv.org/)
-
----
-
-## 🎖️ Technologies
-
-- **Hardware:** ABB YuMi, OAK-D Pro camera
-- **Computer Vision:** YOLOv8, OpenCV
-- **Processing:** NumPy, SciPy, scikit-learn
-- **Communication:** TCP/IP sockets, RAPID language
-- **Framework:** Python 3.8+, Ultralytics
 
 ---
 
