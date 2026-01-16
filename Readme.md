@@ -90,7 +90,7 @@ Rapid is the language to program the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%20
 - [System failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md)
 ## License
 
-MIT
+
 
 ---
 
