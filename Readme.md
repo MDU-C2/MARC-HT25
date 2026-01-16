@@ -88,7 +88,7 @@ Rapid is the language to program the [YuMi IRB 14000](/media/Guide/Yumi%20IRB%20
 [YuMi IRB 14000](/media/Guide/Yumi%20IRB%2014000/README.md) is the robot used. It currently boot with system failure, to solve this and to get started follow the links down below. 
 - [Start the system](/media/Guide/Yumi%20IRB%2014000/how_to_start_rapid.md)
 - [System failure](/media/Guide/Yumi%20IRB%2014000/systemfailure.md)
-## License
+
 
 
 
